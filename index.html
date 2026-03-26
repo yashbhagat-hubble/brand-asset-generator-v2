@@ -545,8 +545,10 @@
 <main class="preview-panel">
   <div class="preview-header">
     <span class="preview-header-title">Live Preview</span>
-    <button class="export-all-btn" onclick="downloadAll()">↓ Export All</button>
-    <button class="export-all-btn" onclick="downloadZip()" style="margin-left:8px">↓ Export ZIP</button>
+    <div style="display:flex;gap:8px;margin-left:auto">
+      <button class="export-all-btn" onclick="downloadAll()">↓ Export All</button>
+      <button class="export-all-btn" onclick="downloadZip()">↓ Export ZIP</button>
+    </div>
   </div>
 
   <!-- Small assets row -->
