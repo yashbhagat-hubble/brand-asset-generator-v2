@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Brand Asset Generator · Hubble</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -545,6 +546,7 @@
   <div class="preview-header">
     <span class="preview-header-title">Live Preview</span>
     <button class="export-all-btn" onclick="downloadAll()">↓ Export All</button>
+    <button class="export-all-btn" onclick="downloadZip()" style="margin-left:8px">↓ Export ZIP</button>
   </div>
 
   <!-- Small assets row -->
@@ -1031,6 +1033,32 @@ async function downloadAll() {
     downloadCanvas2x(cid, base);
     await new Promise(r => setTimeout(r, 150));
   }
+}
+
+async function downloadZip() {
+  const zip = new JSZip();
+  const slug = getBrandSlug();
+  for (const [, [cid, base]] of Object.entries(ASSETS)) {
+    const src = document.getElementById(cid);
+    const scale = 2;
+    const out = document.createElement('canvas');
+    out.width  = src.width  * scale;
+    out.height = src.height * scale;
+    const ctx = out.getContext('2d');
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.scale(scale, scale);
+    ctx.drawImage(src, 0, 0);
+    const dataUrl = out.toDataURL('image/png');
+    const b64 = dataUrl.split(',')[1];
+    zip.file(base + slug + '.png', b64, { base64: true });
+  }
+  const blob = await zip.generateAsync({ type: 'blob' });
+  const link = document.createElement('a');
+  link.download = 'brand-assets' + slug + '.zip';
+  link.href = URL.createObjectURL(blob);
+  link.click();
+  URL.revokeObjectURL(link.href);
 }
 
 // ── File loading ───────────────────────────────────────────────────────
