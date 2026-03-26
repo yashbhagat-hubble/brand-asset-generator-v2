@@ -882,16 +882,12 @@ function renderSquareIcon() {
  */
 function renderSolid() {
   const ctx = prepCanvas('c-solid', 116, 116);
-  ctx.save();
-  roundedRectPath(ctx, 0, 0, 116, 116, 16);
-  ctx.clip();
   ctx.fillStyle = S.color;
   ctx.fillRect(0, 0, 116, 116);
   if (S.logoImg) {
     // Zone: centered, max 98×98px → x=[9,107] y=[9,107]
     drawContained(ctx, S.logoImg, 9, 9, 98, 98, S.iconScale, 0, 'center', 'center');
   }
-  ctx.restore();
 }
 
 /*
