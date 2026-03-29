@@ -1422,6 +1422,14 @@ bindSlider('imgOffset',  'imgOffsetVal',  'imgOffset',  'px');
 // ── Initial render ─────────────────────────────────────────────────────
 renderAll();
 
+// ── CMD+S / Ctrl+S to save brand ───────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+    e.preventDefault();
+    saveBrand();
+  }
+});
+
 // ── Tab navigation ─────────────────────────────────────────────────────
 function showTab(tab, fromEdit = false) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
