@@ -83,7 +83,6 @@
       width: 100%;
       aspect-ratio: 104 / 116;
       display: block;
-      border-radius: 24px;
       object-fit: cover;
     }
     .brand-tile-name {
@@ -135,7 +134,6 @@
     .brand-tile-add-box {
       width: 100%;
       aspect-ratio: 104 / 116;
-      border-radius: 24px;
       border: 1.5px dashed #2a2a2a;
       display: flex;
       flex-direction: column;
@@ -1444,6 +1442,25 @@ bindSlider('iconOffset', 'iconOffsetVal', 'iconOffset', 'px');
 bindSlider('imgScale',   'imgScaleVal',   'imgScale',   'x');
 bindSlider('imgOffset',  'imgOffsetVal',  'imgOffset',  'px');
 
+// ── Squircle clip-path (16px radius, 60% smoothing) ────────────────────
+function squirclePath(w, h, r, s) {
+  const p = Math.min(r * (1 + s), Math.min(w, h) / 2);
+  const a = p * (4 / 3) * Math.tan(Math.PI / 8);
+  return `M ${p},0 L ${w-p},0 C ${w-p+a},0 ${w},${p-a} ${w},${p} ` +
+         `L ${w},${h-p} C ${w},${h-p+a} ${w-p+a},${h} ${w-p},${h} ` +
+         `L ${p},${h} C ${p-a},${h} 0,${h-p+a} 0,${h-p} ` +
+         `L 0,${p} C 0,${p-a} ${p-a},0 ${p},0 Z`;
+}
+
+function applySquircleClips() {
+  document.querySelectorAll('.brand-tile img, .brand-tile-add-box').forEach(el => {
+    const w = el.offsetWidth, h = el.offsetHeight;
+    if (w && h) el.style.clipPath = `path('${squirclePath(w, h, 16, 0.6)}')`;
+  });
+}
+
+const _squircleObserver = new ResizeObserver(() => applySquircleClips());
+
 // ── Initial render ─────────────────────────────────────────────────────
 renderAll();
 
@@ -1591,6 +1608,12 @@ async function renderBrandsGrid() {
   addTile.innerHTML = `<div class="brand-tile-add-box"><div class="brand-tile-add-icon"><svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14 5V23M5 14H23" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div></div><div class="brand-tile-add-label">Add Brand</div>`;
   addTile.addEventListener('click', () => showTab('add'));
   grid.appendChild(addTile);
+
+  // Apply squircle clips after layout
+  requestAnimationFrame(() => {
+    applySquircleClips();
+    _squircleObserver.observe(grid);
+  });
 }
 </script>
 </body>
