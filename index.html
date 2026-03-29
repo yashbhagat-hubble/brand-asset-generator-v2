@@ -81,9 +81,10 @@
     .brand-tile:hover { transform: translateY(-2px); }
     .brand-tile img {
       width: 100%;
-      aspect-ratio: 1;
+      aspect-ratio: 104 / 116;
       display: block;
       border-radius: 24px;
+      object-fit: cover;
     }
     .brand-tile-name {
       padding: 7px 2px 0;
@@ -133,7 +134,7 @@
     .brand-tile-add:hover .brand-tile-add-box { border-color: #444; }
     .brand-tile-add-box {
       width: 100%;
-      aspect-ratio: 1;
+      aspect-ratio: 104 / 116;
       border-radius: 24px;
       border: 1.5px dashed #2a2a2a;
       display: flex;
@@ -1484,7 +1485,7 @@ async function saveBrand() {
 
   const name = (document.getElementById('brandName').value || '').trim() || 'Untitled';
   const solidDataUrl = document.getElementById('c-solid').toDataURL('image/png');
-  const iconDataUrl  = document.getElementById('c-sq-icon').toDataURL('image/png');
+  const iconDataUrl  = document.getElementById('c-icon').toDataURL('image/png');
 
   function imgToDataUrl(img) {
     if (!img) return null;
