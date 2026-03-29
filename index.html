@@ -121,6 +121,23 @@
     .brand-tile-btn.edit:hover  { background: rgba(255,255,255,0.28); }
     .brand-tile-btn.delete { background: rgba(220,50,50,0.7); color: #fff; }
     .brand-tile-btn.delete:hover { background: rgba(220,50,50,0.95); }
+    .brand-tile-add {
+      border-radius: 10px;
+      border: 1.5px dashed #2a2a2a;
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      aspect-ratio: 1 / 1.12;
+      color: #444;
+      transition: border-color 0.15s, color 0.15s, transform 0.15s;
+    }
+    .brand-tile-add:hover { border-color: #555; color: #888; transform: translateY(-2px); }
+    .brand-tile-add-icon { font-size: 28px; line-height: 1; }
+    .brand-tile-add-label { font-size: 11px; font-weight: 500; }
     .brands-empty {
       grid-column: 1 / -1;
       text-align: center;
@@ -1534,32 +1551,38 @@ async function renderBrandsGrid() {
   const { data: brands, error } = await _sb.from('brands').select('*').order('created_at', { ascending: false });
   if (error) { grid.innerHTML = '<div class="brands-empty">Failed to load brands.</div>'; return; }
 
-  if (!brands || brands.length === 0) {
-    grid.innerHTML = '<div class="brands-empty">No saved brands yet.<br>Set up a brand and click <strong>Save Brand</strong>.</div>';
-    return;
-  }
   grid.innerHTML = '';
-  brands.forEach(b => {
-    const tile = document.createElement('div');
-    tile.className = 'brand-tile';
-    tile.innerHTML = `
-      <img src="${b.solid_logo}" alt="${b.name}">
-      <div class="brand-tile-name">${b.name}</div>
-      <div class="brand-tile-actions">
-        <button class="brand-tile-btn edit" title="Edit">✎</button>
-        <button class="brand-tile-btn delete" title="Delete">✕</button>
-      </div>`;
 
-    tile.querySelector('.edit').addEventListener('click', e => { e.stopPropagation(); loadBrand(b); });
-    tile.querySelector('.delete').addEventListener('click', async e => {
-      e.stopPropagation();
-      if (!confirm(`Delete "${b.name}"? This cannot be undone.`)) return;
-      await _sb.from('brands').delete().eq('id', b.id);
-      renderBrandsGrid();
+  if (brands && brands.length > 0) {
+    brands.forEach(b => {
+      const tile = document.createElement('div');
+      tile.className = 'brand-tile';
+      tile.innerHTML = `
+        <img src="${b.solid_logo}" alt="${b.name}">
+        <div class="brand-tile-name">${b.name}</div>
+        <div class="brand-tile-actions">
+          <button class="brand-tile-btn edit" title="Edit">✎</button>
+          <button class="brand-tile-btn delete" title="Delete">✕</button>
+        </div>`;
+
+      tile.querySelector('.edit').addEventListener('click', e => { e.stopPropagation(); loadBrand(b); });
+      tile.querySelector('.delete').addEventListener('click', async e => {
+        e.stopPropagation();
+        if (!confirm(`Delete "${b.name}"? This cannot be undone.`)) return;
+        await _sb.from('brands').delete().eq('id', b.id);
+        renderBrandsGrid();
+      });
+      tile.addEventListener('click', () => loadBrand(b));
+      grid.appendChild(tile);
     });
-    tile.addEventListener('click', () => loadBrand(b));
-    grid.appendChild(tile);
-  });
+  }
+
+  // Always show the "Add new brand" card at the end
+  const addTile = document.createElement('div');
+  addTile.className = 'brand-tile-add';
+  addTile.innerHTML = `<div class="brand-tile-add-icon">+</div><div class="brand-tile-add-label">Add Brand</div>`;
+  addTile.addEventListener('click', () => showTab('add'));
+  grid.appendChild(addTile);
 }
 </script>
 </body>
