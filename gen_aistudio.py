@@ -6,9 +6,6 @@ from pathlib import Path
 from dotenv import load_dotenv
 from google import genai
 from google.genai import types
-import google.oauth2.service_account
-import google.auth
-
 
 SUPPORTED_MIME = {
     ".jpg": "image/jpeg",
@@ -17,39 +14,34 @@ SUPPORTED_MIME = {
     ".webp": "image/webp",
 }
 
-
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--input-logo",  default="input_logo.png")
-    parser.add_argument("--input-image", default="input_image.png")
-    parser.add_argument("--prompt", default="""Task: Create a high-resolution digital brand asset with size 208px * 232px dimensions, fixed aspect ratio (104x116).
+DEFAULT_PROMPT = """Task: Create a high-resolution digital brand asset with size 208px * 232px dimensions, fixed aspect ratio (104x116).
 Background: The background is a single, uniform, solid fill of [Pick from image]. There are no gradients, textures, soft blurs, or shadows on this layer; it is perfectly flat and consistent from top to bottom.
 
 Logo Placement: Centered horizontally and vertically within the top 40 percent of the canvas. The logo must have a fully transparent background (no cards, panels, or bounding boxes). It should occupy approximately 60 percent of the frame width.
 
 Logo Styling: Render the logo in a high-contrast color [pick intelligently] to ensure it is perfectly legible against the solid background—no subtext, taglines, or decorative elements.
 Subject: The subject [Pick from image] is anchored to the bottom edge of the canvas.
-Composition: The upper 20 percent of the image is intentionally left as "quiet" negative space (just the solid background color) to allow the logo to sit cleanly. The final output is premium, clean, and editorial with no visible dividers or borders.""")
-    parser.add_argument("--output", default="output_vertex.png")
+Composition: The upper 20 percent of the image is intentionally left as "quiet" negative space (just the solid background color) to allow the logo to sit cleanly. The final output is premium, clean, and editorial with no visible dividers or borders."""
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--input-logo",  default="input_logo.png")
+    parser.add_argument("--input-image", default="input_image.png")
+    parser.add_argument("--prompt", default=DEFAULT_PROMPT)
+    parser.add_argument("--output", default="output_aistudio.png")
     args = parser.parse_args()
 
-    load_dotenv(".env.vertex")
+    if not args.output.endswith(".png"):
+        args.output += ".png"
 
-    project = os.environ.get("GOOGLE_CLOUD_PROJECT")
-    if not project:
-        sys.exit("GOOGLE_CLOUD_PROJECT not set")
+    load_dotenv(".env.aistudio")
 
-    key_file = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
-    if key_file:
-        credentials = google.oauth2.service_account.Credentials.from_service_account_file(
-            key_file, scopes=["https://www.googleapis.com/auth/cloud-platform"]
-        )
-    else:
-        credentials, _ = google.auth.default(
-            scopes=["https://www.googleapis.com/auth/cloud-platform"]
-        )
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        sys.exit("GEMINI_API_KEY not set in .env")
 
-    client = genai.Client(vertexai=True, project=project, location="us-central1", credentials=credentials)
+    client = genai.Client(api_key=api_key)
 
     logo = Path(args.input_logo)
     image = Path(args.input_image)
@@ -64,7 +56,7 @@ Composition: The upper 20 percent of the image is intentionally left as "quiet" 
     ]
 
     response = client.models.generate_content(
-        model="__",
+        model="gemini-3-pro-image-preview",
         contents=contents,
         config=types.GenerateContentConfig(
             response_modalities=["IMAGE"],

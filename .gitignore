@@ -6,5 +6,8 @@ venv/
 .claude/
 image_test.png
 result_test.png
+input.png
+output_vertex.png
+output_gemini.png
 versace_test*.png
 versace_bw.png
