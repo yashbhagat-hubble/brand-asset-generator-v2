@@ -1,4 +1,5 @@
 .env
+.env.*
 venv/
 *.json
 .DS_Store

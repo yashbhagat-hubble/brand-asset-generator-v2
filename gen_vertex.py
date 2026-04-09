@@ -25,7 +25,7 @@ def main():
     parser.add_argument("--output", default="result_test.png")
     args = parser.parse_args()
 
-    load_dotenv()
+    load_dotenv(".env.vertex")
 
     project = os.environ.get("GOOGLE_CLOUD_PROJECT")
     if not project:
