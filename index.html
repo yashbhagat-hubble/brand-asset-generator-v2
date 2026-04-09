@@ -9,6 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -202,7 +203,7 @@
       border: none;
       border-radius: 8px;
       font-size: 12px;
-      font-weight: 600;
+      font-weight: 500;
       cursor: pointer;
       transition: background 0.15s;
       letter-spacing: -0.01em;
@@ -277,8 +278,8 @@
       text-align: center;
     }
     .upload-icon {
-      width: 24px; height: 24px;
-      opacity: 0.3;
+      font-size: 22px;
+      opacity: 0.45;
     }
     .upload-title {
       font-size: 12px;
@@ -621,11 +622,7 @@
 <nav class="tab-nav">
   <button class="tab-btn" data-tab="brands" onclick="showTab('brands')">All Brands</button>
   <button class="tab-btn active" data-tab="add" onclick="showTab('add')">Add Brand</button>
-  <button class="tab-nav-trash" id="trashBtn" title="Deleted brands" onclick="showTab('trash')">
-    <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M5 1h5M1.5 3.5h12M3 3.5l.8 9c.05.83.72 1.5 1.55 1.5h4.3c.83 0 1.5-.67 1.55-1.5l.8-9" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
-  </button>
+  <button class="tab-btn" id="trashBtn" data-tab="trash" onclick="showTab('trash')" style="margin-left:auto">Deleted assets</button>
 </nav>
 
 <!-- ═══════════ BRANDS GRID VIEW ═══════════ -->
@@ -657,9 +654,7 @@
     <div class="upload-zone" id="logoZone">
       <input type="file" id="logoFile" accept=".png,.jpg,.jpeg,.svg">
       <div class="upload-placeholder" id="logoPlaceholder">
-        <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
-        </svg>
+        <i class="ph ph-upload-simple upload-icon"></i>
         <span class="upload-title">Upload or paste logo</span>
         <span class="upload-hint">PNG · JPG · SVG</span>
         <span class="paste-hint">or ⌘V anywhere to paste</span>
@@ -669,7 +664,7 @@
         <div class="upload-preview-info">
           <div class="upload-preview-name" id="logoFileName">—</div>
         </div>
-        <button class="upload-preview-clear" id="logoClear" title="Remove">×</button>
+        <button class="upload-preview-clear" id="logoClear" title="Remove"><i class="ph ph-x"></i></button>
       </div>
     </div>
   </div>
@@ -680,9 +675,7 @@
     <div class="upload-zone" id="imageZone">
       <input type="file" id="imageFile" accept=".png,.jpg,.jpeg,.svg">
       <div class="upload-placeholder" id="imagePlaceholder">
-        <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-          <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
-        </svg>
+        <i class="ph ph-image upload-icon"></i>
         <span class="upload-title">Upload or paste image</span>
         <span class="upload-hint">PNG · JPG · SVG</span>
         <span class="paste-hint">or ⌘V anywhere to paste</span>
@@ -692,7 +685,7 @@
         <div class="upload-preview-info">
           <div class="upload-preview-name" id="imageFileName">—</div>
         </div>
-        <button class="upload-preview-clear" id="imageClear" title="Remove">×</button>
+        <button class="upload-preview-clear" id="imageClear" title="Remove"><i class="ph ph-x"></i></button>
       </div>
     </div>
   </div>
@@ -779,7 +772,7 @@
       <div class="asset-canvas-wrap">
         <canvas id="c-icon" width="104" height="116"></canvas>
       </div>
-      <button class="download-btn" onclick="downloadAsset('icon')">↓ PNG</button>
+      <button class="download-btn" onclick="downloadAsset('icon')"><i class="ph ph-download-simple"></i> PNG</button>
     </div>
 
     <div class="asset-card">
@@ -790,7 +783,7 @@
       <div class="asset-canvas-wrap">
         <canvas id="c-sq-icon" width="116" height="116"></canvas>
       </div>
-      <button class="download-btn" onclick="downloadAsset('sq-icon')">↓ PNG</button>
+      <button class="download-btn" onclick="downloadAsset('sq-icon')"><i class="ph ph-download-simple"></i> PNG</button>
     </div>
 
     <div class="asset-card">
@@ -801,7 +794,7 @@
       <div class="asset-canvas-wrap">
         <canvas id="c-solid" width="116" height="116"></canvas>
       </div>
-      <button class="download-btn" onclick="downloadAsset('solid')">↓ PNG</button>
+      <button class="download-btn" onclick="downloadAsset('solid')"><i class="ph ph-download-simple"></i> PNG</button>
     </div>
 
     <div class="asset-card">
@@ -812,7 +805,7 @@
       <div class="asset-canvas-wrap">
         <canvas id="c-logo" width="88" height="40"></canvas>
       </div>
-      <button class="download-btn" onclick="downloadAsset('logo')">↓ PNG</button>
+      <button class="download-btn" onclick="downloadAsset('logo')"><i class="ph ph-download-simple"></i> PNG</button>
     </div>
 
     <div class="asset-card">
@@ -823,7 +816,7 @@
       <div class="asset-canvas-wrap">
         <canvas id="c-voucher" width="259" height="94"></canvas>
       </div>
-      <button class="download-btn" onclick="downloadAsset('voucher')">↓ PNG</button>
+      <button class="download-btn" onclick="downloadAsset('voucher')"><i class="ph ph-download-simple"></i> PNG</button>
     </div>
   </div>
 
@@ -837,7 +830,7 @@
       <div class="asset-canvas-wrap">
         <canvas id="c-wa" width="1500" height="750"></canvas>
       </div>
-      <button class="download-btn" onclick="downloadAsset('wa')">↓ PNG — full resolution</button>
+      <button class="download-btn" onclick="downloadAsset('wa')"><i class="ph ph-download-simple"></i> PNG — full resolution</button>
     </div>
   </div>
 </main>
@@ -1638,8 +1631,8 @@ async function renderBrandsGrid() {
         <img src="${b.solid_logo}" alt="${b.name}">
         <div class="brand-tile-name">${b.name}</div>
         <div class="brand-tile-actions">
-          <button class="brand-tile-btn edit" title="Edit">✎</button>
-          <button class="brand-tile-btn delete" title="Move to trash">✕</button>
+          <button class="brand-tile-btn edit" title="Edit"><i class="ph ph-pencil-simple"></i></button>
+          <button class="brand-tile-btn delete" title="Move to trash"><i class="ph ph-trash-simple"></i></button>
         </div>`;
 
       tile.querySelector('.edit').addEventListener('click', e => { e.stopPropagation(); loadBrand(b); });
@@ -1657,7 +1650,7 @@ async function renderBrandsGrid() {
   // Always show the "Add new brand" card at the end
   const addTile = document.createElement('div');
   addTile.className = 'brand-tile-add';
-  addTile.innerHTML = `<div class="brand-tile-add-box"><div class="brand-tile-add-icon"><svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14 5V23M5 14H23" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div></div><div class="brand-tile-add-label">Add Brand</div>`;
+  addTile.innerHTML = `<div class="brand-tile-add-box"><div class="brand-tile-add-icon"><i class="ph ph-plus"></i></div></div><div class="brand-tile-add-label">Add Brand</div>`;
   addTile.addEventListener('click', () => showTab('add'));
   grid.appendChild(addTile);
 
@@ -1692,7 +1685,7 @@ async function renderTrashGrid() {
       <div class="brand-tile-name">${b.name}</div>
       <button class="trash-tile-restore" title="Restore">Restore</button>
       <div class="brand-tile-actions">
-        <button class="brand-tile-btn delete" title="Delete permanently">✕</button>
+        <button class="brand-tile-btn delete" title="Delete permanently"><i class="ph ph-trash-simple"></i></button>
       </div>`;
 
     tile.querySelector('.trash-tile-restore').addEventListener('click', async e => {
