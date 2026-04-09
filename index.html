@@ -4,15 +4,19 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Brand Asset Generator · Hubble</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
-      background: #0c0c0c;
-      color: #e0e0e0;
+      font-family: 'Inter', 'Inter Display', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #171717;
+      color: #ebebeb;
+      letter-spacing: -0.01em;
       display: flex;
       flex-direction: column;
       height: 100vh;
@@ -23,8 +27,8 @@
     .tab-nav {
       height: 44px;
       min-height: 44px;
-      background: #111;
-      border-bottom: 1px solid #1f1f1f;
+      background: #1c1c1c;
+      border-bottom: 1px solid #262626;
       display: flex;
       align-items: center;
       padding: 0 16px;
@@ -37,29 +41,29 @@
       border-radius: 6px;
       border: none;
       background: transparent;
-      color: #555;
+      color: #7b7b7b;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       transition: color 0.15s, background 0.15s;
     }
-    .tab-nav-trash:hover { color: #ccc; background: #1a1a1a; }
-    .tab-nav-trash.active { color: #fff; background: #222; }
+    .tab-nav-trash:hover { color: #a3a3a3; background: #262626; }
+    .tab-nav-trash.active { color: #ebebeb; background: #333333; }
     .tab-btn {
       height: 28px;
       padding: 0 14px;
       border-radius: 6px;
       border: none;
       background: transparent;
-      color: #555;
+      color: #7b7b7b;
       font-size: 12px;
       font-weight: 500;
       cursor: pointer;
       transition: color 0.15s, background 0.15s;
     }
-    .tab-btn:hover { color: #ccc; background: #1a1a1a; }
-    .tab-btn.active { color: #fff; background: #222; }
+    .tab-btn:hover { color: #a3a3a3; background: #262626; }
+    .tab-btn.active { color: #ebebeb; background: #333333; }
 
     /* ── App content row (controls + preview) ── */
     #view-add {
@@ -80,7 +84,7 @@
     }
     #view-brands.active, #view-trash.active { display: block; }
     #view-brands::-webkit-scrollbar, #view-trash::-webkit-scrollbar { width: 4px; }
-    #view-brands::-webkit-scrollbar-thumb, #view-trash::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 2px; }
+    #view-brands::-webkit-scrollbar-thumb, #view-trash::-webkit-scrollbar-thumb { background: #333333; border-radius: 2px; }
     .trash-tile-restore {
       position: absolute;
       bottom: 6px;
@@ -88,8 +92,8 @@
       transform: translateX(-50%);
       opacity: 0;
       transition: opacity 0.15s;
-      background: rgba(255,255,255,0.15);
-      color: #fff;
+      background: rgba(255,255,255,0.1);
+      color: #ebebeb;
       border: none;
       border-radius: 6px;
       font-size: 11px;
@@ -124,7 +128,7 @@
       padding: 7px 2px 0;
       font-size: 11px;
       font-weight: 500;
-      color: #bbb;
+      color: #a3a3a3;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -153,8 +157,8 @@
       backdrop-filter: blur(4px);
       transition: background 0.15s;
     }
-    .brand-tile-btn.edit  { background: rgba(255,255,255,0.15); color: #fff; }
-    .brand-tile-btn.edit:hover  { background: rgba(255,255,255,0.28); }
+    .brand-tile-btn.edit  { background: rgba(255,255,255,0.1); color: #ebebeb; }
+    .brand-tile-btn.edit:hover  { background: rgba(255,255,255,0.18); }
     .brand-tile-btn.delete { background: rgba(220,50,50,0.7); color: #fff; }
     .brand-tile-btn.delete:hover { background: rgba(220,50,50,0.95); }
     .brand-tile-add {
@@ -162,15 +166,15 @@
       border: none;
       cursor: pointer;
       transition: transform 0.15s;
-      color: #444;
+      color: #7b7b7b;
     }
-    .brand-tile-add:hover { transform: translateY(-2px); color: #777; }
-    .brand-tile-add:hover .brand-tile-add-box { border-color: #444; }
+    .brand-tile-add:hover { transform: translateY(-2px); color: #a3a3a3; }
+    .brand-tile-add:hover .brand-tile-add-box { border-color: #5c5c5c; }
     .brand-tile-add-box {
       width: 100%;
       aspect-ratio: 104 / 116;
       border-radius: 16px;
-      border: 1.5px dashed #2a2a2a;
+      border: 1.5px dashed #333333;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -184,7 +188,7 @@
       grid-column: 1 / -1;
       text-align: center;
       padding: 100px 20px;
-      color: #444;
+      color: #7b7b7b;
       font-size: 13px;
       line-height: 1.7;
     }
@@ -193,24 +197,24 @@
     .save-brand-btn {
       width: 100%;
       padding: 10px;
-      background: #fff;
-      color: #000;
+      background: #7d52f4;
+      color: #ffffff;
       border: none;
       border-radius: 8px;
       font-size: 12px;
       font-weight: 600;
       cursor: pointer;
       transition: background 0.15s;
-      letter-spacing: 0.01em;
+      letter-spacing: -0.01em;
     }
-    .save-brand-btn:hover { background: #e8e8e8; }
+    .save-brand-btn:hover { background: #6e3ee0; }
 
     /* ── Controls Panel ── */
     .controls {
       width: 272px;
       min-width: 272px;
-      background: #111;
-      border-right: 1px solid #1f1f1f;
+      background: #1c1c1c;
+      border-right: 1px solid #262626;
       overflow-y: auto;
       padding: 20px 16px 32px;
       display: flex;
@@ -219,14 +223,14 @@
     }
     .controls::-webkit-scrollbar { width: 4px; }
     .controls::-webkit-scrollbar-track { background: transparent; }
-    .controls::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 2px; }
+    .controls::-webkit-scrollbar-thumb { background: #333333; border-radius: 2px; }
 
     .app-title {
       font-size: 11px;
       font-weight: 600;
-      letter-spacing: 0.1em;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
-      color: #888;
+      color: #7b7b7b;
       padding-bottom: 4px;
     }
 
@@ -234,21 +238,21 @@
       font-size: 10px;
       font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: #777;
+      letter-spacing: 0.06em;
+      color: #7b7b7b;
       margin-bottom: 8px;
     }
 
     .divider {
       height: 1px;
-      background: #1a1a1a;
+      background: #262626;
       margin: 0 -16px;
     }
 
     /* ── Upload Zones ── */
     .upload-zone {
       position: relative;
-      border: 1.5px dashed #2a2a2a;
+      border: 1.5px dashed #333333;
       border-radius: 10px;
       cursor: pointer;
       transition: border-color 0.15s, background 0.15s;
@@ -258,8 +262,8 @@
       align-items: center;
       justify-content: center;
     }
-    .upload-zone:hover { border-color: #444; background: rgba(255,255,255,0.02); }
-    .upload-zone.active { border-color: #555; border-style: solid; background: rgba(255,255,255,0.03); }
+    .upload-zone:hover { border-color: #5c5c5c; background: rgba(255,255,255,0.03); }
+    .upload-zone.active { border-color: #5c5c5c; border-style: solid; background: rgba(255,255,255,0.03); }
     .upload-zone input[type="file"] {
       position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
     }
@@ -279,11 +283,11 @@
     .upload-title {
       font-size: 12px;
       font-weight: 500;
-      color: #bbb;
+      color: #a3a3a3;
     }
     .upload-hint {
       font-size: 10px;
-      color: #888;
+      color: #7b7b7b;
     }
     .upload-preview-wrap {
       display: none;
@@ -300,12 +304,12 @@
       object-fit: contain;
       flex-shrink: 0;
       border-radius: 4px;
-      background: rgba(255,255,255,0.04);
+      background: rgba(255,255,255,0.06);
     }
     .upload-preview-info { flex: 1; min-width: 0; }
     .upload-preview-name {
       font-size: 11px;
-      color: #ccc;
+      color: #a3a3a3;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -314,7 +318,7 @@
       pointer-events: all;
       background: none;
       border: none;
-      color: #888;
+      color: #7b7b7b;
       cursor: pointer;
       font-size: 16px;
       line-height: 1;
@@ -323,7 +327,7 @@
       flex-shrink: 0;
       transition: color 0.15s;
     }
-    .upload-preview-clear:hover { color: #aaa; }
+    .upload-preview-clear:hover { color: #a3a3a3; }
 
     /* ── Color ── */
     .color-row {
@@ -335,7 +339,7 @@
       width: 36px;
       height: 36px;
       border-radius: 8px;
-      border: 1px solid #2a2a2a;
+      border: 1px solid #333333;
       overflow: hidden;
       flex-shrink: 0;
       cursor: pointer;
@@ -351,35 +355,35 @@
     }
     .hex-input {
       flex: 1;
-      background: #181818;
-      border: 1px solid #2a2a2a;
+      background: #1c1c1c;
+      border: 1px solid #333333;
       border-radius: 8px;
       padding: 9px 12px;
-      color: #e0e0e0;
+      color: #ebebeb;
       font-size: 12px;
       font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.02em;
       outline: none;
       transition: border-color 0.15s;
     }
-    .hex-input:focus { border-color: #444; }
-    .hex-input.invalid { border-color: #6b2a2a; color: #e08080; }
+    .hex-input:focus { border-color: #5c5c5c; }
+    .hex-input.invalid { border-color: #e93544; color: #e93544; }
 
     /* ── Brand Name ── */
     .brand-name-input {
       width: 100%;
-      background: #181818;
-      border: 1px solid #2a2a2a;
+      background: #1c1c1c;
+      border: 1px solid #333333;
       border-radius: 8px;
       padding: 9px 12px;
-      color: #e0e0e0;
+      color: #ebebeb;
       font-size: 13px;
       font-weight: 500;
       outline: none;
       transition: border-color 0.15s;
     }
-    .brand-name-input:focus { border-color: #444; }
-    .brand-name-input::placeholder { color: #555; }
+    .brand-name-input:focus { border-color: #5c5c5c; }
+    .brand-name-input::placeholder { color: #7b7b7b; }
 
     /* ── Sliders ── */
     .slider-group {
@@ -399,12 +403,12 @@
     }
     .slider-name {
       font-size: 11px;
-      color: #aaa;
+      color: #a3a3a3;
     }
     .slider-val {
       font-size: 10px;
       font-family: 'SF Mono', Consolas, monospace;
-      color: #888;
+      color: #7b7b7b;
       min-width: 36px;
       text-align: right;
     }
@@ -413,7 +417,7 @@
       -webkit-appearance: none;
       height: 3px;
       border-radius: 2px;
-      background: #333;
+      background: #333333;
       outline: none;
       cursor: pointer;
     }
@@ -422,12 +426,12 @@
       width: 13px;
       height: 13px;
       border-radius: 50%;
-      background: #ddd;
+      background: #7d52f4;
       cursor: pointer;
       transition: background 0.15s, transform 0.1s;
     }
     input[type="range"]::-webkit-slider-thumb:hover {
-      background: #fff;
+      background: #6e3ee0;
       transform: scale(1.15);
     }
 
@@ -442,7 +446,7 @@
     }
     .preview-panel::-webkit-scrollbar { width: 4px; }
     .preview-panel::-webkit-scrollbar-track { background: transparent; }
-    .preview-panel::-webkit-scrollbar-thumb { background: #222; border-radius: 2px; }
+    .preview-panel::-webkit-scrollbar-thumb { background: #333333; border-radius: 2px; }
 
     .preview-header {
       display: flex;
@@ -452,23 +456,23 @@
     .preview-header-title {
       font-size: 10px;
       font-weight: 600;
-      letter-spacing: 0.1em;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
-      color: #777;
+      color: #7b7b7b;
     }
     .export-all-btn {
-      background: #181818;
-      border: 1px solid #2a2a2a;
+      background: #1c1c1c;
+      border: 1px solid #333333;
       border-radius: 8px;
       padding: 7px 14px;
-      color: #bbb;
+      color: #a3a3a3;
       font-size: 11px;
       font-weight: 500;
       cursor: pointer;
       transition: background 0.15s, color 0.15s;
-      letter-spacing: 0.02em;
+      letter-spacing: 0em;
     }
-    .export-all-btn:hover { background: #222; color: #ddd; }
+    .export-all-btn:hover { background: #262626; color: #ebebeb; }
 
     /* ── Asset Cards ── */
     .assets-row {
@@ -478,8 +482,8 @@
       align-items: flex-start;
     }
     .asset-card {
-      background: #111;
-      border: 1px solid #222;
+      background: #1c1c1c;
+      border: 1px solid #262626;
       border-radius: 12px;
       padding: 14px;
       display: flex;
@@ -494,19 +498,19 @@
     .asset-card-name {
       font-size: 11px;
       font-weight: 500;
-      color: #ddd;
+      color: #ebebeb;
     }
     .asset-card-dims {
       font-size: 9px;
-      color: #777;
+      color: #7b7b7b;
       font-family: 'SF Mono', Consolas, monospace;
-      letter-spacing: 0.03em;
+      letter-spacing: 0.02em;
     }
     .asset-canvas-wrap {
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #0c0c0c;
+      background: #262626;
       border-radius: 6px;
       padding: 10px;
     }
@@ -514,32 +518,32 @@
       display: block;
     }
     .download-btn {
-      background: #161616;
-      border: 1px solid #2a2a2a;
+      background: #1c1c1c;
+      border: 1px solid #333333;
       border-radius: 6px;
       padding: 6px 10px;
-      color: #999;
+      color: #7b7b7b;
       font-size: 10px;
       font-weight: 500;
       cursor: pointer;
       text-align: center;
       transition: background 0.15s, color 0.15s;
       width: 100%;
-      letter-spacing: 0.02em;
+      letter-spacing: 0em;
     }
-    .download-btn:hover { background: #1e1e1e; color: #ccc; }
+    .download-btn:hover { background: #262626; color: #a3a3a3; }
 
 
     /* ── Paste zone highlight ── */
     .upload-zone.paste-hover {
-      border-color: #666;
+      border-color: #5c5c5c;
       border-style: solid;
-      background: rgba(255,255,255,0.04);
+      background: rgba(255,255,255,0.03);
     }
     .upload-zone .paste-hint {
       display: block;
       font-size: 9px;
-      color: #666;
+      color: #7b7b7b;
       margin-top: 2px;
     }
 
@@ -555,8 +559,8 @@
     }
     .paste-modal.visible { display: flex; }
     .paste-modal-box {
-      background: #1a1a1a;
-      border: 1px solid #2a2a2a;
+      background: #1c1c1c;
+      border: 1px solid #333333;
       border-radius: 14px;
       padding: 20px 24px;
       display: flex;
@@ -567,7 +571,7 @@
     .paste-modal-title {
       font-size: 12px;
       font-weight: 600;
-      color: #bbb;
+      color: #a3a3a3;
       text-align: center;
     }
     .paste-modal-preview {
@@ -575,7 +579,7 @@
       max-height: 120px;
       object-fit: contain;
       border-radius: 6px;
-      background: #111;
+      background: #262626;
       display: block;
     }
     .paste-modal-btns {
@@ -584,19 +588,19 @@
     }
     .paste-modal-btns button {
       flex: 1;
-      background: #222;
-      border: 1px solid #333;
+      background: #262626;
+      border: 1px solid #333333;
       border-radius: 8px;
       padding: 9px 8px;
-      color: #ccc;
+      color: #a3a3a3;
       font-size: 11px;
       font-weight: 500;
       cursor: pointer;
       transition: background 0.15s, color 0.15s;
     }
-    .paste-modal-btns button:hover { background: #2e2e2e; color: #fff; }
-    .paste-modal-btns button.cancel { color: #888; }
-    .paste-modal-btns button.cancel:hover { color: #bbb; background: #1e1e1e; }
+    .paste-modal-btns button:hover { background: #333333; color: #ebebeb; }
+    .paste-modal-btns button.cancel { color: #7b7b7b; }
+    .paste-modal-btns button.cancel:hover { color: #a3a3a3; background: #262626; }
 
     /* WA Card full row */
     .wa-row { width: 100%; }
