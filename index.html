@@ -608,6 +608,186 @@
     .wa-row .asset-card { width: 100%; }
     .wa-row .asset-canvas-wrap { overflow: hidden; }
     .wa-row canvas { display: block; width: 40%; aspect-ratio: 2 / 1; }
+
+    /* ── AI Generate View ── */
+    #view-aigen {
+      flex: 1;
+      overflow-y: auto;
+      display: none;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 48px 24px;
+    }
+    #view-aigen.active { display: flex; }
+    #view-aigen::-webkit-scrollbar { width: 4px; }
+    #view-aigen::-webkit-scrollbar-thumb { background: #333333; border-radius: 2px; }
+
+    .aigen-container {
+      width: 100%;
+      max-width: 560px;
+      display: flex;
+      flex-direction: column;
+      gap: 36px;
+    }
+    .aigen-header { display: flex; flex-direction: column; gap: 6px; }
+    .aigen-title {
+      font-size: 22px;
+      font-weight: 600;
+      color: #ebebeb;
+      letter-spacing: -0.02em;
+    }
+    .aigen-subtitle {
+      font-size: 13px;
+      color: #7b7b7b;
+      line-height: 1.5;
+    }
+    .aigen-form { display: flex; flex-direction: column; gap: 24px; }
+    .aigen-field { display: flex; flex-direction: column; gap: 8px; }
+    .aigen-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #7b7b7b;
+    }
+    .aigen-input {
+      background: #1c1c1c;
+      border: 1px solid #333333;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 13px;
+      color: #ebebeb;
+      outline: none;
+      font-family: inherit;
+      transition: border-color 0.15s;
+    }
+    .aigen-input:focus { border-color: #5c5c5c; }
+    .aigen-input::placeholder { color: #5c5c5c; }
+
+    .aigen-uploads {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .aigen-upload-zone {
+      position: relative;
+      border: 1.5px dashed #333333;
+      border-radius: 12px;
+      aspect-ratio: 104 / 116;
+      cursor: pointer;
+      overflow: hidden;
+      transition: border-color 0.15s, background 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .aigen-upload-zone:hover { border-color: #5c5c5c; background: rgba(255,255,255,0.02); }
+    .aigen-upload-zone.drag-over { border-color: #7d52f4; background: rgba(125,82,244,0.06); }
+    .aigen-upload-zone input[type="file"] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+    }
+    .aigen-upload-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      text-align: center;
+      pointer-events: none;
+      padding: 16px;
+    }
+    .aigen-upload-label { font-size: 12px; font-weight: 500; color: #a3a3a3; }
+    .aigen-upload-hint { font-size: 10px; color: #5c5c5c; }
+    .aigen-upload-preview {
+      display: none;
+      position: absolute;
+      inset: 0;
+    }
+    .aigen-upload-preview.visible { display: block; }
+    .aigen-upload-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      padding: 8px;
+    }
+    .aigen-clear-btn {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 22px;
+      height: 22px;
+      border-radius: 5px;
+      border: none;
+      background: rgba(0,0,0,0.5);
+      color: #ebebeb;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      backdrop-filter: blur(4px);
+      transition: background 0.15s;
+    }
+    .aigen-clear-btn:hover { background: rgba(0,0,0,0.75); }
+
+    .aigen-generate-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 12px;
+      background: #7d52f4;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      letter-spacing: -0.01em;
+      font-family: inherit;
+      transition: background 0.15s, opacity 0.15s;
+    }
+    .aigen-generate-btn:hover { background: #6e3ee0; }
+    .aigen-generate-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .aigen-status {
+      font-size: 12px;
+      color: #7b7b7b;
+      text-align: center;
+      padding: 8px 0;
+    }
+    .aigen-status.error { color: #f87171; }
+
+    .aigen-result-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+    .aigen-result-wrap img {
+      width: 208px;
+      height: 232px;
+      object-fit: cover;
+      border-radius: 12px;
+      border: 1px solid #262626;
+    }
+    .aigen-result-actions { display: flex; gap: 8px; }
+    .aigen-result-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      background: #1c1c1c;
+      border: 1px solid #333333;
+      border-radius: 7px;
+      color: #a3a3a3;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: inherit;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .aigen-result-btn:hover { border-color: #5c5c5c; color: #ebebeb; }
   </style>
 </head>
 <body>
@@ -622,6 +802,7 @@
 <nav class="tab-nav">
   <button class="tab-btn" data-tab="brands" onclick="showTab('brands')">All Brands</button>
   <button class="tab-btn active" data-tab="add" onclick="showTab('add')">Add Brand</button>
+  <button class="tab-btn" data-tab="aigen" onclick="showTab('aigen')">AI Generate</button>
   <button class="tab-btn" id="trashBtn" data-tab="trash" onclick="showTab('trash')" style="margin-left:auto">Deleted assets</button>
 </nav>
 
@@ -633,6 +814,76 @@
 <!-- ═══════════ TRASH VIEW ═══════════ -->
 <div id="view-trash">
   <div class="brands-grid" id="trashGrid"></div>
+</div>
+
+<!-- ═══════════ AI GENERATE VIEW ═══════════ -->
+<div id="view-aigen">
+  <div class="aigen-container">
+    <div class="aigen-header">
+      <h1 class="aigen-title">Generate brand assets</h1>
+      <p class="aigen-subtitle">Upload a logo and a subject image to generate a brand asset using AI.</p>
+    </div>
+
+    <div class="aigen-form">
+      <!-- Image uploads -->
+      <div class="aigen-field">
+        <label class="aigen-label">Images</label>
+        <div class="aigen-uploads">
+
+          <!-- Logo upload -->
+          <div class="aigen-upload-zone" id="aigenLogoZone" data-slot="logo">
+            <input type="file" id="aigenLogoInput" accept="image/*">
+            <div class="aigen-upload-placeholder" id="aigenLogoPlaceholder">
+              <i class="ph ph-image-square" style="font-size:28px;opacity:0.4;"></i>
+              <span class="aigen-upload-label">Logo</span>
+              <span class="aigen-upload-hint">Drop, paste, or click</span>
+            </div>
+            <div class="aigen-upload-preview" id="aigenLogoPreview">
+              <img id="aigenLogoThumb" src="" alt="">
+              <button class="aigen-clear-btn" id="aigenLogoClear" title="Remove"><i class="ph ph-x"></i></button>
+            </div>
+          </div>
+
+          <!-- Subject image upload -->
+          <div class="aigen-upload-zone" id="aigenSubjectZone" data-slot="subject">
+            <input type="file" id="aigenSubjectInput" accept="image/*">
+            <div class="aigen-upload-placeholder" id="aigenSubjectPlaceholder">
+              <i class="ph ph-person" style="font-size:28px;opacity:0.4;"></i>
+              <span class="aigen-upload-label">Subject</span>
+              <span class="aigen-upload-hint">Drop, paste, or click</span>
+            </div>
+            <div class="aigen-upload-preview" id="aigenSubjectPreview">
+              <img id="aigenSubjectThumb" src="" alt="">
+              <button class="aigen-clear-btn" id="aigenSubjectClear" title="Remove"><i class="ph ph-x"></i></button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Generate button -->
+      <button class="aigen-generate-btn" id="aigenGenerateBtn" onclick="aigenGenerate()">
+        <i class="ph ph-sparkle"></i>
+        Generate
+      </button>
+
+      <!-- Result -->
+      <div class="aigen-result" id="aigenResult" style="display:none;">
+        <div class="aigen-label" style="margin-bottom:10px;">Result</div>
+        <div class="aigen-result-wrap">
+          <img id="aigenResultImg" src="" alt="Generated asset">
+          <div class="aigen-result-actions">
+            <button class="aigen-result-btn" onclick="aigenGenerate()"><i class="ph ph-arrow-clockwise"></i> Regenerate</button>
+            <button class="aigen-result-btn" onclick="aigenDownload()"><i class="ph ph-download-simple"></i> Download</button>
+            <button class="aigen-result-btn" onclick="aigenSaveToLibrary()"><i class="ph ph-floppy-disk"></i> Save to library</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Status message -->
+      <div class="aigen-status" id="aigenStatus" style="display:none;"></div>
+    </div>
+  </div>
 </div>
 
 <!-- ═══════════ ADD BRAND VIEW ═══════════ -->
@@ -1522,10 +1773,136 @@ function showTab(tab, fromEdit = false) {
   document.getElementById('view-add').classList.toggle('active', tab === 'add');
   document.getElementById('view-brands').classList.toggle('active', tab === 'brands');
   document.getElementById('view-trash').classList.toggle('active', tab === 'trash');
+  document.getElementById('view-aigen').classList.toggle('active', tab === 'aigen');
   if (tab === 'brands') renderBrandsGrid();
   if (tab === 'trash') renderTrashGrid();
   if (tab === 'add' && !fromEdit) { editingBrandId = null; setSaveBrandMode(false); }
 }
+
+// ── AI Generate ─────────────────────────────────────────────────────────
+(function initAigen() {
+  const slots = { logo: null, subject: null };
+
+  function setSlot(slot, file) {
+    if (!file || !file.type.startsWith('image/')) return;
+    slots[slot] = file;
+    const reader = new FileReader();
+    reader.onload = e => {
+      const thumb = document.getElementById(slot === 'logo' ? 'aigenLogoThumb' : 'aigenSubjectThumb');
+      const preview = document.getElementById(slot === 'logo' ? 'aigenLogoPreview' : 'aigenSubjectPreview');
+      const placeholder = document.getElementById(slot === 'logo' ? 'aigenLogoPlaceholder' : 'aigenSubjectPlaceholder');
+      thumb.src = e.target.result;
+      preview.classList.add('visible');
+      placeholder.style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function clearSlot(slot) {
+    slots[slot] = null;
+    const thumb = document.getElementById(slot === 'logo' ? 'aigenLogoThumb' : 'aigenSubjectThumb');
+    const preview = document.getElementById(slot === 'logo' ? 'aigenLogoPreview' : 'aigenSubjectPreview');
+    const placeholder = document.getElementById(slot === 'logo' ? 'aigenLogoPlaceholder' : 'aigenSubjectPlaceholder');
+    const input = document.getElementById(slot === 'logo' ? 'aigenLogoInput' : 'aigenSubjectInput');
+    thumb.src = '';
+    preview.classList.remove('visible');
+    placeholder.style.display = '';
+    input.value = '';
+  }
+
+  // File input change
+  document.getElementById('aigenLogoInput').addEventListener('change', e => {
+    if (e.target.files[0]) setSlot('logo', e.target.files[0]);
+  });
+  document.getElementById('aigenSubjectInput').addEventListener('change', e => {
+    if (e.target.files[0]) setSlot('subject', e.target.files[0]);
+  });
+
+  // Clear buttons
+  document.getElementById('aigenLogoClear').addEventListener('click', e => {
+    e.stopPropagation(); clearSlot('logo');
+  });
+  document.getElementById('aigenSubjectClear').addEventListener('click', e => {
+    e.stopPropagation(); clearSlot('subject');
+  });
+
+  // Drag & drop per zone
+  ['aigenLogoZone', 'aigenSubjectZone'].forEach(id => {
+    const zone = document.getElementById(id);
+    const slot = zone.dataset.slot;
+    zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+    zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+    zone.addEventListener('drop', e => {
+      e.preventDefault(); zone.classList.remove('drag-over');
+      const file = e.dataTransfer.files[0];
+      if (file) setSlot(slot, file);
+    });
+  });
+
+  // Paste anywhere on the aigen view — fill next empty slot
+  document.addEventListener('paste', e => {
+    if (!document.getElementById('view-aigen').classList.contains('active')) return;
+    const items = Array.from(e.clipboardData.items);
+    const imgItem = items.find(i => i.type.startsWith('image/'));
+    if (!imgItem) return;
+    const file = imgItem.getAsFile();
+    if (!slots.logo) setSlot('logo', file);
+    else if (!slots.subject) setSlot('subject', file);
+  });
+
+  window.aigenGenerate = async function() {
+    const status = document.getElementById('aigenStatus');
+    const btn = document.getElementById('aigenGenerateBtn');
+    const result = document.getElementById('aigenResult');
+
+    status.style.display = 'block';
+    status.className = 'aigen-status';
+    status.textContent = 'Generating… this may take a moment.';
+    btn.disabled = true;
+    result.style.display = 'none';
+
+    try {
+      const formData = new FormData();
+      if (slots.logo) formData.append('logo', slots.logo, 'logo.png');
+      if (slots.subject) formData.append('subject', slots.subject, 'subject.png');
+
+      const resp = await fetch('/api/aigen', { method: 'POST', body: formData });
+      if (!resp.ok) throw new Error(await resp.text());
+      const blob = await resp.blob();
+      const url = URL.createObjectURL(blob);
+      document.getElementById('aigenResultImg').src = url;
+      result.style.display = 'block';
+      status.style.display = 'none';
+      window._aigenResultUrl = url;
+    } catch (err) {
+      status.className = 'aigen-status error';
+      status.textContent = 'Error: ' + err.message;
+    } finally {
+      btn.disabled = false;
+    }
+  };
+
+  window.aigenDownload = function() {
+    const url = window._aigenResultUrl;
+    if (!url) return;
+    const name = (prompt('Brand name for the file:', 'brand-asset') || 'brand-asset').trim().replace(/\s+/g, '-');
+    const a = document.createElement('a'); a.href = url; a.download = name + '.png'; a.click();
+  };
+
+  window.aigenSaveToLibrary = async function() {
+    const url = window._aigenResultUrl;
+    if (!url) return;
+    const name = (prompt('Brand name:', '') || '').trim() || 'AI Generated';
+    const resp = await fetch(url);
+    const blob = await resp.blob();
+    const reader = new FileReader();
+    reader.onload = async e => {
+      await _sb.from('brands').insert({ name, asset_url: e.target.result });
+      showTab('brands');
+    };
+    reader.readAsDataURL(blob);
+  };
+})();
 
 // ── Supabase ────────────────────────────────────────────────────────────
 const _sb = supabase.createClient(
