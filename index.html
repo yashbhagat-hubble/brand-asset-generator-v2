@@ -10,6 +10,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
+  <script src="/prompts.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -622,6 +623,83 @@
     #view-aigen::-webkit-scrollbar { width: 4px; }
     #view-aigen::-webkit-scrollbar-thumb { background: #333333; border-radius: 2px; }
 
+    /* ── AI Gen 2 ── */
+    #view-aigen2 { display: none; flex: 1; overflow: hidden; }
+    #view-aigen2.active { display: flex; }
+
+    .ag2-prompts { display: flex; flex-direction: column; gap: 8px; }
+    .ag2-prompt-row { display: flex; align-items: center; gap: 8px; }
+    .ag2-prompt-num {
+      font-size: 10px; font-weight: 600; color: #5c5c5c;
+      width: 16px; text-align: right; flex-shrink: 0;
+    }
+    .ag2-prompt-input {
+      flex: 1;
+      background: #262626;
+      border: 1px solid #333;
+      border-radius: 7px;
+      padding: 8px 10px;
+      font-size: 12px;
+      color: #ebebeb;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .ag2-prompt-input:focus { border-color: #5c5c5c; }
+    .ag2-prompt-input::placeholder { color: #5c5c5c; }
+
+    .ag2-generate-btn {
+      width: 100%;
+      padding: 10px;
+      background: #7d52f4;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: inherit;
+      letter-spacing: -0.01em;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      transition: background 0.15s, opacity 0.15s;
+    }
+    .ag2-generate-btn:hover { background: #6e3ee0; }
+    .ag2-generate-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .ag2-preview-panel {
+      flex: 1; overflow-y: auto;
+      padding: 20px 24px;
+      display: flex; flex-direction: column; gap: 16px;
+    }
+    .ag2-preview-panel::-webkit-scrollbar { width: 4px; }
+    .ag2-preview-panel::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+
+    .ag2-variants-grid {
+      display: flex; flex-wrap: wrap; gap: 20px;
+    }
+    .ag2-variant {
+      display: flex; flex-direction: column; gap: 8px; align-items: center;
+    }
+    .ag2-variant-label {
+      font-size: 10px; font-weight: 600; color: #7b7b7b;
+      text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    .ag2-variant canvas {
+      border-radius: 10px;
+      display: block;
+    }
+    .ag2-variant-status {
+      font-size: 10px; color: #5c5c5c; text-align: center;
+    }
+    .ag2-header-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding-bottom: 4px;
+    }
+    .ag2-header-title {
+      font-size: 11px; font-weight: 600; color: #7b7b7b;
+      text-transform: uppercase; letter-spacing: 0.06em;
+    }
+
     .aigen-container {
       width: 100%;
       max-width: 560px;
@@ -664,70 +742,66 @@
     .aigen-input:focus { border-color: #5c5c5c; }
     .aigen-input::placeholder { color: #5c5c5c; }
 
-    .aigen-uploads {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-    .aigen-upload-zone {
+    .aigen-drop-zone {
       position: relative;
       border: 1.5px dashed #333333;
       border-radius: 12px;
-      aspect-ratio: 104 / 116;
+      min-height: 100px;
       cursor: pointer;
       overflow: hidden;
       transition: border-color 0.15s, background 0.15s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
     }
-    .aigen-upload-zone:hover { border-color: #5c5c5c; background: rgba(255,255,255,0.02); }
-    .aigen-upload-zone.drag-over { border-color: #7d52f4; background: rgba(125,82,244,0.06); }
-    .aigen-upload-zone input[type="file"] {
+    .aigen-drop-zone:hover { border-color: #5c5c5c; background: rgba(255,255,255,0.02); }
+    .aigen-drop-zone.drag-over { border-color: #7d52f4; background: rgba(125,82,244,0.06); }
+    .aigen-drop-zone input[type="file"] {
       position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
     }
-    .aigen-upload-placeholder {
+    .aigen-drop-placeholder {
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 6px;
       text-align: center;
+      padding: 28px 16px;
       pointer-events: none;
-      padding: 16px;
     }
-    .aigen-upload-label { font-size: 12px; font-weight: 500; color: #a3a3a3; }
-    .aigen-upload-hint { font-size: 10px; color: #5c5c5c; }
-    .aigen-upload-preview {
-      display: none;
-      position: absolute;
-      inset: 0;
-    }
-    .aigen-upload-preview.visible { display: block; }
-    .aigen-upload-preview img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      padding: 8px;
-    }
-    .aigen-clear-btn {
-      position: absolute;
-      top: 6px;
-      right: 6px;
-      width: 22px;
-      height: 22px;
-      border-radius: 5px;
-      border: none;
-      background: rgba(0,0,0,0.5);
-      color: #ebebeb;
-      cursor: pointer;
+    .aigen-drop-placeholder.hidden { display: none; }
+    .aigen-thumbs {
       display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      backdrop-filter: blur(4px);
-      transition: background 0.15s;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 12px;
     }
-    .aigen-clear-btn:hover { background: rgba(0,0,0,0.75); }
+    .aigen-thumb-item {
+      position: relative;
+      width: 72px;
+      height: 72px;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid #333;
+      flex-shrink: 0;
+    }
+    .aigen-thumb-item img {
+      width: 100%; height: 100%; object-fit: cover;
+    }
+    .aigen-thumb-remove {
+      position: absolute; top: 3px; right: 3px;
+      width: 18px; height: 18px;
+      border-radius: 4px; border: none;
+      background: rgba(0,0,0,0.6); color: #fff;
+      font-size: 10px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      backdrop-filter: blur(4px);
+    }
+    .aigen-thumb-add {
+      width: 72px; height: 72px;
+      border-radius: 8px;
+      border: 1.5px dashed #444;
+      display: flex; align-items: center; justify-content: center;
+      color: #666; font-size: 22px;
+      cursor: pointer; flex-shrink: 0;
+      pointer-events: none;
+    }
 
     .aigen-generate-btn {
       display: flex;
@@ -788,6 +862,45 @@
       transition: border-color 0.15s, color 0.15s;
     }
     .aigen-result-btn:hover { border-color: #5c5c5c; color: #ebebeb; }
+
+    /* ── Name Modal ── */
+    .name-modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.6);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 1000;
+    }
+    .name-modal {
+      background: #1c1c1c;
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 24px;
+      width: 320px;
+      display: flex; flex-direction: column; gap: 16px;
+    }
+    .name-modal-title { font-size: 13px; font-weight: 600; color: #ebebeb; }
+    .name-modal-subtitle { font-size: 11px; color: #7b7b7b; margin-top: -8px; }
+    .name-modal-input {
+      width: 100%; background: #111; border: 1px solid #333;
+      border-radius: 8px; padding: 9px 12px; box-sizing: border-box;
+      font-size: 13px; color: #ebebeb; font-family: inherit; outline: none;
+      transition: border-color 0.15s;
+    }
+    .name-modal-input:focus { border-color: #5c5c5c; }
+    .name-modal-input::placeholder { color: #5c5c5c; }
+    .name-modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+    .name-modal-skip {
+      background: transparent; border: 1px solid #333; border-radius: 8px;
+      padding: 8px 16px; font-size: 12px; color: #7b7b7b; cursor: pointer;
+      font-family: inherit; transition: background 0.15s, color 0.15s;
+    }
+    .name-modal-skip:hover { background: #262626; color: #ebebeb; }
+    .name-modal-confirm {
+      background: #7d52f4; border: none; border-radius: 8px;
+      padding: 8px 16px; font-size: 12px; color: #fff; cursor: pointer;
+      font-family: inherit; font-weight: 500; transition: background 0.15s;
+    }
+    .name-modal-confirm:hover { background: #6e3ee0; }
   </style>
 </head>
 <body>
@@ -801,8 +914,9 @@
 <!-- ═══════════ TAB NAV ═══════════ -->
 <nav class="tab-nav">
   <button class="tab-btn" data-tab="brands" onclick="showTab('brands')">All Brands</button>
-  <button class="tab-btn active" data-tab="add" onclick="showTab('add')">Add Brand</button>
-  <button class="tab-btn" data-tab="aigen" onclick="showTab('aigen')">AI Generate</button>
+  <button class="tab-btn" data-tab="add" onclick="showTab('add')">Generate</button>
+  <button class="tab-btn" data-tab="aigen" onclick="showTab('aigen')">AI Gen 1</button>
+  <button class="tab-btn active" data-tab="aigen2" onclick="showTab('aigen2')">AI Gen 2</button>
   <button class="tab-btn" id="trashBtn" data-tab="trash" onclick="showTab('trash')" style="margin-left:auto">Deleted assets</button>
 </nav>
 
@@ -828,36 +942,14 @@
       <!-- Image uploads -->
       <div class="aigen-field">
         <label class="aigen-label">Images</label>
-        <div class="aigen-uploads">
-
-          <!-- Logo upload -->
-          <div class="aigen-upload-zone" id="aigenLogoZone" data-slot="logo">
-            <input type="file" id="aigenLogoInput" accept="image/*">
-            <div class="aigen-upload-placeholder" id="aigenLogoPlaceholder">
-              <i class="ph ph-image-square" style="font-size:28px;opacity:0.4;"></i>
-              <span class="aigen-upload-label">Logo</span>
-              <span class="aigen-upload-hint">Drop, paste, or click</span>
-            </div>
-            <div class="aigen-upload-preview" id="aigenLogoPreview">
-              <img id="aigenLogoThumb" src="" alt="">
-              <button class="aigen-clear-btn" id="aigenLogoClear" title="Remove"><i class="ph ph-x"></i></button>
-            </div>
+        <div class="aigen-drop-zone" id="aigenDropZone">
+          <input type="file" id="aigenFileInput" accept="image/*" multiple>
+          <div class="aigen-drop-placeholder" id="aigenDropPlaceholder">
+            <i class="ph ph-images" style="font-size:30px;opacity:0.35;"></i>
+            <span class="aigen-upload-label">Drop, paste, or click to add images</span>
+            <span class="aigen-upload-hint">Logo first, then subject — accepts multiple</span>
           </div>
-
-          <!-- Subject image upload -->
-          <div class="aigen-upload-zone" id="aigenSubjectZone" data-slot="subject">
-            <input type="file" id="aigenSubjectInput" accept="image/*">
-            <div class="aigen-upload-placeholder" id="aigenSubjectPlaceholder">
-              <i class="ph ph-person" style="font-size:28px;opacity:0.4;"></i>
-              <span class="aigen-upload-label">Subject</span>
-              <span class="aigen-upload-hint">Drop, paste, or click</span>
-            </div>
-            <div class="aigen-upload-preview" id="aigenSubjectPreview">
-              <img id="aigenSubjectThumb" src="" alt="">
-              <button class="aigen-clear-btn" id="aigenSubjectClear" title="Remove"><i class="ph ph-x"></i></button>
-            </div>
-          </div>
-
+          <div class="aigen-thumbs" id="aigenThumbs"></div>
         </div>
       </div>
 
@@ -886,18 +978,43 @@
   </div>
 </div>
 
+<!-- ═══════════ AI GEN 2 VIEW ═══════════ -->
+<div id="view-aigen2" class="active">
+  <aside class="controls">
+    <div class="app-title">AI Gen 2</div>
+
+    <!-- Images -->
+    <div>
+      <div class="section-label">Images</div>
+      <div class="aigen-drop-zone" id="ag2-dropZone">
+        <input type="file" id="ag2-fileInput" accept="image/*" multiple>
+        <div class="aigen-drop-placeholder" id="ag2-dropPlaceholder">
+          <i class="ph ph-images" style="font-size:30px;opacity:0.35;"></i>
+          <span class="aigen-upload-label">Drop, paste, or click to add images</span>
+          <span class="aigen-upload-hint">Logo first, then subject</span>
+        </div>
+        <div class="aigen-thumbs" id="ag2-thumbs"></div>
+      </div>
+    </div>
+
+    <!-- Generate -->
+    <button class="ag2-generate-btn" id="ag2-generateBtn" onclick="ag2Generate()" style="margin-top:auto;">
+      <i class="ph ph-sparkle"></i> Generate All
+    </button>
+  </aside>
+
+  <!-- Preview -->
+  <main class="preview-panel" id="ag2-previewPanel" style="overflow-y:auto;">
+    <div id="ag2-sections"></div>
+  </main>
+</div>
+
 <!-- ═══════════ ADD BRAND VIEW ═══════════ -->
-<div id="view-add" class="active">
+<div id="view-add">
 
 <!-- ═══════════ CONTROLS ═══════════ -->
 <aside class="controls">
   <div class="app-title">Brand Assets</div>
-
-  <!-- Brand Name -->
-  <div>
-    <div class="section-label">Brand Name</div>
-    <input type="text" class="brand-name-input" id="brandName" placeholder="e.g. Mint" autocomplete="off">
-  </div>
 
   <!-- Brand Logo -->
   <div>
@@ -1449,15 +1566,12 @@ function renderAll() {
 
 
 // ── Download ───────────────────────────────────────────────────────────
-function getBrandSlug() {
-  const raw = (document.getElementById('brandName').value || '').trim();
-  return raw ? ' ' + raw : '';
-}
+let _currentBrandName = '';
 
 /**
  * Exports canvas at 2× by drawing it into a scaled offscreen canvas.
  */
-function downloadCanvas2x(canvasId, baseName) {
+function downloadCanvas2x(canvasId, baseName, slug) {
   const src = document.getElementById(canvasId);
   // Use CSS (logical) dimensions so DPR scaling doesn't inflate export size
   const lw = src.clientWidth  || Math.round(src.width  / DPR);
@@ -1469,8 +1583,8 @@ function downloadCanvas2x(canvasId, baseName) {
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = 'high';
   ctx.drawImage(src, 0, 0, lw * 2, lh * 2);
-  const slug = getBrandSlug();
-  const filename = baseName + slug + '.png';
+  const suffix = slug ? ' ' + slug : '';
+  const filename = baseName + suffix + '.png';
   const link = document.createElement('a');
   link.download = filename;
   link.href = out.toDataURL('image/png');
@@ -1487,18 +1601,19 @@ const ASSETS = {
 };
 function downloadAsset(id) {
   const [cid, base] = ASSETS[id];
-  downloadCanvas2x(cid, base);
+  downloadCanvas2x(cid, base, '');
 }
 async function downloadAll() {
+  const slug = await askName('Export', _currentBrandName);
   for (const [, [cid, base]] of Object.entries(ASSETS)) {
-    downloadCanvas2x(cid, base);
+    downloadCanvas2x(cid, base, slug);
     await new Promise(r => setTimeout(r, 150));
   }
 }
 
 async function downloadZip() {
+  const slug = await askName('Export', _currentBrandName);
   const zip = new JSZip();
-  const slug = getBrandSlug();
   for (const [, [cid, base]] of Object.entries(ASSETS)) {
     const src = document.getElementById(cid);
     const scale = 2;
@@ -1512,11 +1627,13 @@ async function downloadZip() {
     ctx.drawImage(src, 0, 0);
     const dataUrl = out.toDataURL('image/png');
     const b64 = dataUrl.split(',')[1];
-    zip.file(base + slug + '.png', b64, { base64: true });
+    const suffix = slug ? ' ' + slug : '';
+    zip.file(base + suffix + '.png', b64, { base64: true });
   }
   const blob = await zip.generateAsync({ type: 'blob' });
   const link = document.createElement('a');
-  link.download = 'brand-assets' + slug + '.zip';
+  const suffix = slug ? ' ' + slug : '';
+  link.download = 'brand-assets' + suffix + '.zip';
   link.href = URL.createObjectURL(blob);
   link.click();
   URL.revokeObjectURL(link.href);
@@ -1667,15 +1784,9 @@ document.addEventListener('paste', async (e) => {
     i.src = url;
   });
 
-  if (hoveredZone) {
-    // Paste directly to the hovered zone
-    applyPastedImage(hoveredZone, img);
-  } else {
-    // Show picker
-    pendingPasteImg = img;
-    document.getElementById('pastePreview').src = url;
-    document.getElementById('pasteModal').classList.add('visible');
-  }
+  // Paste to hovered zone, or fall through: logo first, then product image
+  const target = hoveredZone || (!S.logoImg ? 'logoImg' : 'productImg');
+  applyPastedImage(target, img);
 });
 
 // Close modal on backdrop click
@@ -1774,6 +1885,7 @@ function showTab(tab, fromEdit = false) {
   document.getElementById('view-brands').classList.toggle('active', tab === 'brands');
   document.getElementById('view-trash').classList.toggle('active', tab === 'trash');
   document.getElementById('view-aigen').classList.toggle('active', tab === 'aigen');
+  document.getElementById('view-aigen2').classList.toggle('active', tab === 'aigen2');
   if (tab === 'brands') renderBrandsGrid();
   if (tab === 'trash') renderTrashGrid();
   if (tab === 'add' && !fromEdit) { editingBrandId = null; setSaveBrandMode(false); }
@@ -1781,99 +1893,123 @@ function showTab(tab, fromEdit = false) {
 
 // ── AI Generate ─────────────────────────────────────────────────────────
 (function initAigen() {
-  const slots = { logo: null, subject: null };
+  const GEMINI_API_KEY = 'AIzaSyBB6iL9zCr-77znSx0qKRDSW--oK-9P90A';
+  const GEMINI_MODEL   = 'gemini-3-pro-image-preview';
+  const PROMPT = PROMPTS.brandAsset;
 
-  function setSlot(slot, file) {
-    if (!file || !file.type.startsWith('image/')) return;
-    slots[slot] = file;
-    const reader = new FileReader();
-    reader.onload = e => {
-      const thumb = document.getElementById(slot === 'logo' ? 'aigenLogoThumb' : 'aigenSubjectThumb');
-      const preview = document.getElementById(slot === 'logo' ? 'aigenLogoPreview' : 'aigenSubjectPreview');
-      const placeholder = document.getElementById(slot === 'logo' ? 'aigenLogoPlaceholder' : 'aigenSubjectPlaceholder');
-      thumb.src = e.target.result;
-      preview.classList.add('visible');
-      placeholder.style.display = 'none';
-    };
-    reader.readAsDataURL(file);
-  }
+  const images = []; // array of { file, dataUrl }
 
-  function clearSlot(slot) {
-    slots[slot] = null;
-    const thumb = document.getElementById(slot === 'logo' ? 'aigenLogoThumb' : 'aigenSubjectThumb');
-    const preview = document.getElementById(slot === 'logo' ? 'aigenLogoPreview' : 'aigenSubjectPreview');
-    const placeholder = document.getElementById(slot === 'logo' ? 'aigenLogoPlaceholder' : 'aigenSubjectPlaceholder');
-    const input = document.getElementById(slot === 'logo' ? 'aigenLogoInput' : 'aigenSubjectInput');
-    thumb.src = '';
-    preview.classList.remove('visible');
-    placeholder.style.display = '';
-    input.value = '';
-  }
-
-  // File input change
-  document.getElementById('aigenLogoInput').addEventListener('change', e => {
-    if (e.target.files[0]) setSlot('logo', e.target.files[0]);
-  });
-  document.getElementById('aigenSubjectInput').addEventListener('change', e => {
-    if (e.target.files[0]) setSlot('subject', e.target.files[0]);
-  });
-
-  // Clear buttons
-  document.getElementById('aigenLogoClear').addEventListener('click', e => {
-    e.stopPropagation(); clearSlot('logo');
-  });
-  document.getElementById('aigenSubjectClear').addEventListener('click', e => {
-    e.stopPropagation(); clearSlot('subject');
-  });
-
-  // Drag & drop per zone
-  ['aigenLogoZone', 'aigenSubjectZone'].forEach(id => {
-    const zone = document.getElementById(id);
-    const slot = zone.dataset.slot;
-    zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
-    zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
-    zone.addEventListener('drop', e => {
-      e.preventDefault(); zone.classList.remove('drag-over');
-      const file = e.dataTransfer.files[0];
-      if (file) setSlot(slot, file);
+  function renderThumbs() {
+    const thumbs = document.getElementById('aigenThumbs');
+    const placeholder = document.getElementById('aigenDropPlaceholder');
+    thumbs.innerHTML = '';
+    images.forEach((img, i) => {
+      const item = document.createElement('div');
+      item.className = 'aigen-thumb-item';
+      item.innerHTML = `<img src="${img.dataUrl}"><button class="aigen-thumb-remove" data-i="${i}"><i class="ph ph-x"></i></button>`;
+      thumbs.appendChild(item);
     });
+    if (images.length > 0) {
+      const add = document.createElement('div');
+      add.className = 'aigen-thumb-add';
+      add.innerHTML = '<i class="ph ph-plus"></i>';
+      thumbs.appendChild(add);
+      placeholder.classList.add('hidden');
+    } else {
+      placeholder.classList.remove('hidden');
+    }
+    thumbs.querySelectorAll('.aigen-thumb-remove').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        images.splice(+btn.dataset.i, 1);
+        renderThumbs();
+      });
+    });
+  }
+
+  function addFiles(files) {
+    Array.from(files).forEach(file => {
+      if (!file.type.startsWith('image/')) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        images.push({ file, dataUrl: e.target.result });
+        renderThumbs();
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  const zone = document.getElementById('aigenDropZone');
+  const input = document.getElementById('aigenFileInput');
+
+  input.addEventListener('change', e => { addFiles(e.target.files); input.value = ''; });
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault(); zone.classList.remove('drag-over');
+    addFiles(e.dataTransfer.files);
   });
 
-  // Paste anywhere on the aigen view — fill next empty slot
   document.addEventListener('paste', e => {
     if (!document.getElementById('view-aigen').classList.contains('active')) return;
     const items = Array.from(e.clipboardData.items);
     const imgItem = items.find(i => i.type.startsWith('image/'));
-    if (!imgItem) return;
-    const file = imgItem.getAsFile();
-    if (!slots.logo) setSlot('logo', file);
-    else if (!slots.subject) setSlot('subject', file);
+    if (imgItem) addFiles([imgItem.getAsFile()]);
   });
 
+  function fileToBase64(dataUrl) {
+    return dataUrl.split(',')[1];
+  }
+
   window.aigenGenerate = async function() {
+    if (images.length === 0) {
+      alert('Please add at least one image.'); return;
+    }
     const status = document.getElementById('aigenStatus');
-    const btn = document.getElementById('aigenGenerateBtn');
+    const btn    = document.getElementById('aigenGenerateBtn');
     const result = document.getElementById('aigenResult');
 
     status.style.display = 'block';
     status.className = 'aigen-status';
-    status.textContent = 'Generating… this may take a moment.';
+    status.textContent = 'Generating… this may take 15–30 seconds.';
     btn.disabled = true;
     result.style.display = 'none';
 
     try {
-      const formData = new FormData();
-      if (slots.logo) formData.append('logo', slots.logo, 'logo.png');
-      if (slots.subject) formData.append('subject', slots.subject, 'subject.png');
+      const parts = images.map(img => ({
+        inlineData: {
+          mimeType: img.file.type || 'image/png',
+          data: fileToBase64(img.dataUrl)
+        }
+      }));
+      parts.push({ text: PROMPT });
 
-      const resp = await fetch('/api/aigen', { method: 'POST', body: formData });
-      if (!resp.ok) throw new Error(await resp.text());
-      const blob = await resp.blob();
-      const url = URL.createObjectURL(blob);
+      const resp = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ role: 'user', parts }],
+            generationConfig: { responseModalities: ['IMAGE', 'TEXT'] }
+          })
+        }
+      );
+
+      if (!resp.ok) {
+        const err = await resp.json().catch(() => ({}));
+        throw new Error(err?.error?.message || `HTTP ${resp.status}`);
+      }
+
+      const data = await resp.json();
+      const imgPart = data?.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
+      if (!imgPart) throw new Error('No image returned. ' + JSON.stringify(data?.candidates?.[0]?.content?.parts));
+
+      const url = `data:${imgPart.inlineData.mimeType};base64,${imgPart.inlineData.data}`;
       document.getElementById('aigenResultImg').src = url;
+      window._aigenResultUrl = url;
       result.style.display = 'block';
       status.style.display = 'none';
-      window._aigenResultUrl = url;
     } catch (err) {
       status.className = 'aigen-status error';
       status.textContent = 'Error: ' + err.message;
@@ -1885,7 +2021,7 @@ function showTab(tab, fromEdit = false) {
   window.aigenDownload = function() {
     const url = window._aigenResultUrl;
     if (!url) return;
-    const name = (prompt('Brand name for the file:', 'brand-asset') || 'brand-asset').trim().replace(/\s+/g, '-');
+    const name = (prompt('File name:', 'brand-asset') || 'brand-asset').trim().replace(/\s+/g, '-');
     const a = document.createElement('a'); a.href = url; a.download = name + '.png'; a.click();
   };
 
@@ -1893,14 +2029,301 @@ function showTab(tab, fromEdit = false) {
     const url = window._aigenResultUrl;
     if (!url) return;
     const name = (prompt('Brand name:', '') || '').trim() || 'AI Generated';
-    const resp = await fetch(url);
-    const blob = await resp.blob();
-    const reader = new FileReader();
-    reader.onload = async e => {
-      await _sb.from('brands').insert({ name, asset_url: e.target.result });
-      showTab('brands');
-    };
-    reader.readAsDataURL(blob);
+    await _sb.from('brands').insert({ name, asset_url: url });
+    showTab('brands');
+  };
+})();
+
+// ── AI Gen 2 ────────────────────────────────────────────────────────────
+(function initAg2() {
+  const GEMINI_API_KEY = 'AIzaSyBB6iL9zCr-77znSx0qKRDSW--oK-9P90A';
+  const GEMINI_MODEL   = 'gemini-3-pro-image-preview';
+
+  const ag2Images = []; // shared images for all calls
+  let ag2Assets = [];
+
+  fetch('/prompts.json').then(r => r.json()).then(d => { ag2Assets = d.assets || []; });
+
+  // ── Build variant sections in DOM ──
+  const sectionsEl = document.getElementById('ag2-sections');
+  for (let i = 1; i <= 1; i++) {
+    sectionsEl.insertAdjacentHTML('beforeend', `
+      <div class="preview-header" id="ag2-hdr${i}">
+        <span class="preview-header-title">Variant ${i}</span>
+        <span id="ag2-s${i}" style="font-size:11px;color:#7b7b7b;margin-left:8px;">—</span>
+        <div style="display:flex;gap:8px;margin-left:auto;">
+          <button class="export-all-btn" onclick="ag2DownloadAll(${i})">Export PNGs</button>
+          <button class="export-all-btn" onclick="ag2DownloadZip(${i})">Export ZIP</button>
+        </div>
+      </div>
+      <div class="assets-row" id="ag2-row${i}">
+        <div class="asset-card">
+          <div class="asset-card-head"><span class="asset-card-name">Icon</span><span class="asset-card-dims">104 × 116</span></div>
+          <div class="asset-canvas-wrap"><canvas id="ag2-v${i}-icon" width="208" height="232" style="width:104px;height:116px;"></canvas></div>
+          <button class="download-btn" onclick="ag2DownloadOne(${i},'icon')"><i class="ph ph-download-simple"></i> PNG</button>
+        </div>
+        <div class="asset-card">
+          <div class="asset-card-head"><span class="asset-card-name">Square Icon</span><span class="asset-card-dims">116 × 116</span></div>
+          <div class="asset-canvas-wrap"><canvas id="ag2-v${i}-sq" width="232" height="232" style="width:116px;height:116px;"></canvas></div>
+          <button class="download-btn" onclick="ag2DownloadOne(${i},'sq')"><i class="ph ph-download-simple"></i> PNG</button>
+        </div>
+        <div class="asset-card">
+          <div class="asset-card-head"><span class="asset-card-name">Solid Square Logo</span><span class="asset-card-dims">116 × 116</span></div>
+          <div class="asset-canvas-wrap"><canvas id="ag2-v${i}-solid" width="232" height="232" style="width:116px;height:116px;"></canvas></div>
+          <button class="download-btn" onclick="ag2DownloadOne(${i},'solid')"><i class="ph ph-download-simple"></i> PNG</button>
+        </div>
+        <div class="asset-card">
+          <div class="asset-card-head"><span class="asset-card-name">Logo</span><span class="asset-card-dims">88 × 40</span></div>
+          <div class="asset-canvas-wrap"><canvas id="ag2-v${i}-logo" width="176" height="80" style="width:88px;height:40px;"></canvas></div>
+          <button class="download-btn" onclick="ag2DownloadOne(${i},'logo')"><i class="ph ph-download-simple"></i> PNG</button>
+        </div>
+        <div class="asset-card">
+          <div class="asset-card-head"><span class="asset-card-name">Voucher Colour</span><span class="asset-card-dims">259 × 94</span></div>
+          <div class="asset-canvas-wrap"><canvas id="ag2-v${i}-voucher" width="518" height="188" style="width:259px;height:94px;"></canvas></div>
+          <button class="download-btn" onclick="ag2DownloadOne(${i},'voucher')"><i class="ph ph-download-simple"></i> PNG</button>
+        </div>
+      </div>
+      <div class="wa-row" id="ag2-wa${i}" style="opacity:0.2;pointer-events:none;">
+        <div class="asset-card">
+          <div class="asset-card-head"><span class="asset-card-name">WA Brand Card</span><span class="asset-card-dims">1500 × 750</span></div>
+          <div class="asset-canvas-wrap"><canvas id="ag2-v${i}-wa" width="1500" height="750"></canvas></div>
+          <button class="download-btn" onclick="ag2DownloadOne(${i},'wa')"><i class="ph ph-download-simple"></i> PNG — full resolution</button>
+        </div>
+      </div>
+    `);
+  }
+
+  // ── Shared multi-image upload ──
+  function ag2RenderThumbs() {
+    const thumbs = document.getElementById('ag2-thumbs');
+    const placeholder = document.getElementById('ag2-dropPlaceholder');
+    thumbs.innerHTML = '';
+    ag2Images.forEach((img, i) => {
+      const item = document.createElement('div');
+      item.className = 'aigen-thumb-item';
+      item.innerHTML = `<img src="${img.dataUrl}"><button class="aigen-thumb-remove" data-i="${i}"><i class="ph ph-x"></i></button>`;
+      thumbs.appendChild(item);
+    });
+    if (ag2Images.length > 0) {
+      const add = document.createElement('div');
+      add.className = 'aigen-thumb-add';
+      add.innerHTML = '<i class="ph ph-plus"></i>';
+      thumbs.appendChild(add);
+      placeholder.classList.add('hidden');
+    } else {
+      placeholder.classList.remove('hidden');
+    }
+    thumbs.querySelectorAll('.aigen-thumb-remove').forEach(btn => {
+      btn.addEventListener('click', e => { e.stopPropagation(); ag2Images.splice(+btn.dataset.i, 1); ag2RenderThumbs(); });
+    });
+  }
+
+  function ag2AddFiles(files) {
+    Array.from(files).forEach(file => {
+      if (!file.type.startsWith('image/')) return;
+      const reader = new FileReader();
+      reader.onload = e => { ag2Images.push({ file, dataUrl: e.target.result }); ag2RenderThumbs(); };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  const ag2Zone  = document.getElementById('ag2-dropZone');
+  const ag2Input = document.getElementById('ag2-fileInput');
+  ag2Input.addEventListener('change', e => { ag2AddFiles(e.target.files); ag2Input.value = ''; });
+  ag2Zone.addEventListener('dragover', e => { e.preventDefault(); ag2Zone.classList.add('drag-over'); });
+  ag2Zone.addEventListener('dragleave', () => ag2Zone.classList.remove('drag-over'));
+  ag2Zone.addEventListener('drop', e => { e.preventDefault(); ag2Zone.classList.remove('drag-over'); ag2AddFiles(e.dataTransfer.files); });
+
+  document.addEventListener('paste', e => {
+    if (!document.getElementById('view-aigen2').classList.contains('active')) return;
+    const items = Array.from(e.clipboardData.items);
+    const imgItem = items.find(i => i.type.startsWith('image/'));
+    if (imgItem) ag2AddFiles([imgItem.getAsFile()]);
+  });
+
+  // ── Canvas rendering ──
+  const DPR = window.devicePixelRatio || 1;
+  function ag2Prep(id, w, h) {
+    const c = document.getElementById(id);
+    c.width = w * DPR; c.height = h * DPR;
+    c.style.width = w + 'px'; c.style.height = h + 'px';
+    const ctx = c.getContext('2d');
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    return ctx;
+  }
+
+  function ag2RenderAll(i, productImg) {
+    const color = S.color;
+    const logo  = ag2Logo;
+
+    // Icon 104×116
+    { const ctx = ag2Prep(`ag2-v${i}-icon`, 104, 116);
+      ctx.save(); roundedRectPath(ctx,0,0,104,116,16); ctx.clip();
+      drawGradientBg(ctx,104,116,color);
+      if (logo) drawContained(ctx,logo,5,6,94,52,100,0,'center','center');
+      if (productImg) drawContained(ctx,productImg,0,56,104,60,100,0,'center','bottom');
+      ctx.restore(); }
+
+    // Square Icon 116×116
+    { const ctx = ag2Prep(`ag2-v${i}-sq`, 116, 116);
+      ctx.save(); roundedRectPath(ctx,0,0,116,116,16); ctx.clip();
+      drawGradientBg(ctx,116,116,color);
+      if (logo) drawContained(ctx,logo,11,5,94,52,100,0,'center','center');
+      if (productImg) drawContained(ctx,productImg,0,56,116,60,100,0,'center','bottom');
+      ctx.restore(); }
+
+    // Solid Square Logo 116×116
+    { const ctx = ag2Prep(`ag2-v${i}-solid`, 116, 116);
+      ctx.fillStyle = color; ctx.fillRect(0,0,116,116);
+      if (logo) drawContained(ctx,logo,9,9,98,98,100,0,'center','center'); }
+
+    // Logo 88×40
+    { const ctx = ag2Prep(`ag2-v${i}-logo`, 88, 40);
+      ctx.fillStyle = color; ctx.fillRect(0,0,88,40);
+      if (logo) {
+        const aspect = (logo.naturalWidth||logo.width||1)/(logo.naturalHeight||logo.height||1);
+        let dw=88, dh=40;
+        if (aspect > dw/dh) { dh = dw/aspect; } else { dw = dh*aspect; }
+        ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(logo,1,40-dh-1,dw,dh);
+      } }
+
+    // Voucher 259×94
+    { const ctx = ag2Prep(`ag2-v${i}-voucher`, 259, 94);
+      ctx.save(); roundedRectPath(ctx,0,0,259,94,8); ctx.clip();
+      ctx.fillStyle = color; ctx.fillRect(0,0,259,94); ctx.restore(); }
+
+    // WA Brand Card 1500×750
+    { const c = document.getElementById(`ag2-v${i}-wa`);
+      c.width=1500; c.height=750; c.style.width=''; c.style.height='';
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = color; ctx.fillRect(0,0,1500,750);
+      if (bowImg.complete && bowImg.naturalWidth > 0) ctx.drawImage(bowImg,-122,0,1818,753);
+      const ZX=411,ZY=199,ZW=678,ZH=352;
+      ctx.save(); ctx.beginPath(); ctx.rect(ZX,ZY,ZW,ZH); ctx.clip();
+      if (logo) drawContained(ctx,logo,ZX,ZY,ZW,ZH,100,0,'center','center');
+      ctx.restore();
+      if (hubbleImg.complete && hubbleImg.naturalWidth > 0) {
+        if (isColorDark(color)) {
+          ctx.save(); ctx.filter='url(#to-white)';
+          ctx.drawImage(hubbleImg,1103.27,138.17,325.93,60.95); ctx.restore();
+        } else { ctx.drawImage(hubbleImg,1103.27,138.17,325.93,60.95); }
+      } }
+
+    // Reveal
+    document.getElementById(`ag2-row${i}`).style.opacity = '1';
+    document.getElementById(`ag2-row${i}`).style.pointerEvents = '';
+    document.getElementById(`ag2-wa${i}`).style.opacity = '1';
+    document.getElementById(`ag2-wa${i}`).style.pointerEvents = '';
+    document.getElementById(`ag2-hdr${i}`).style.opacity = '1';
+  }
+
+  // ── Download helpers ──
+  function canvasToBlob(id) {
+    return new Promise(res => document.getElementById(id).toBlob(res, 'image/png'));
+  }
+  window.ag2DownloadOne = async function(i, type) {
+    const blob = await canvasToBlob(`ag2-v${i}-${type}`);
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = `ag2-${type}.png`; a.click();
+  };
+  window.ag2DownloadAll = async function(i) {
+    const types = ['icon','sq','solid','logo','voucher','wa'];
+    for (const t of types) { await window.ag2DownloadOne(i, t); await new Promise(r => setTimeout(r, 150)); }
+  };
+  window.ag2DownloadZip = async function(i) {
+    const zip = new JSZip();
+    const types = ['icon','sq','solid','logo','voucher','wa'];
+    for (const t of types) {
+      const c = document.getElementById(`ag2-v${i}-${t}`);
+      if (!c) continue;
+      const dataUrl = c.toDataURL('image/png');
+      zip.file(`ag2-${t}.png`, dataUrl.split(',')[1], { base64: true });
+    }
+    const blob = await zip.generateAsync({ type: 'blob' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = 'ag2-assets.zip'; a.click();
+    URL.revokeObjectURL(a.href);
+  };
+
+  // ── Generate ──
+  async function generateSubject(prompt) {
+    const imgParts = ag2Images.map(img => ({
+      inlineData: { mimeType: img.file.type || 'image/png', data: img.dataUrl.split(',')[1] }
+    }));
+    const resp = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`,
+      { method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ contents:[{role:'user',parts:[...imgParts,{text:prompt}]}], generationConfig:{responseModalities:['IMAGE','TEXT']} }) }
+    );
+    if (!resp.ok) { const e = await resp.json().catch(()=>({})); throw new Error(e?.error?.message||`HTTP ${resp.status}`); }
+    const data = await resp.json();
+    const imgPart = data?.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
+    if (!imgPart) throw new Error('No image in response');
+    return `data:${imgPart.inlineData.mimeType};base64,${imgPart.inlineData.data}`;
+  }
+
+  window.ag2Generate = async function() {
+    if (!ag2Images.length) { alert('Please upload at least one image.'); return; }
+    if (!ag2Assets.length) { alert('Prompts not loaded yet, please try again.'); return; }
+    const btn = document.getElementById('ag2-generateBtn');
+    btn.disabled = true;
+
+    // Reset
+    document.getElementById('ag2-row1').style.opacity = '0.2';
+    document.getElementById('ag2-row1').style.pointerEvents = 'none';
+    document.getElementById('ag2-wa1').style.opacity = '0.2';
+    document.getElementById('ag2-wa1').style.pointerEvents = 'none';
+    document.getElementById('ag2-hdr1').style.opacity = '0.35';
+    document.getElementById('ag2-s1').textContent = 'Generating…';
+
+    // Build shared image parts from all uploaded images
+    const imgParts = ag2Images.map(img => ({
+      inlineData: { mimeType: img.file.type || 'image/png', data: img.dataUrl.split(',')[1] }
+    }));
+
+    // Run all 5 asset types in parallel, each using ALL images + its own prompt
+    const canvasTargets = ['icon','sq','solid','logo','voucher'];
+    const results = await Promise.all(ag2Assets.map(async (asset, idx) => {
+      try {
+        const resp = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`,
+          { method:'POST', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({ contents:[{role:'user',parts:[...imgParts,{text:asset.prompt}]}], generationConfig:{responseModalities:['IMAGE','TEXT']} }) }
+        );
+        if (!resp.ok) { const e=await resp.json().catch(()=>({})); throw new Error(e?.error?.message||`HTTP ${resp.status}`); }
+        const data = await resp.json();
+        const imgPart = data?.candidates?.[0]?.content?.parts?.find(p=>p.inlineData);
+        if (!imgPart) throw new Error('No image returned');
+        const dataUrl = `data:${imgPart.inlineData.mimeType};base64,${imgPart.inlineData.data}`;
+        const img = new Image();
+        await new Promise((res,rej) => { img.onload=res; img.onerror=rej; img.src=dataUrl; });
+        return { idx, img };
+      } catch(err) {
+        console.error(`Asset ${idx} (${asset.label}) error:`, err);
+        return null;
+      }
+    }));
+
+    // Paint each result into its canvas at native canvas resolution
+    results.forEach(r => {
+      if (!r) return;
+      const { idx, img } = r;
+      const type = canvasTargets[idx];
+      if (!type) return;
+      const c = document.getElementById(`ag2-v1-${type}`);
+      if (!c) return;
+      const ctx = c.getContext('2d');
+      ctx.drawImage(img, 0, 0, c.width, c.height);
+    });
+
+    document.getElementById('ag2-row1').style.opacity = '1';
+    document.getElementById('ag2-row1').style.pointerEvents = '';
+    document.getElementById('ag2-wa1').style.opacity = '1';
+    document.getElementById('ag2-wa1').style.pointerEvents = '';
+    document.getElementById('ag2-hdr1').style.opacity = '1';
+    document.getElementById('ag2-s1').textContent = '✓';
+    btn.disabled = false;
   };
 })();
 
@@ -1919,10 +2342,11 @@ function setSaveBrandMode(editing) {
 
 // ── Save brand ─────────────────────────────────────────────────────────
 async function saveBrand() {
+  const name = (await askName('Save', _currentBrandName)) || 'Untitled';
+  _currentBrandName = name;
+
   const btn = document.querySelector('.save-brand-btn');
   btn.textContent = 'Saving…'; btn.disabled = true;
-
-  const name = (document.getElementById('brandName').value || '').trim() || 'Untitled';
   const iconDataUrl = document.getElementById('c-icon').toDataURL('image/png');
 
   function imgToDataUrl(img) {
@@ -1955,7 +2379,7 @@ async function saveBrand() {
 
 // ── Load brand from grid tile ───────────────────────────────────────────
 async function loadBrand(brand) {
-  document.getElementById('brandName').value = brand.name;
+  _currentBrandName = brand.name || '';
   document.getElementById('hexInput').value = brand.color;
   document.getElementById('colorPicker').value = brand.color;
   document.getElementById('colorSwatch').style.background = brand.color;
@@ -2082,6 +2506,57 @@ async function renderTrashGrid() {
   requestAnimationFrame(() => {
     applySquircleClips();
     _squircleObserver.observe(grid);
+  });
+}
+</script>
+
+<!-- ═══════════ NAME MODAL ═══════════ -->
+<div id="nameModal" class="name-modal-overlay" style="display:none;">
+  <div class="name-modal">
+    <div>
+      <div class="name-modal-title" id="nameModalTitle">Name your export</div>
+      <div class="name-modal-subtitle">Optional — skip to use no name</div>
+    </div>
+    <input type="text" class="name-modal-input" id="nameModalInput" placeholder="e.g. Mint" autocomplete="off">
+    <div class="name-modal-actions">
+      <button class="name-modal-skip" id="nameModalSkip">Skip</button>
+      <button class="name-modal-confirm" id="nameModalConfirm">Export</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Name Modal ─────────────────────────────────────────────────────────
+function askName(confirmLabel = 'Export', prefill = '') {
+  return new Promise(resolve => {
+    const overlay = document.getElementById('nameModal');
+    const input   = document.getElementById('nameModalInput');
+    const confirmBtn = document.getElementById('nameModalConfirm');
+    const skipBtn    = document.getElementById('nameModalSkip');
+    document.getElementById('nameModalTitle').textContent =
+      confirmLabel === 'Save' ? 'Name this brand' : 'Name your export';
+    confirmBtn.textContent = confirmLabel;
+    input.value = prefill;
+    overlay.style.display = 'flex';
+    setTimeout(() => { input.focus(); input.select(); }, 50);
+
+    function done(name) {
+      overlay.style.display = 'none';
+      confirmBtn.removeEventListener('click', onConfirm);
+      skipBtn.removeEventListener('click', onSkip);
+      overlay.removeEventListener('click', onOverlay);
+      input.removeEventListener('keydown', onKey);
+      resolve(name);
+    }
+    function onConfirm() { done(input.value.trim()); }
+    function onSkip()    { done(''); }
+    function onOverlay(e){ if (e.target === overlay) done(''); }
+    function onKey(e)    { if (e.key === 'Enter') done(input.value.trim()); if (e.key === 'Escape') done(''); }
+
+    confirmBtn.addEventListener('click', onConfirm);
+    skipBtn.addEventListener('click', onSkip);
+    overlay.addEventListener('click', onOverlay);
+    input.addEventListener('keydown', onKey);
   });
 }
 </script>
