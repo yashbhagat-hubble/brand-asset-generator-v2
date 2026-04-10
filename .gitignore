@@ -2,6 +2,7 @@
 .env.*
 venv/
 *.json
+!prompts.json
 .DS_Store
 .claude/
 image_test.png
