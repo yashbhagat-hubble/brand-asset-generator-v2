@@ -3,6 +3,7 @@
 venv/
 *.json
 !prompts.json
+!vercel.json
 .DS_Store
 .claude/
 image_test.png
