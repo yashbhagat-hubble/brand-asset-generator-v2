@@ -2286,12 +2286,14 @@ function getGeminiApiKey() {
   // ── Accordion ──
   const accordionHdr  = document.getElementById('ag2-accordionHdr');
   const accordionBody = document.getElementById('ag2-accordionBody');
-  // Measure natural height then set, so CSS transition works on collapse
-  const _ah = accordionBody.scrollHeight;
-  accordionBody.style.maxHeight = _ah + 'px';
-  accordionHdr.addEventListener('click', () => {
-    const isOpen = accordionHdr.classList.toggle('open');
-    accordionBody.style.maxHeight = isOpen ? accordionBody.scrollHeight + 'px' : '0px';
+  // Measure after layout so scrollHeight is accurate; store it for re-open
+  requestAnimationFrame(() => {
+    const naturalHeight = accordionBody.scrollHeight;
+    accordionBody.style.maxHeight = naturalHeight + 'px';
+    accordionHdr.addEventListener('click', () => {
+      const isOpen = accordionHdr.classList.toggle('open');
+      accordionBody.style.maxHeight = isOpen ? naturalHeight + 'px' : '0px';
+    });
   });
 
   const ag2Zone  = document.getElementById('ag2-dropZone');
