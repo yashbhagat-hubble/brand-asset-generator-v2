@@ -666,6 +666,48 @@
     .ag2-generate-btn:hover { background: #6e3ee0; }
     .ag2-generate-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
+    /* ── Asset selector accordion ── */
+    .ag2-accordion-wrap {
+      border: 1px solid #2e2e2e; border-radius: 8px; overflow: hidden;
+    }
+    .ag2-accordion-header {
+      display: flex; align-items: center; justify-content: space-between;
+      cursor: pointer; user-select: none; padding: 10px 12px;
+    }
+    .ag2-accordion-arrow {
+      font-size: 10px; color: #5c5c5c; transition: transform 0.2s;
+    }
+    .ag2-accordion-header.open .ag2-accordion-arrow { transform: rotate(180deg); }
+    .ag2-accordion-body {
+      overflow: hidden; transition: max-height 0.25s ease;
+      padding: 0 10px;
+    }
+
+    .ag2-asset-selector {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding-bottom: 10px;
+    }
+    .ag2-asset-option {
+      position: relative; cursor: pointer; user-select: none;
+    }
+    .ag2-asset-option input[type="checkbox"] { display: none; }
+    .ag2-asset-tile {
+      display: flex; align-items: center; justify-content: center;
+      padding: 8px 6px; border-radius: 6px; text-align: center;
+      border: 1.5px solid #2e2e2e; background: transparent;
+      font-size: 11px; color: #5c5c5c; line-height: 1.3;
+      transition: border-color 0.12s, color 0.12s;
+      min-height: 40px;
+    }
+    .ag2-asset-tile { position: relative; }
+    .ag2-tile-check {
+      position: absolute; top: 4px; right: 5px;
+      font-size: 9px; color: #ebebeb; opacity: 0; transition: opacity 0.12s;
+    }
+    .ag2-asset-option input:checked ~ .ag2-asset-tile {
+      background: #2a2a2a; color: #ebebeb;
+    }
+    .ag2-asset-option input:checked ~ .ag2-asset-tile .ag2-tile-check { opacity: 1; }
+
     .ag2-preview-panel {
       flex: 1; overflow-y: auto;
       padding: 20px 24px;
@@ -878,8 +920,17 @@
       width: 320px;
       display: flex; flex-direction: column; gap: 16px;
     }
+    @keyframes spin { to { transform: rotate(360deg); } }
     .name-modal-title { font-size: 13px; font-weight: 600; color: #ebebeb; }
-    .name-modal-subtitle { font-size: 11px; color: #7b7b7b; margin-top: -8px; }
+    .name-modal-close {
+      position: absolute; top: 14px; right: 14px;
+      background: none; border: none; color: #7b7b7b; cursor: pointer;
+      font-size: 16px; line-height: 1; padding: 4px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 4px; transition: color 0.15s;
+    }
+    .name-modal-close:hover { color: #ebebeb; }
+    .name-modal { position: relative; }
     .name-modal-input {
       width: 100%; background: #111; border: 1px solid #333;
       border-radius: 8px; padding: 9px 12px; box-sizing: border-box;
@@ -901,6 +952,29 @@
       font-family: inherit; font-weight: 500; transition: background 0.15s;
     }
     .name-modal-confirm:hover { background: #6e3ee0; }
+
+    /* ── Error Toast ── */
+    #toastContainer {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      display: flex; flex-direction: column; gap: 8px; align-items: center;
+      z-index: 2000; pointer-events: none;
+    }
+    .toast {
+      display: flex; align-items: center; gap: 10px;
+      background: #2a1a1a; border: 1px solid #5c2020;
+      color: #f87171; border-radius: 8px;
+      padding: 10px 14px; font-size: 12px; font-family: inherit;
+      pointer-events: all; max-width: 420px;
+      animation: toastIn 0.2s ease;
+    }
+    @keyframes toastIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+    .toast-msg { flex: 1; }
+    .toast-close {
+      background: none; border: none; color: #f87171; cursor: pointer;
+      padding: 0; font-size: 14px; line-height: 1; opacity: 0.7;
+      display: flex; align-items: center;
+    }
+    .toast-close:hover { opacity: 1; }
   </style>
 </head>
 <body>
@@ -997,15 +1071,33 @@
       </div>
     </div>
 
+    <!-- Asset selection accordion -->
+    <div class="ag2-accordion-wrap">
+      <div class="ag2-accordion-header open" id="ag2-accordionHdr">
+        <span class="section-label" style="margin:0;">Choose assets</span>
+        <i class="ph ph-caret-down ag2-accordion-arrow"></i>
+      </div>
+      <div class="ag2-accordion-body" id="ag2-accordionBody">
+        <div class="ag2-asset-selector">
+          <label class="ag2-asset-option"><input type="checkbox" value="0" checked><div class="ag2-asset-tile">Icon<i class="ph ph-check ag2-tile-check"></i></div></label>
+          <label class="ag2-asset-option"><input type="checkbox" value="1" checked><div class="ag2-asset-tile">Square Icon<i class="ph ph-check ag2-tile-check"></i></div></label>
+          <label class="ag2-asset-option"><input type="checkbox" value="2" checked><div class="ag2-asset-tile">Solid Logo<i class="ph ph-check ag2-tile-check"></i></div></label>
+          <label class="ag2-asset-option"><input type="checkbox" value="3" checked><div class="ag2-asset-tile">Logo<i class="ph ph-check ag2-tile-check"></i></div></label>
+          <label class="ag2-asset-option"><input type="checkbox" value="4" checked><div class="ag2-asset-tile">Voucher<i class="ph ph-check ag2-tile-check"></i></div></label>
+          <label class="ag2-asset-option"><input type="checkbox" value="5" checked><div class="ag2-asset-tile">WA Card<i class="ph ph-check ag2-tile-check"></i></div></label>
+        </div>
+      </div>
+    </div>
+
     <!-- Generate -->
     <button class="ag2-generate-btn" id="ag2-generateBtn" onclick="ag2Generate()" style="margin-top:auto;">
-      <i class="ph ph-sparkle"></i> Generate All
+      <i class="ph ph-sparkle"></i> Generate
     </button>
   </aside>
 
   <!-- Preview -->
   <main class="preview-panel" id="ag2-previewPanel" style="overflow-y:auto;">
-    <div id="ag2-sections"></div>
+    <div id="ag2-sections" style="display:flex;flex-direction:column;gap:20px;"></div>
   </main>
 </div>
 
@@ -1892,8 +1984,24 @@ function showTab(tab, fromEdit = false) {
 }
 
 // ── AI Generate ─────────────────────────────────────────────────────────
+let _geminiApiKeyPromise;
+function getGeminiApiKey() {
+  if (!_geminiApiKeyPromise) {
+    _geminiApiKeyPromise = fetch('/.env.aistudio')
+      .then(r => {
+        if (!r.ok) throw new Error(`Failed to load .env.aistudio: ${r.status}`);
+        return r.text();
+      })
+      .then(text => {
+        const match = text.match(/^GEMINI_API_KEY=(.+)$/m);
+        if (!match) throw new Error('GEMINI_API_KEY not found in .env.aistudio');
+        return match[1].trim();
+      });
+  }
+  return _geminiApiKeyPromise;
+}
+
 (function initAigen() {
-  const GEMINI_API_KEY = 'AIzaSyBB6iL9zCr-77znSx0qKRDSW--oK-9P90A';
   const GEMINI_MODEL   = 'gemini-3-pro-image-preview';
   const PROMPT = PROMPTS.brandAsset;
 
@@ -1963,7 +2071,7 @@ function showTab(tab, fromEdit = false) {
 
   window.aigenGenerate = async function() {
     if (images.length === 0) {
-      alert('Please add at least one image.'); return;
+      showToast('Please add at least one image.'); return;
     }
     const status = document.getElementById('aigenStatus');
     const btn    = document.getElementById('aigenGenerateBtn');
@@ -1976,6 +2084,7 @@ function showTab(tab, fromEdit = false) {
     result.style.display = 'none';
 
     try {
+      const GEMINI_API_KEY = await getGeminiApiKey();
       const parts = images.map(img => ({
         inlineData: {
           mimeType: img.file.type || 'image/png',
@@ -2036,7 +2145,6 @@ function showTab(tab, fromEdit = false) {
 
 // ── AI Gen 2 ────────────────────────────────────────────────────────────
 (function initAg2() {
-  const GEMINI_API_KEY = 'AIzaSyBB6iL9zCr-77znSx0qKRDSW--oK-9P90A';
   const GEMINI_MODEL   = 'gemini-3-pro-image-preview';
 
   const ag2Images = []; // shared images for all calls
@@ -2060,6 +2168,7 @@ function showTab(tab, fromEdit = false) {
         <div style="display:flex;gap:8px;margin-left:auto;">
           <button class="export-all-btn" onclick="ag2DownloadAll(${i})">Export PNGs</button>
           <button class="export-all-btn" onclick="ag2DownloadZip(${i})">Export ZIP</button>
+          <button class="save-brand-btn" style="width:auto;padding:0 14px;" onclick="ag2Save(${i})">Save</button>
         </div>
       </div>
       <div class="assets-row" id="ag2-row${i}">
@@ -2084,12 +2193,15 @@ function showTab(tab, fromEdit = false) {
           <button class="download-btn" onclick="ag2DownloadOne(${i},'logo')"><i class="ph ph-download-simple"></i> PNG</button>
         </div>
         <div class="asset-card">
-          <div class="asset-card-head"><span class="asset-card-name">Voucher Colour</span><span class="asset-card-dims">259 × 94</span></div>
-          <div class="asset-canvas-wrap"><canvas id="ag2-v${i}-voucher" width="518" height="188" style="width:259px;height:94px;"></canvas></div>
-          <button class="download-btn" onclick="ag2DownloadOne(${i},'voucher')"><i class="ph ph-download-simple"></i> PNG</button>
+          <div class="asset-card-head"><span class="asset-card-name">Voucher Colour</span><span class="asset-card-dims" id="ag2-v${i}-voucher-hex" style="font-family:monospace;letter-spacing:0.04em;">—</span></div>
+          <div class="asset-canvas-wrap" style="position:relative;">
+            <canvas id="ag2-v${i}-voucher" width="518" height="188" style="width:259px;height:94px;display:block;"></canvas>
+            <span id="ag2-v${i}-voucher-label" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:11px;font-weight:600;letter-spacing:0.08em;pointer-events:none;opacity:0;"></span>
+          </div>
+          <button class="download-btn" onclick="ag2CopyVoucherHex(${i})"><i class="ph ph-copy"></i> Copy Hex</button>
         </div>
       </div>
-      <div class="wa-row" id="ag2-wa${i}" style="opacity:0.2;pointer-events:none;">
+      <div class="wa-row" id="ag2-wa${i}">
         <div class="asset-card">
           <div class="asset-card-head"><span class="asset-card-name">WA Brand Card</span><span class="asset-card-dims">1500 × 750</span></div>
           <div class="asset-canvas-wrap"><canvas id="ag2-v${i}-wa" width="1500" height="750"></canvas></div>
@@ -2098,6 +2210,44 @@ function showTab(tab, fromEdit = false) {
       </div>
     `);
   }
+
+  // ── Fill canvases with placeholder on init ──
+  function ag2FillPlaceholders() {
+    const fill = '#000000';
+    // icon — rounded 16
+    { const c = document.getElementById('ag2-v1-icon'); const ctx = c.getContext('2d');
+      ctx.save(); roundedRectPath(ctx,0,0,c.width,c.height,32); ctx.clip();
+      ctx.fillStyle = fill; ctx.fillRect(0,0,c.width,c.height); ctx.restore(); }
+    // sq — rounded 16
+    { const c = document.getElementById('ag2-v1-sq'); const ctx = c.getContext('2d');
+      ctx.save(); roundedRectPath(ctx,0,0,c.width,c.height,32); ctx.clip();
+      ctx.fillStyle = fill; ctx.fillRect(0,0,c.width,c.height); ctx.restore(); }
+    // solid — no radius
+    { const c = document.getElementById('ag2-v1-solid'); const ctx = c.getContext('2d');
+      ctx.fillStyle = fill; ctx.fillRect(0,0,c.width,c.height); }
+    // logo — no radius
+    { const c = document.getElementById('ag2-v1-logo'); const ctx = c.getContext('2d');
+      ctx.fillStyle = fill; ctx.fillRect(0,0,c.width,c.height); }
+    // voucher — rounded 8 (16 at 2x), reset label
+    { const c = document.getElementById('ag2-v1-voucher'); const ctx = c.getContext('2d');
+      ctx.save(); roundedRectPath(ctx,0,0,c.width,c.height,16); ctx.clip();
+      ctx.fillStyle = fill; ctx.fillRect(0,0,c.width,c.height); ctx.restore();
+      delete c.dataset.hex;
+      const lbl = document.getElementById('ag2-v1-voucher-label'); if (lbl) { lbl.textContent=''; lbl.style.opacity='0'; }
+      const hexEl = document.getElementById('ag2-v1-voucher-hex'); if (hexEl) hexEl.textContent='—'; }
+    // wa — fill + bow overlay
+    { const c = document.getElementById('ag2-v1-wa'); const ctx = c.getContext('2d');
+      ctx.fillStyle = fill; ctx.fillRect(0,0,1500,750);
+      if (bowImg.complete && bowImg.naturalWidth > 0) {
+        ctx.drawImage(bowImg,-122,0,1818,753);
+      } else {
+        bowImg.addEventListener('load', () => {
+          ctx.fillStyle = fill; ctx.fillRect(0,0,1500,750);
+          ctx.drawImage(bowImg,-122,0,1818,753);
+        }, { once: true });
+      } }
+  }
+  ag2FillPlaceholders();
 
   // ── Shared multi-image upload ──
   function ag2RenderThumbs() {
@@ -2132,6 +2282,17 @@ function showTab(tab, fromEdit = false) {
       reader.readAsDataURL(file);
     });
   }
+
+  // ── Accordion ──
+  const accordionHdr  = document.getElementById('ag2-accordionHdr');
+  const accordionBody = document.getElementById('ag2-accordionBody');
+  // Measure natural height then set, so CSS transition works on collapse
+  const _ah = accordionBody.scrollHeight;
+  accordionBody.style.maxHeight = _ah + 'px';
+  accordionHdr.addEventListener('click', () => {
+    const isOpen = accordionHdr.classList.toggle('open');
+    accordionBody.style.maxHeight = isOpen ? accordionBody.scrollHeight + 'px' : '0px';
+  });
 
   const ag2Zone  = document.getElementById('ag2-dropZone');
   const ag2Input = document.getElementById('ag2-fileInput');
@@ -2231,12 +2392,95 @@ function showTab(tab, fromEdit = false) {
   window.ag2DownloadOne = async function(i, type) {
     const blob = await canvasToBlob(`ag2-v${i}-${type}`);
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-    a.download = `ag2-${type}.png`; a.click();
+    const hexPrefix = type === 'voucher' ? (document.getElementById(`ag2-v${i}-voucher`)?.dataset?.hex || '') + '-' : '';
+    a.download = `${hexPrefix}ag2-${type}.png`; a.click();
   };
   window.ag2DownloadAll = async function(i) {
     const types = ['icon','sq','solid','logo','voucher','wa'];
     for (const t of types) { await window.ag2DownloadOne(i, t); await new Promise(r => setTimeout(r, 150)); }
   };
+  window.ag2Save = async function(i) {
+    const name = (await askName('Save', '')) || 'Untitled';
+    const types = ['icon','sq','solid','logo','voucher','wa'];
+    const canvases = {};
+    types.forEach(t => {
+      const c = document.getElementById(`ag2-v${i}-${t}`);
+      if (c) canvases[t] = c.toDataURL('image/png');
+    });
+    const entry = {
+      id: Date.now(),
+      name,
+      color: S.color,
+      solid_logo: canvases.icon || null,
+      logo: null, product: null,
+      sliders: { ag2: { ...canvases, voucherHex: document.getElementById(`ag2-v${i}-voucher`)?.dataset?.hex || null } }
+    };
+    const { error } = await _sb.from('brands').upsert(entry);
+    if (error) { showToast('Save failed: ' + error.message); } else { showTab('brands'); }
+  };
+
+  // ── Voucher hex fill ──
+  function fillVoucherWithHex(variantIdx, hex) {
+    const c = document.getElementById(`ag2-v${variantIdx}-voucher`);
+    if (!c) return;
+    const ctx = c.getContext('2d');
+    ctx.save(); roundedRectPath(ctx,0,0,c.width,c.height,16); ctx.clip();
+    ctx.fillStyle = hex; ctx.fillRect(0,0,c.width,c.height);
+    ctx.restore();
+    const label = document.getElementById(`ag2-v${variantIdx}-voucher-label`);
+    if (label) { label.textContent = hex; label.style.color = isColorDark(hex) ? '#fff' : '#111'; label.style.opacity = '1'; }
+    const hexEl = document.getElementById(`ag2-v${variantIdx}-voucher-hex`);
+    if (hexEl) hexEl.textContent = hex;
+    c.dataset.hex = hex;
+  }
+  window.ag2CopyVoucherHex = function(i) {
+    const hex = document.getElementById(`ag2-v${i}-voucher`)?.dataset?.hex;
+    if (!hex) return;
+    navigator.clipboard.writeText(hex).then(() => showToast(`Copied ${hex}`));
+  };
+
+  // ── Draw image into canvas with correct corner radius per type ──
+  function ag2DrawToCanvas(c, type, img) {
+    const ctx = c.getContext('2d');
+    ctx.clearRect(0, 0, c.width, c.height);
+    if (type === 'wa') {
+      ctx.drawImage(img, 0, 0, 1500, 750);
+      if (bowImg.complete && bowImg.naturalWidth > 0) ctx.drawImage(bowImg, -122, 0, 1818, 753);
+    } else {
+      const radii = { icon: 32, sq: 32, voucher: 16 };
+      const r = radii[type] || 0;
+      ctx.save();
+      if (r) { roundedRectPath(ctx, 0, 0, c.width, c.height, r); ctx.clip(); }
+      ctx.drawImage(img, 0, 0, c.width, c.height);
+      ctx.restore();
+    }
+  }
+
+  // ── Load a saved brand into AG2 canvases ──
+  window.ag2LoadBrand = function(brand) {
+    const ag2 = brand.sliders?.ag2;
+    if (!ag2) {
+      // Only icon available (legacy save) — show it, reset others to placeholder
+      ag2FillPlaceholders();
+      if (brand.solid_logo) {
+        const img = new Image();
+        img.onload = () => ag2DrawToCanvas(document.getElementById('ag2-v1-icon'), 'icon', img);
+        img.src = brand.solid_logo;
+      }
+      return;
+    }
+    ag2FillPlaceholders();
+    if (ag2.voucherHex) fillVoucherWithHex(1, ag2.voucherHex);
+    ['icon','sq','solid','logo','wa'].forEach(t => {
+      if (!ag2[t]) return;
+      const c = document.getElementById(`ag2-v1-${t}`);
+      if (!c) return;
+      const img = new Image();
+      img.onload = () => ag2DrawToCanvas(c, t, img);
+      img.src = ag2[t];
+    });
+  };
+
   window.ag2DownloadZip = async function(i) {
     const zip = new JSZip();
     const types = ['icon','sq','solid','logo','voucher','wa'];
@@ -2254,6 +2498,7 @@ function showTab(tab, fromEdit = false) {
 
   // ── Generate ──
   async function generateSubject(prompt) {
+    const GEMINI_API_KEY = await getGeminiApiKey();
     const imgParts = ag2Images.map(img => ({
       inlineData: { mimeType: img.file.type || 'image/png', data: img.dataUrl.split(',')[1] }
     }));
@@ -2270,10 +2515,11 @@ function showTab(tab, fromEdit = false) {
   }
 
   window.ag2Generate = async function() {
-    if (!ag2Images.length) { alert('Please upload at least one image.'); return; }
-    if (!ag2Assets.length) { alert('Prompts not loaded yet, please try again.'); return; }
+    if (!ag2Images.length) { showToast('Please upload at least one image.'); return; }
+    if (!ag2Assets.length) { showToast('Prompts not loaded yet, please try again.'); return; }
     const btn = document.getElementById('ag2-generateBtn');
     btn.disabled = true;
+    btn.innerHTML = '<i class="ph ph-circle-notch" style="animation:spin 0.8s linear infinite;"></i> Generating…';
 
     // Reset
     document.getElementById('ag2-row1').style.opacity = '0.2';
@@ -2288,17 +2534,33 @@ function showTab(tab, fromEdit = false) {
       inlineData: { mimeType: img.file.type || 'image/png', data: img.dataUrl.split(',')[1] }
     }));
 
-    // Run all 5 asset types in parallel, each using ALL images + its own prompt
-    const canvasTargets = ['icon','sq','solid','logo','voucher'];
+    // Determine which assets are selected
+    const selectedIndices = new Set(
+      [...document.querySelectorAll('.ag2-asset-selector input[type="checkbox"]:checked')].map(cb => +cb.value)
+    );
+    if (!selectedIndices.size) { showToast('Select at least one asset to generate.'); btn.disabled = false; btn.innerHTML = '<i class="ph ph-sparkle"></i> Generate'; return; }
+
+    // Run selected asset types in parallel
+    const canvasTargets = ['icon','sq','solid','logo','voucher','wa'];
+    const GEMINI_API_KEY = await getGeminiApiKey();
     const results = await Promise.all(ag2Assets.map(async (asset, idx) => {
+      if (!selectedIndices.has(idx)) return null;
       try {
+        const isVoucher = canvasTargets[idx] === 'voucher';
+        const modalities = isVoucher ? ['TEXT'] : ['IMAGE','TEXT'];
         const resp = await fetch(
           `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`,
           { method:'POST', headers:{'Content-Type':'application/json'},
-            body: JSON.stringify({ contents:[{role:'user',parts:[...imgParts,{text:asset.prompt}]}], generationConfig:{responseModalities:['IMAGE','TEXT']} }) }
+            body: JSON.stringify({ contents:[{role:'user',parts:[...imgParts,{text:asset.prompt}]}], generationConfig:{responseModalities:modalities} }) }
         );
         if (!resp.ok) { const e=await resp.json().catch(()=>({})); throw new Error(e?.error?.message||`HTTP ${resp.status}`); }
         const data = await resp.json();
+        if (isVoucher) {
+          const textPart = data?.candidates?.[0]?.content?.parts?.find(p=>p.text);
+          const hex = textPart?.text?.match(/#[0-9a-fA-F]{3,6}/)?.[0];
+          if (!hex) throw new Error('No hex code in response');
+          return { idx, hex };
+        }
         const imgPart = data?.candidates?.[0]?.content?.parts?.find(p=>p.inlineData);
         if (!imgPart) throw new Error('No image returned');
         const dataUrl = `data:${imgPart.inlineData.mimeType};base64,${imgPart.inlineData.data}`;
@@ -2307,20 +2569,20 @@ function showTab(tab, fromEdit = false) {
         return { idx, img };
       } catch(err) {
         console.error(`Asset ${idx} (${asset.label}) error:`, err);
+        showToast(`Failed to generate ${asset.label}: ${err.message}`);
         return null;
       }
     }));
 
-    // Paint each result into its canvas at native canvas resolution
+    // Paint each result with correct clipping per canvas type
     results.forEach(r => {
       if (!r) return;
-      const { idx, img } = r;
-      const type = canvasTargets[idx];
+      const type = canvasTargets[r.idx];
       if (!type) return;
+      if (r.hex) { fillVoucherWithHex(1, r.hex); return; }
       const c = document.getElementById(`ag2-v1-${type}`);
       if (!c) return;
-      const ctx = c.getContext('2d');
-      ctx.drawImage(img, 0, 0, c.width, c.height);
+      ag2DrawToCanvas(c, type, r.img);
     });
 
     document.getElementById('ag2-row1').style.opacity = '1';
@@ -2330,6 +2592,7 @@ function showTab(tab, fromEdit = false) {
     document.getElementById('ag2-hdr1').style.opacity = '1';
     document.getElementById('ag2-s1').textContent = '✓';
     btn.disabled = false;
+    btn.innerHTML = '<i class="ph ph-sparkle"></i> Generate All';
   };
 })();
 
@@ -2449,7 +2712,11 @@ async function renderBrandsGrid() {
         await _sb.from('brands').update({ deleted_at: new Date().toISOString() }).eq('id', b.id);
         renderBrandsGrid();
       });
-      tile.addEventListener('click', () => loadBrand(b));
+      tile.addEventListener('click', () => {
+        _currentBrandName = b.name || '';
+        showTab('aigen2');
+        ag2LoadBrand(b);
+      });
       grid.appendChild(tile);
     });
   }
@@ -2516,13 +2783,14 @@ async function renderTrashGrid() {
 }
 </script>
 
+<!-- ═══════════ TOAST ═══════════ -->
+<div id="toastContainer"></div>
+
 <!-- ═══════════ NAME MODAL ═══════════ -->
 <div id="nameModal" class="name-modal-overlay" style="display:none;">
   <div class="name-modal">
-    <div>
-      <div class="name-modal-title" id="nameModalTitle">Name your export</div>
-      <div class="name-modal-subtitle">Optional — skip to use no name</div>
-    </div>
+    <button class="name-modal-close" id="nameModalClose"><i class="ph ph-x"></i></button>
+    <div class="name-modal-title" id="nameModalTitle">Name your export</div>
     <input type="text" class="name-modal-input" id="nameModalInput" placeholder="e.g. Mint" autocomplete="off">
     <div class="name-modal-actions">
       <button class="name-modal-skip" id="nameModalSkip">Skip</button>
@@ -2532,6 +2800,18 @@ async function renderTrashGrid() {
 </div>
 
 <script>
+// ── Toast ──────────────────────────────────────────────────────────────
+function showToast(msg, duration = 5000) {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.innerHTML = `<span class="toast-msg">${msg}</span><button class="toast-close"><i class="ph ph-x"></i></button>`;
+  container.appendChild(toast);
+  const remove = () => { toast.style.opacity='0'; toast.style.transition='opacity 0.2s'; setTimeout(()=>toast.remove(),200); };
+  toast.querySelector('.toast-close').addEventListener('click', remove);
+  if (duration) setTimeout(remove, duration);
+}
+
 // ── Name Modal ─────────────────────────────────────────────────────────
 function askName(confirmLabel = 'Export', prefill = '') {
   return new Promise(resolve => {
@@ -2539,6 +2819,7 @@ function askName(confirmLabel = 'Export', prefill = '') {
     const input   = document.getElementById('nameModalInput');
     const confirmBtn = document.getElementById('nameModalConfirm');
     const skipBtn    = document.getElementById('nameModalSkip');
+    const closeBtn   = document.getElementById('nameModalClose');
     document.getElementById('nameModalTitle').textContent =
       confirmLabel === 'Save' ? 'Name this brand' : 'Name your export';
     confirmBtn.textContent = confirmLabel;
@@ -2550,6 +2831,7 @@ function askName(confirmLabel = 'Export', prefill = '') {
       overlay.style.display = 'none';
       confirmBtn.removeEventListener('click', onConfirm);
       skipBtn.removeEventListener('click', onSkip);
+      closeBtn.removeEventListener('click', onSkip);
       overlay.removeEventListener('click', onOverlay);
       input.removeEventListener('keydown', onKey);
       resolve(name);
@@ -2561,6 +2843,7 @@ function askName(confirmLabel = 'Export', prefill = '') {
 
     confirmBtn.addEventListener('click', onConfirm);
     skipBtn.addEventListener('click', onSkip);
+    closeBtn.addEventListener('click', onSkip);
     overlay.addEventListener('click', onOverlay);
     input.addEventListener('keydown', onKey);
   });
