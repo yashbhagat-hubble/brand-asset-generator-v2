@@ -10,7 +10,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
-  <script src="/prompts.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -798,6 +797,11 @@
     .aigen-drop-zone input[type="file"] {
       position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
     }
+    /* AG2 drop zone: input is hidden off-screen; zone click triggers it programmatically */
+    #ag2-dropZone input[type="file"] {
+      position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none;
+    }
+    #ag2-dropZone { cursor: pointer; }
     .aigen-drop-placeholder {
       display: flex;
       flex-direction: column;
@@ -808,6 +812,12 @@
       pointer-events: none;
     }
     .aigen-drop-placeholder.hidden { display: none; }
+    .aigen-upload-label {
+      font-size: 12px; color: #7b7b7b;
+    }
+    .aigen-upload-hint {
+      font-size: 12px; color: #7b7b7b;
+    }
     .aigen-thumbs {
       display: flex;
       flex-wrap: wrap;
@@ -1060,15 +1070,15 @@
     <!-- Images -->
     <div>
       <div class="section-label">Images</div>
-      <div class="aigen-drop-zone" id="ag2-dropZone">
+      <div class="aigen-drop-zone" id="ag2-dropZone" onclick="if(event.target===this||event.target.closest('#ag2-dropPlaceholder'))document.getElementById('ag2-fileInput').click()">
         <input type="file" id="ag2-fileInput" accept="image/*" multiple>
         <div class="aigen-drop-placeholder" id="ag2-dropPlaceholder">
           <i class="ph ph-images" style="font-size:30px;opacity:0.35;"></i>
           <span class="aigen-upload-label">Drop, paste, or click to add images</span>
           <span class="aigen-upload-hint">Logo, subject & brand color</span>
         </div>
-        <div class="aigen-thumbs" id="ag2-thumbs"></div>
       </div>
+      <div class="aigen-thumbs" id="ag2-thumbs"></div>
     </div>
 
     <!-- Asset selection accordion -->
@@ -2003,7 +2013,8 @@ function getGeminiApiKey() {
 
 (function initAigen() {
   const GEMINI_MODEL   = 'gemini-3-pro-image-preview';
-  const PROMPT = PROMPTS.brandAsset;
+  let PROMPT = '';
+  fetch('/prompts.json').then(r => r.json()).then(d => { PROMPT = d.assets?.[0]?.prompt || ''; }).catch(() => {});
 
   const images = []; // array of { file, dataUrl }
 
@@ -2251,7 +2262,8 @@ function getGeminiApiKey() {
 
   // ── Shared multi-image upload ──
   function ag2RenderThumbs() {
-    const thumbs = document.getElementById('ag2-thumbs');
+    const thumbs   = document.getElementById('ag2-thumbs');
+    const zone     = document.getElementById('ag2-dropZone');
     const placeholder = document.getElementById('ag2-dropPlaceholder');
     thumbs.innerHTML = '';
     ag2Images.forEach((img, i) => {
@@ -2264,9 +2276,11 @@ function getGeminiApiKey() {
       const add = document.createElement('div');
       add.className = 'aigen-thumb-add';
       add.innerHTML = '<i class="ph ph-plus"></i>';
+      add.addEventListener('click', () => document.getElementById('ag2-fileInput').click());
       thumbs.appendChild(add);
-      placeholder.classList.add('hidden');
+      zone.style.display = 'none';
     } else {
+      zone.style.display = '';
       placeholder.classList.remove('hidden');
     }
     thumbs.querySelectorAll('.aigen-thumb-remove').forEach(btn => {
