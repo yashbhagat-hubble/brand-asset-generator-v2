@@ -668,7 +668,7 @@
 
     /* ── Asset selector accordion ── */
     .ag2-accordion-wrap {
-      border: 1px solid #2e2e2e; border-radius: 8px; overflow: hidden;
+      border: 1px solid #2e2e2e; border-radius: 8px;
     }
     .ag2-accordion-header {
       display: flex; align-items: center; justify-content: space-between;
@@ -1073,11 +1073,11 @@
 
     <!-- Asset selection accordion -->
     <div class="ag2-accordion-wrap">
-      <div class="ag2-accordion-header open" id="ag2-accordionHdr">
+      <div class="ag2-accordion-header open" id="ag2-accordionHdr" onclick="(function(h){var b=document.getElementById('ag2-accordionBody');var o=h.classList.toggle('open');b.style.maxHeight=o?'600px':'0px';})(this)">
         <span class="section-label" style="margin:0;">Choose assets</span>
         <i class="ph ph-caret-down ag2-accordion-arrow"></i>
       </div>
-      <div class="ag2-accordion-body" id="ag2-accordionBody">
+      <div class="ag2-accordion-body" id="ag2-accordionBody" style="max-height:600px">
         <div class="ag2-asset-selector">
           <label class="ag2-asset-option"><input type="checkbox" value="0" checked><div class="ag2-asset-tile">Icon<i class="ph ph-check ag2-tile-check"></i></div></label>
           <label class="ag2-asset-option"><input type="checkbox" value="1" checked><div class="ag2-asset-tile">Square Icon<i class="ph ph-check ag2-tile-check"></i></div></label>
@@ -2283,18 +2283,7 @@ function getGeminiApiKey() {
     });
   }
 
-  // ── Accordion ──
-  const accordionHdr  = document.getElementById('ag2-accordionHdr');
-  const accordionBody = document.getElementById('ag2-accordionBody');
-  // Measure after layout so scrollHeight is accurate; store it for re-open
-  requestAnimationFrame(() => {
-    const naturalHeight = accordionBody.scrollHeight;
-    accordionBody.style.maxHeight = naturalHeight + 'px';
-    accordionHdr.addEventListener('click', () => {
-      const isOpen = accordionHdr.classList.toggle('open');
-      accordionBody.style.maxHeight = isOpen ? naturalHeight + 'px' : '0px';
-    });
-  });
+  // Accordion handled via inline onclick on #ag2-accordionHdr
 
   const ag2Zone  = document.getElementById('ag2-dropZone');
   const ag2Input = document.getElementById('ag2-fileInput');
