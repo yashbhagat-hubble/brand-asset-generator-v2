@@ -626,6 +626,10 @@
     #view-aigen2 { display: none; flex: 1; overflow: hidden; }
     #view-aigen2.active { display: flex; }
 
+    /* ── AI Gen 3 ── */
+    #view-aigen3 { display: none; flex: 1; overflow: hidden; }
+    #view-aigen3.active { display: flex; }
+
     .ag2-prompts { display: flex; flex-direction: column; gap: 8px; }
     .ag2-prompt-row { display: flex; align-items: center; gap: 8px; }
     .ag2-prompt-num {
@@ -1000,6 +1004,7 @@
   <button class="tab-btn" data-tab="brands" onclick="showTab('brands')">All Brands</button>
   <button class="tab-btn" data-tab="aigen" onclick="showTab('aigen')">AI Gen 1</button>
   <button class="tab-btn active" data-tab="aigen2" onclick="showTab('aigen2')">AI Gen 2</button>
+  <button class="tab-btn" data-tab="aigen3" onclick="showTab('aigen3')">AI Gen 3</button>
   <button class="tab-btn" id="trashBtn" data-tab="trash" onclick="showTab('trash')" style="margin-left:auto">Deleted assets</button>
 </nav>
 
@@ -1107,6 +1112,55 @@
   <!-- Preview -->
   <main class="preview-panel" id="ag2-previewPanel" style="overflow-y:auto;">
     <div id="ag2-sections" style="display:flex;flex-direction:column;gap:20px;"></div>
+  </main>
+</div>
+
+<!-- ═══════════ AI GEN 3 VIEW ═══════════ -->
+<div id="view-aigen3">
+  <aside class="controls">
+    <div class="app-title">AI Gen 3</div>
+
+    <!-- Images -->
+    <div>
+      <div class="section-label">Images</div>
+      <div class="aigen-drop-zone" id="ag3-dropZone" onclick="if(event.target===this||event.target.closest('#ag3-dropPlaceholder'))document.getElementById('ag3-fileInput').click()">
+        <input type="file" id="ag3-fileInput" accept="image/*" multiple>
+        <div class="aigen-drop-placeholder" id="ag3-dropPlaceholder">
+          <i class="ph ph-images" style="font-size:30px;opacity:0.35;"></i>
+          <span class="aigen-upload-label">Drop, paste, or click to add images</span>
+          <span class="aigen-upload-hint">Logo, subject & brand color</span>
+        </div>
+      </div>
+      <div class="aigen-thumbs" id="ag3-thumbs"></div>
+    </div>
+
+    <!-- Asset selection accordion -->
+    <div class="ag2-accordion-wrap">
+      <div class="ag2-accordion-header" id="ag3-accordionHdr" onclick="(function(h){var b=document.getElementById('ag3-accordionBody');var o=h.classList.toggle('open');b.style.maxHeight=o?'600px':'0px';})(this)">
+        <span class="section-label" style="margin:0;">Choose assets</span>
+        <i class="ph ph-caret-down ag2-accordion-arrow"></i>
+      </div>
+      <div class="ag2-accordion-body" id="ag3-accordionBody" style="max-height:0px">
+        <div class="ag2-asset-selector">
+          <label class="ag2-asset-option"><input type="checkbox" value="0" checked><div class="ag2-asset-tile">Icon<i class="ph ph-check ag2-tile-check"></i></div></label>
+          <label class="ag2-asset-option"><input type="checkbox" value="1" checked><div class="ag2-asset-tile">Square Icon<i class="ph ph-check ag2-tile-check"></i></div></label>
+          <label class="ag2-asset-option"><input type="checkbox" value="2" checked><div class="ag2-asset-tile">Solid Logo<i class="ph ph-check ag2-tile-check"></i></div></label>
+          <label class="ag2-asset-option"><input type="checkbox" value="3" checked><div class="ag2-asset-tile">Logo<i class="ph ph-check ag2-tile-check"></i></div></label>
+          <label class="ag2-asset-option"><input type="checkbox" value="4" checked><div class="ag2-asset-tile">Voucher<i class="ph ph-check ag2-tile-check"></i></div></label>
+          <label class="ag2-asset-option"><input type="checkbox" value="5" checked><div class="ag2-asset-tile">WA Card<i class="ph ph-check ag2-tile-check"></i></div></label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Generate -->
+    <button class="ag2-generate-btn" id="ag3-generateBtn" onclick="ag3Generate()" style="margin-top:auto;">
+      <i class="ph ph-sparkle"></i> Generate
+    </button>
+  </aside>
+
+  <!-- Preview -->
+  <main class="preview-panel" id="ag3-previewPanel" style="overflow-y:auto;">
+    <div id="ag3-sections" style="display:flex;flex-direction:column;gap:20px;"></div>
   </main>
 </div>
 
@@ -1987,6 +2041,7 @@ function showTab(tab, fromEdit = false) {
   document.getElementById('view-trash').classList.toggle('active', tab === 'trash');
   document.getElementById('view-aigen').classList.toggle('active', tab === 'aigen');
   document.getElementById('view-aigen2').classList.toggle('active', tab === 'aigen2');
+  document.getElementById('view-aigen3').classList.toggle('active', tab === 'aigen3');
   if (tab === 'brands') renderBrandsGrid();
   if (tab === 'trash') renderTrashGrid();
   if (tab === 'add' && !fromEdit) { editingBrandId = null; setSaveBrandMode(false); }
@@ -2605,6 +2660,452 @@ function getGeminiApiKey() {
     document.getElementById('ag2-wa1').style.pointerEvents = '';
     document.getElementById('ag2-hdr1').style.opacity = '1';
     document.getElementById('ag2-s1').textContent = '✓';
+    btn.disabled = false;
+    btn.innerHTML = '<i class="ph ph-sparkle"></i> Generate All';
+  };
+})();
+
+(function initAg3() {
+  const GEMINI_MODEL   = 'gemini-3-pro-image-preview';
+
+  const ag3Images = []; // shared images for all calls
+  let ag3Assets = [];
+
+  fetch('/prompts.json')
+    .then(r => {
+      if (!r.ok) throw new Error(`Failed to load prompts.json: ${r.status}`);
+      return r.json();
+    })
+    .then(d => { ag3Assets = d.assets3 || []; })
+    .catch(err => console.error(err));
+
+  // ── Build variant sections in DOM ──
+  const sectionsEl = document.getElementById('ag3-sections');
+  for (let i = 1; i <= 1; i++) {
+    sectionsEl.insertAdjacentHTML('beforeend', `
+      <div class="preview-header" id="ag3-hdr${i}">
+        <span class="preview-header-title">Variant ${i}</span>
+        <span id="ag3-s${i}" style="font-size:11px;color:#7b7b7b;margin-left:8px;">—</span>
+        <div style="display:flex;gap:8px;margin-left:auto;">
+          <button class="export-all-btn" onclick="ag3DownloadAll(${i})">Export PNGs</button>
+          <button class="export-all-btn" onclick="ag3DownloadZip(${i})">Export ZIP</button>
+          <button class="save-brand-btn" style="width:auto;padding:0 14px;" onclick="ag3Save(${i})">Save</button>
+        </div>
+      </div>
+      <div class="assets-row" id="ag3-row${i}">
+        <div class="asset-card">
+          <div class="asset-card-head"><span class="asset-card-name">Icon</span><span class="asset-card-dims">104 × 116</span></div>
+          <div class="asset-canvas-wrap"><canvas id="ag3-v${i}-icon" width="208" height="232" style="width:104px;height:116px;"></canvas></div>
+          <button class="download-btn" onclick="ag3DownloadOne(${i},'icon')"><i class="ph ph-download-simple"></i> PNG</button>
+        </div>
+        <div class="asset-card">
+          <div class="asset-card-head"><span class="asset-card-name">Square Icon</span><span class="asset-card-dims">116 × 116</span></div>
+          <div class="asset-canvas-wrap"><canvas id="ag3-v${i}-sq" width="232" height="232" style="width:116px;height:116px;"></canvas></div>
+          <button class="download-btn" onclick="ag3DownloadOne(${i},'sq')"><i class="ph ph-download-simple"></i> PNG</button>
+        </div>
+        <div class="asset-card">
+          <div class="asset-card-head"><span class="asset-card-name">Solid Square Logo</span><span class="asset-card-dims">116 × 116</span></div>
+          <div class="asset-canvas-wrap"><canvas id="ag3-v${i}-solid" width="232" height="232" style="width:116px;height:116px;"></canvas></div>
+          <button class="download-btn" onclick="ag3DownloadOne(${i},'solid')"><i class="ph ph-download-simple"></i> PNG</button>
+        </div>
+        <div class="asset-card">
+          <div class="asset-card-head"><span class="asset-card-name">Logo</span><span class="asset-card-dims">88 × 40</span></div>
+          <div class="asset-canvas-wrap"><canvas id="ag3-v${i}-logo" width="176" height="80" style="width:88px;height:40px;"></canvas></div>
+          <button class="download-btn" onclick="ag3DownloadOne(${i},'logo')"><i class="ph ph-download-simple"></i> PNG</button>
+        </div>
+        <div class="asset-card">
+          <div class="asset-card-head"><span class="asset-card-name">Voucher Colour</span><span class="asset-card-dims" id="ag3-v${i}-voucher-hex" style="font-family:monospace;letter-spacing:0.04em;">—</span></div>
+          <div class="asset-canvas-wrap" style="position:relative;">
+            <canvas id="ag3-v${i}-voucher" width="518" height="188" style="width:259px;height:94px;display:block;"></canvas>
+            <span id="ag3-v${i}-voucher-label" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:11px;font-weight:600;letter-spacing:0.08em;pointer-events:none;opacity:0;"></span>
+          </div>
+          <button class="download-btn" onclick="ag3CopyVoucherHex(${i})"><i class="ph ph-copy"></i> Copy Hex</button>
+        </div>
+      </div>
+      <div class="wa-row" id="ag3-wa${i}">
+        <div class="asset-card">
+          <div class="asset-card-head"><span class="asset-card-name">WA Brand Card</span><span class="asset-card-dims">1500 × 750</span></div>
+          <div class="asset-canvas-wrap"><canvas id="ag3-v${i}-wa" width="1500" height="750"></canvas></div>
+          <button class="download-btn" onclick="ag3DownloadOne(${i},'wa')"><i class="ph ph-download-simple"></i> PNG — full resolution</button>
+        </div>
+      </div>
+    `);
+  }
+
+  // ── Fill canvases with placeholder on init ──
+  function ag3FillPlaceholders() {
+    const fill = '#000000';
+    // icon — rounded 16
+    { const c = document.getElementById('ag3-v1-icon'); const ctx = c.getContext('2d');
+      ctx.save(); roundedRectPath(ctx,0,0,c.width,c.height,32); ctx.clip();
+      ctx.fillStyle = fill; ctx.fillRect(0,0,c.width,c.height); ctx.restore(); }
+    // sq — rounded 16
+    { const c = document.getElementById('ag3-v1-sq'); const ctx = c.getContext('2d');
+      ctx.save(); roundedRectPath(ctx,0,0,c.width,c.height,32); ctx.clip();
+      ctx.fillStyle = fill; ctx.fillRect(0,0,c.width,c.height); ctx.restore(); }
+    // solid — no radius
+    { const c = document.getElementById('ag3-v1-solid'); const ctx = c.getContext('2d');
+      ctx.fillStyle = fill; ctx.fillRect(0,0,c.width,c.height); }
+    // logo — no radius
+    { const c = document.getElementById('ag3-v1-logo'); const ctx = c.getContext('2d');
+      ctx.fillStyle = fill; ctx.fillRect(0,0,c.width,c.height); }
+    // voucher — rounded 8 (16 at 2x), reset label
+    { const c = document.getElementById('ag3-v1-voucher'); const ctx = c.getContext('2d');
+      ctx.save(); roundedRectPath(ctx,0,0,c.width,c.height,16); ctx.clip();
+      ctx.fillStyle = fill; ctx.fillRect(0,0,c.width,c.height); ctx.restore();
+      delete c.dataset.hex;
+      const lbl = document.getElementById('ag3-v1-voucher-label'); if (lbl) { lbl.textContent=''; lbl.style.opacity='0'; }
+      const hexEl = document.getElementById('ag3-v1-voucher-hex'); if (hexEl) hexEl.textContent='—'; }
+    // wa — fill + bow overlay
+    { const c = document.getElementById('ag3-v1-wa'); const ctx = c.getContext('2d');
+      ctx.fillStyle = fill; ctx.fillRect(0,0,1500,750);
+      if (bowImg.complete && bowImg.naturalWidth > 0) {
+        ctx.drawImage(bowImg,-122,0,1818,753);
+      } else {
+        bowImg.addEventListener('load', () => {
+          ctx.fillStyle = fill; ctx.fillRect(0,0,1500,750);
+          ctx.drawImage(bowImg,-122,0,1818,753);
+        }, { once: true });
+      } }
+  }
+  ag3FillPlaceholders();
+
+  // ── Shared multi-image upload ──
+  function ag3RenderThumbs() {
+    const thumbs   = document.getElementById('ag3-thumbs');
+    const zone     = document.getElementById('ag3-dropZone');
+    const placeholder = document.getElementById('ag3-dropPlaceholder');
+    thumbs.innerHTML = '';
+    ag3Images.forEach((img, i) => {
+      const item = document.createElement('div');
+      item.className = 'aigen-thumb-item';
+      item.innerHTML = `<img src="${img.dataUrl}"><button class="aigen-thumb-remove" data-i="${i}"><i class="ph ph-x"></i></button>`;
+      thumbs.appendChild(item);
+    });
+    if (ag3Images.length > 0) {
+      const add = document.createElement('div');
+      add.className = 'aigen-thumb-add';
+      add.innerHTML = '<i class="ph ph-plus"></i>';
+      add.addEventListener('click', () => document.getElementById('ag3-fileInput').click());
+      thumbs.appendChild(add);
+      zone.style.display = 'none';
+    } else {
+      zone.style.display = '';
+      placeholder.classList.remove('hidden');
+    }
+    thumbs.querySelectorAll('.aigen-thumb-remove').forEach(btn => {
+      btn.addEventListener('click', e => { e.stopPropagation(); ag3Images.splice(+btn.dataset.i, 1); ag3RenderThumbs(); });
+    });
+  }
+
+  function ag3AddFiles(files) {
+    Array.from(files).forEach(file => {
+      if (!file.type.startsWith('image/')) return;
+      const reader = new FileReader();
+      reader.onload = e => { ag3Images.push({ file, dataUrl: e.target.result }); ag3RenderThumbs(); };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // Accordion handled via inline onclick on #ag3-accordionHdr
+
+  const ag3Zone  = document.getElementById('ag3-dropZone');
+  const ag3Input = document.getElementById('ag3-fileInput');
+  ag3Input.addEventListener('change', e => { ag3AddFiles(e.target.files); ag3Input.value = ''; });
+  ag3Zone.addEventListener('dragover', e => { e.preventDefault(); ag3Zone.classList.add('drag-over'); });
+  ag3Zone.addEventListener('dragleave', () => ag3Zone.classList.remove('drag-over'));
+  ag3Zone.addEventListener('drop', e => { e.preventDefault(); ag3Zone.classList.remove('drag-over'); ag3AddFiles(e.dataTransfer.files); });
+
+  document.addEventListener('paste', e => {
+    if (!document.getElementById('view-aigen3').classList.contains('active')) return;
+    const items = Array.from(e.clipboardData.items);
+    const imgItem = items.find(i => i.type.startsWith('image/'));
+    if (imgItem) ag3AddFiles([imgItem.getAsFile()]);
+  });
+
+  // ── Canvas rendering ──
+  const DPR = window.devicePixelRatio || 1;
+  function ag3Prep(id, w, h) {
+    const c = document.getElementById(id);
+    c.width = w * DPR; c.height = h * DPR;
+    c.style.width = w + 'px'; c.style.height = h + 'px';
+    const ctx = c.getContext('2d');
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    return ctx;
+  }
+
+  function ag3RenderAll(i, productImg) {
+    const color = S.color;
+    const logo  = ag3Logo;
+
+    // Icon 104×116
+    { const ctx = ag3Prep(`ag3-v${i}-icon`, 104, 116);
+      ctx.save(); roundedRectPath(ctx,0,0,104,116,16); ctx.clip();
+      drawGradientBg(ctx,104,116,color);
+      if (logo) drawContained(ctx,logo,5,6,94,52,100,0,'center','center');
+      if (productImg) drawContained(ctx,productImg,0,56,104,60,100,0,'center','bottom');
+      ctx.restore(); }
+
+    // Square Icon 116×116
+    { const ctx = ag3Prep(`ag3-v${i}-sq`, 116, 116);
+      ctx.save(); roundedRectPath(ctx,0,0,116,116,16); ctx.clip();
+      drawGradientBg(ctx,116,116,color);
+      if (logo) drawContained(ctx,logo,11,5,94,52,100,0,'center','center');
+      if (productImg) drawContained(ctx,productImg,0,56,116,60,100,0,'center','bottom');
+      ctx.restore(); }
+
+    // Solid Square Logo 116×116
+    { const ctx = ag3Prep(`ag3-v${i}-solid`, 116, 116);
+      ctx.fillStyle = color; ctx.fillRect(0,0,116,116);
+      if (logo) drawContained(ctx,logo,9,9,98,98,100,0,'center','center'); }
+
+    // Logo 88×40
+    { const ctx = ag3Prep(`ag3-v${i}-logo`, 88, 40);
+      ctx.fillStyle = color; ctx.fillRect(0,0,88,40);
+      if (logo) {
+        const aspect = (logo.naturalWidth||logo.width||1)/(logo.naturalHeight||logo.height||1);
+        let dw=88, dh=40;
+        if (aspect > dw/dh) { dh = dw/aspect; } else { dw = dh*aspect; }
+        ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(logo,1,40-dh-1,dw,dh);
+      } }
+
+    // Voucher 259×94
+    { const ctx = ag3Prep(`ag3-v${i}-voucher`, 259, 94);
+      ctx.save(); roundedRectPath(ctx,0,0,259,94,8); ctx.clip();
+      ctx.fillStyle = color; ctx.fillRect(0,0,259,94); ctx.restore(); }
+
+    // WA Brand Card 1500×750
+    { const c = document.getElementById(`ag3-v${i}-wa`);
+      c.width=1500; c.height=750; c.style.width=''; c.style.height='';
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = color; ctx.fillRect(0,0,1500,750);
+      if (bowImg.complete && bowImg.naturalWidth > 0) ctx.drawImage(bowImg,-122,0,1818,753);
+      const ZX=411,ZY=199,ZW=678,ZH=352;
+      ctx.save(); ctx.beginPath(); ctx.rect(ZX,ZY,ZW,ZH); ctx.clip();
+      if (logo) drawContained(ctx,logo,ZX,ZY,ZW,ZH,100,0,'center','center');
+      ctx.restore();
+      if (hubbleImg.complete && hubbleImg.naturalWidth > 0) {
+        if (isColorDark(color)) {
+          ctx.save(); ctx.filter='url(#to-white)';
+          ctx.drawImage(hubbleImg,1103.27,138.17,325.93,60.95); ctx.restore();
+        } else { ctx.drawImage(hubbleImg,1103.27,138.17,325.93,60.95); }
+      } }
+
+    // Reveal
+    document.getElementById(`ag3-row${i}`).style.opacity = '1';
+    document.getElementById(`ag3-row${i}`).style.pointerEvents = '';
+    document.getElementById(`ag3-wa${i}`).style.opacity = '1';
+    document.getElementById(`ag3-wa${i}`).style.pointerEvents = '';
+    document.getElementById(`ag3-hdr${i}`).style.opacity = '1';
+  }
+
+  // ── Download helpers ──
+  function canvasToBlob(id) {
+    return new Promise(res => document.getElementById(id).toBlob(res, 'image/png'));
+  }
+  window.ag3DownloadOne = async function(i, type) {
+    const blob = await canvasToBlob(`ag3-v${i}-${type}`);
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    const hexPrefix = type === 'voucher' ? (document.getElementById(`ag3-v${i}-voucher`)?.dataset?.hex || '') + '-' : '';
+    a.download = `${hexPrefix}ag3-${type}.png`; a.click();
+  };
+  window.ag3DownloadAll = async function(i) {
+    const types = ['icon','sq','solid','logo','voucher','wa'];
+    for (const t of types) { await window.ag3DownloadOne(i, t); await new Promise(r => setTimeout(r, 150)); }
+  };
+  window.ag3Save = async function(i) {
+    const name = (await askName('Save', '')) || 'Untitled';
+    const types = ['icon','sq','solid','logo','voucher','wa'];
+    const canvases = {};
+    types.forEach(t => {
+      const c = document.getElementById(`ag3-v${i}-${t}`);
+      if (c) canvases[t] = c.toDataURL('image/png');
+    });
+    const entry = {
+      id: Date.now(),
+      name,
+      color: S.color,
+      solid_logo: canvases.icon || null,
+      logo: null, product: null,
+      sliders: { ag3: { ...canvases, voucherHex: document.getElementById(`ag3-v${i}-voucher`)?.dataset?.hex || null } }
+    };
+    const { error } = await _sb.from('brands').upsert(entry);
+    if (error) { showToast('Save failed: ' + error.message); } else { showTab('brands'); }
+  };
+
+  // ── Voucher hex fill ──
+  function fillVoucherWithHex(variantIdx, hex) {
+    const c = document.getElementById(`ag3-v${variantIdx}-voucher`);
+    if (!c) return;
+    const ctx = c.getContext('2d');
+    ctx.save(); roundedRectPath(ctx,0,0,c.width,c.height,16); ctx.clip();
+    ctx.fillStyle = hex; ctx.fillRect(0,0,c.width,c.height);
+    ctx.restore();
+    const label = document.getElementById(`ag3-v${variantIdx}-voucher-label`);
+    if (label) { label.textContent = hex; label.style.color = isColorDark(hex) ? '#fff' : '#111'; label.style.opacity = '1'; }
+    const hexEl = document.getElementById(`ag3-v${variantIdx}-voucher-hex`);
+    if (hexEl) hexEl.textContent = hex;
+    c.dataset.hex = hex;
+  }
+  window.ag3CopyVoucherHex = function(i) {
+    const hex = document.getElementById(`ag3-v${i}-voucher`)?.dataset?.hex;
+    if (!hex) return;
+    navigator.clipboard.writeText(hex).then(() => showToast(`Copied ${hex}`));
+  };
+
+  // ── Draw image into canvas with correct corner radius per type ──
+  function ag3DrawToCanvas(c, type, img) {
+    const ctx = c.getContext('2d');
+    ctx.clearRect(0, 0, c.width, c.height);
+    if (type === 'wa') {
+      ctx.drawImage(img, 0, 0, 1500, 750);
+      if (bowImg.complete && bowImg.naturalWidth > 0) ctx.drawImage(bowImg, -122, 0, 1818, 753);
+    } else {
+      const radii = { icon: 32, sq: 32, voucher: 16 };
+      const r = radii[type] || 0;
+      ctx.save();
+      if (r) { roundedRectPath(ctx, 0, 0, c.width, c.height, r); ctx.clip(); }
+      ctx.drawImage(img, 0, 0, c.width, c.height);
+      ctx.restore();
+    }
+  }
+
+  // ── Load a saved brand into AG3 canvases ──
+  window.ag3LoadBrand = function(brand) {
+    const ag3 = brand.sliders?.ag3;
+    if (!ag3) {
+      // Only icon available (legacy save) — show it, reset others to placeholder
+      ag3FillPlaceholders();
+      if (brand.solid_logo) {
+        const img = new Image();
+        img.onload = () => ag3DrawToCanvas(document.getElementById('ag3-v1-icon'), 'icon', img);
+        img.src = brand.solid_logo;
+      }
+      return;
+    }
+    ag3FillPlaceholders();
+    if (ag3.voucherHex) fillVoucherWithHex(1, ag3.voucherHex);
+    ['icon','sq','solid','logo','wa'].forEach(t => {
+      if (!ag3[t]) return;
+      const c = document.getElementById(`ag3-v1-${t}`);
+      if (!c) return;
+      const img = new Image();
+      img.onload = () => ag3DrawToCanvas(c, t, img);
+      img.src = ag3[t];
+    });
+  };
+
+  window.ag3DownloadZip = async function(i) {
+    const zip = new JSZip();
+    const types = ['icon','sq','solid','logo','voucher','wa'];
+    for (const t of types) {
+      const c = document.getElementById(`ag3-v${i}-${t}`);
+      if (!c) continue;
+      const dataUrl = c.toDataURL('image/png');
+      zip.file(`ag3-${t}.png`, dataUrl.split(',')[1], { base64: true });
+    }
+    const blob = await zip.generateAsync({ type: 'blob' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = 'ag3-assets.zip'; a.click();
+    URL.revokeObjectURL(a.href);
+  };
+
+  // ── Generate ──
+  async function generateSubject(prompt) {
+    const GEMINI_API_KEY = await getGeminiApiKey();
+    const imgParts = ag3Images.map(img => ({
+      inlineData: { mimeType: img.file.type || 'image/png', data: img.dataUrl.split(',')[1] }
+    }));
+    const resp = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`,
+      { method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ contents:[{role:'user',parts:[...imgParts,{text:prompt}]}], generationConfig:{responseModalities:['IMAGE','TEXT']} }) }
+    );
+    if (!resp.ok) { const e = await resp.json().catch(()=>({})); throw new Error(e?.error?.message||`HTTP ${resp.status}`); }
+    const data = await resp.json();
+    const imgPart = data?.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
+    if (!imgPart) throw new Error('No image in response');
+    return `data:${imgPart.inlineData.mimeType};base64,${imgPart.inlineData.data}`;
+  }
+
+  window.ag3Generate = async function() {
+    if (!ag3Images.length) { showToast('Please upload at least one image.'); return; }
+    if (!ag3Assets.length) { showToast('Prompts not loaded yet, please try again.'); return; }
+    const btn = document.getElementById('ag3-generateBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="ph ph-circle-notch" style="animation:spin 0.8s linear infinite;"></i> Generating…';
+
+    // Reset
+    document.getElementById('ag3-row1').style.opacity = '0.2';
+    document.getElementById('ag3-row1').style.pointerEvents = 'none';
+    document.getElementById('ag3-wa1').style.opacity = '0.2';
+    document.getElementById('ag3-wa1').style.pointerEvents = 'none';
+    document.getElementById('ag3-hdr1').style.opacity = '0.35';
+    document.getElementById('ag3-s1').textContent = 'Generating…';
+
+    // Build shared image parts from all uploaded images
+    const imgParts = ag3Images.map(img => ({
+      inlineData: { mimeType: img.file.type || 'image/png', data: img.dataUrl.split(',')[1] }
+    }));
+
+    // Determine which assets are selected
+    const selectedIndices = new Set(
+      [...document.querySelectorAll('.ag2-asset-selector input[type="checkbox"]:checked')].map(cb => +cb.value)
+    );
+    if (!selectedIndices.size) { showToast('Select at least one asset to generate.'); btn.disabled = false; btn.innerHTML = '<i class="ph ph-sparkle"></i> Generate'; return; }
+
+    // Run selected asset types in parallel
+    const canvasTargets = ['icon','sq','solid','logo','voucher','wa'];
+    const GEMINI_API_KEY = await getGeminiApiKey();
+    const results = await Promise.all(ag3Assets.map(async (asset, idx) => {
+      if (!selectedIndices.has(idx)) return null;
+      try {
+        const isVoucher = canvasTargets[idx] === 'voucher';
+        const modalities = isVoucher ? ['TEXT'] : ['IMAGE','TEXT'];
+        const resp = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`,
+          { method:'POST', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({ contents:[{role:'user',parts:[...imgParts,{text:asset.prompt}]}], generationConfig:{responseModalities:modalities} }) }
+        );
+        if (!resp.ok) { const e=await resp.json().catch(()=>({})); throw new Error(e?.error?.message||`HTTP ${resp.status}`); }
+        const data = await resp.json();
+        if (isVoucher) {
+          const textPart = data?.candidates?.[0]?.content?.parts?.find(p=>p.text);
+          const hex = textPart?.text?.match(/#[0-9a-fA-F]{3,6}/)?.[0];
+          if (!hex) throw new Error('No hex code in response');
+          return { idx, hex };
+        }
+        const imgPart = data?.candidates?.[0]?.content?.parts?.find(p=>p.inlineData);
+        if (!imgPart) throw new Error('No image returned');
+        const dataUrl = `data:${imgPart.inlineData.mimeType};base64,${imgPart.inlineData.data}`;
+        const img = new Image();
+        await new Promise((res,rej) => { img.onload=res; img.onerror=rej; img.src=dataUrl; });
+        return { idx, img };
+      } catch(err) {
+        console.error(`Asset ${idx} (${asset.label}) error:`, err);
+        showToast(`Failed to generate ${asset.label}: ${err.message}`);
+        return null;
+      }
+    }));
+
+    // Paint each result with correct clipping per canvas type
+    results.forEach(r => {
+      if (!r) return;
+      const type = canvasTargets[r.idx];
+      if (!type) return;
+      if (r.hex) { fillVoucherWithHex(1, r.hex); return; }
+      const c = document.getElementById(`ag3-v1-${type}`);
+      if (!c) return;
+      ag3DrawToCanvas(c, type, r.img);
+    });
+
+    document.getElementById('ag3-row1').style.opacity = '1';
+    document.getElementById('ag3-row1').style.pointerEvents = '';
+    document.getElementById('ag3-wa1').style.opacity = '1';
+    document.getElementById('ag3-wa1').style.pointerEvents = '';
+    document.getElementById('ag3-hdr1').style.opacity = '1';
+    document.getElementById('ag3-s1').textContent = '✓';
     btn.disabled = false;
     btn.innerHTML = '<i class="ph ph-sparkle"></i> Generate All';
   };
