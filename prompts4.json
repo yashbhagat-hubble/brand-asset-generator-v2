@@ -1,10 +1,21 @@
 {
   "assets": [
     {
-      "label": "Listing1_subject",
+      "label": "Listing1_subject_v1",
       "prompt": [
         "Task: Edit the input image to only replace the subject in the bottom half of the image, let other parts stay in place as it is. Do not modify anything else except replacing the subject.",
         "Subject: Replace the subject from Image 1 with the subject provided in Image 2. Remove the background from the new subject. Anchor the new subject to the bottom edge of the canvas. Do not make any other creative changes to the subject — use it as it is.",
+        "Visual balance: Feel free to scale down the subject if required, but strictly not move any other elements in the image. The overall layout should remain exactly as in Image 1, with only the subject in the bottom half being replaced.",
+        "Replacement: Do not change any other creative elements — preserve the background color, logo position, size, and everything else, keep overall layout exactly as in Image 1.",
+        "The final output is 208px * 232px, fixed aspect ratio (104x116), premium, clean, and editorial with no visible dividers or borders."
+      ]
+    },
+    {
+      "label": "Listing1_subject_v2",
+      "prompt": [
+        "Task: Edit ONLY the bottom 70% of the input image. The top 30% must remain pixel-perfect identical — do not move, resize, recolor, or alter the logo or any element in the top portion under any circumstances.",
+        "Subject: Replace the subject in the bottom 70% with the subject from Image 2. Remove the background from the new subject. Anchor the new subject to the bottom edge of the canvas. Do not make any other creative changes to the subject — use it as it is.",
+        "Constraint: If the new subject is too large to fit without touching the top 30%, scale it down to fit within the bottom 70% only. Never push elements in the top 30% to accommodate the new subject.",
         "Replacement: Do not change any other creative elements — preserve the background color, logo position, size, and everything else, keep overall layout exactly as in Image 1.",
         "The final output is 208px * 232px, fixed aspect ratio (104x116), premium, clean, and editorial with no visible dividers or borders."
       ]

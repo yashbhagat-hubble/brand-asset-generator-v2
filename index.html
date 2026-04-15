@@ -3418,7 +3418,7 @@ function getGeminiApiKey() {
   const GEMINI_MODEL = 'gemini-3-pro-image-preview';
   let AG4_PROMPT = '';
   fetch('/prompts4.json').then(r => r.json()).then(d => {
-    const raw = d.assets?.[0]?.prompt || '';
+    const raw = d.assets?.[1]?.prompt || ''; // v2: top-30% lock
     AG4_PROMPT = Array.isArray(raw) ? raw.join('\n') : raw;
   }).catch(() => {});
 
