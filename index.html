@@ -3429,13 +3429,13 @@ function openBrandModal(brand) {
       img.onload = () => {
         const ctx = c.getContext('2d');
         ctx.clearRect(0, 0, c.width, c.height);
-        if (t.r) { roundedRectPath(ctx, 0, 0, c.width, c.height, t.r * 2); ctx.clip(); }
+        if (t.r) { roundedRectPath(ctx, 0, 0, c.width, c.height, t.r); ctx.clip(); }
         ctx.drawImage(img, 0, 0, c.width, c.height);
       };
       img.src = dataUrl;
     } else if (voucherHex) {
       const ctx = c.getContext('2d');
-      roundedRectPath(ctx, 0, 0, c.width, c.height, t.r * 2); ctx.clip();
+      roundedRectPath(ctx, 0, 0, c.width, c.height, t.r); ctx.clip();
       ctx.fillStyle = voucherHex; ctx.fillRect(0, 0, c.width, c.height);
     }
 
