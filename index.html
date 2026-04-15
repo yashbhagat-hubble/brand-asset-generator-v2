@@ -995,7 +995,9 @@
   
     /* ── Brand Preview Modal ── */
     .bp-overlay {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.72); z-index: 900;
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.72); z-index: 900;
       display: flex; align-items: center; justify-content: center; padding: 20px;
     }
     .bp-modal {
@@ -1245,54 +1247,54 @@
 
 <!-- ═══════════ AI GEN 4 VIEW ═══════════ -->
 <div id="view-aigen4">
-  <div class="ag4-layout">
-    <div class="ag4-inputs">
-      <!-- Main image -->
-      <div class="ag4-input-block" style="max-width:220px;">
-        <div class="ag4-input-label">Main Image</div>
-        <div class="ag4-drop-zone" id="ag4-mainZone">
-          <input type="file" id="ag4-mainInput" accept="image/*" style="display:none;">
-          <div class="ag4-drop-placeholder" id="ag4-mainPlaceholder">
-            <i class="ph ph-image" style="font-size:26px;opacity:0.3;"></i>
-            <span class="aigen-upload-label">Drop or click</span>
-            <span class="aigen-upload-hint">Single image</span>
-          </div>
-          <div class="ag4-thumbs" id="ag4-mainThumbs"></div>
+  <aside class="controls">
+    <div class="app-title">AI Gen 4</div>
+
+    <!-- Main Image -->
+    <div>
+      <div class="section-label">Main Image</div>
+      <div class="aigen-drop-zone" id="ag4-mainZone" onclick="if(event.target===this||event.target.closest('#ag4-mainPlaceholder')||event.target.closest('#ag4-mainThumbs'))document.getElementById('ag4-mainInput').click()">
+        <input type="file" id="ag4-mainInput" accept="image/*">
+        <div class="aigen-drop-placeholder" id="ag4-mainPlaceholder">
+          <i class="ph ph-image" style="font-size:30px;opacity:0.35;"></i>
+          <span class="aigen-upload-label">Drop, paste, or click</span>
+          <span class="aigen-upload-hint">Single brand image</span>
         </div>
-      </div>
-      <!-- Subject images -->
-      <div class="ag4-input-block">
-        <div class="ag4-input-label">Subject Images</div>
-        <div class="ag4-drop-zone" id="ag4-subjectZone">
-          <input type="file" id="ag4-subjectInput" accept="image/*" multiple style="display:none;">
-          <div class="ag4-drop-placeholder" id="ag4-subjectPlaceholder">
-            <i class="ph ph-images" style="font-size:26px;opacity:0.3;"></i>
-            <span class="aigen-upload-label">Drop or click to add subjects</span>
-            <span class="aigen-upload-hint">One Icon will be generated per subject</span>
-          </div>
-          <div class="ag4-thumbs" id="ag4-subjectThumbs"></div>
-        </div>
+        <div class="aigen-thumbs" id="ag4-mainThumbs"></div>
       </div>
     </div>
 
-    <div class="ag4-actions">
-      <button class="ag4-generate-btn" id="ag4-generateBtn" onclick="ag4Generate()">
-        <i class="ph ph-sparkle"></i> Generate
-      </button>
-      <span id="ag4-status" style="font-size:11px;color:#7b7b7b;"></span>
+    <!-- Subject Images -->
+    <div>
+      <div class="section-label">Subject Images</div>
+      <div class="aigen-drop-zone" id="ag4-subjectZone" onclick="if(event.target===this||event.target.closest('#ag4-subjectPlaceholder')||event.target.closest('#ag4-subjectThumbs'))document.getElementById('ag4-subjectInput').click()">
+        <input type="file" id="ag4-subjectInput" accept="image/*" multiple>
+        <div class="aigen-drop-placeholder" id="ag4-subjectPlaceholder">
+          <i class="ph ph-images" style="font-size:30px;opacity:0.35;"></i>
+          <span class="aigen-upload-label">Drop, paste, or click</span>
+          <span class="aigen-upload-hint">One Icon per subject</span>
+        </div>
+        <div class="aigen-thumbs" id="ag4-subjectThumbs"></div>
+      </div>
     </div>
 
-    <div class="ag4-results">
-      <div class="ag4-results-header" id="ag4-resultsHeader" style="display:none;">
-        <span class="preview-header-title">Generated Icons</span>
-        <div style="display:flex;gap:8px;">
-          <button class="export-all-btn" id="ag4-exportPNGs">Export PNGs</button>
-          <button class="export-all-btn" id="ag4-exportZip">Export ZIP</button>
-        </div>
+    <!-- Generate -->
+    <button class="ag2-generate-btn" id="ag4-generateBtn" onclick="ag4Generate()" style="margin-top:auto;">
+      <i class="ph ph-sparkle"></i> Generate
+    </button>
+  </aside>
+
+  <!-- Preview -->
+  <main class="preview-panel" id="ag4-previewPanel" style="overflow-y:auto;">
+    <div id="ag4-resultsHeader" style="display:none; align-items:center; justify-content:space-between; padding:20px 20px 0;">
+      <span class="preview-header-title">Generated Icons</span>
+      <div style="display:flex;gap:8px;">
+        <button class="export-all-btn" id="ag4-exportPNGs">Export PNGs</button>
+        <button class="export-all-btn" id="ag4-exportZip">Export ZIP</button>
       </div>
-      <div class="ag4-grid" id="ag4-grid"></div>
     </div>
-  </div>
+    <div class="ag4-grid" id="ag4-grid" style="display:flex;flex-wrap:wrap;gap:14px;padding:20px;"></div>
+  </main>
 </div>
 
 <!-- ═══════════ ADD BRAND VIEW ═══════════ -->
@@ -3239,6 +3241,7 @@ function getGeminiApiKey() {
 
 // ── AI Gen 4 ─────────────────────────────────────────────────────────────
 (function initAg4() {
+  const GEMINI_MODEL = 'gemini-3-pro-image-preview';
   const AG4_PROMPT = [
     "Task: Create a high-resolution digital brand asset with fixed size 208px * 232px, fixed aspect ratio (104x116).",
     "Background: Use the exact same solid background color from the main image (Image 1).",
@@ -3252,13 +3255,9 @@ function getGeminiApiKey() {
   let ag4Subjects = [];   // [{ file, dataUrl }, ...]
 
   // ── Main image zone ──
-  const mainZone = document.getElementById('ag4-mainZone');
   const mainInput = document.getElementById('ag4-mainInput');
+  const mainZone  = document.getElementById('ag4-mainZone');
 
-  mainZone.addEventListener('click', e => {
-    if (e.target === mainZone || e.target.closest('#ag4-mainPlaceholder') || e.target.closest('#ag4-mainThumbs'))
-      mainInput.click();
-  });
   mainInput.addEventListener('change', () => {
     const file = mainInput.files[0];
     if (!file) return;
@@ -3283,9 +3282,9 @@ function getGeminiApiKey() {
     const placeholder = document.getElementById('ag4-mainPlaceholder');
     if (!ag4Main) { thumbs.innerHTML = ''; placeholder.style.display = ''; return; }
     placeholder.style.display = 'none';
-    thumbs.innerHTML = `<div class="ag4-thumb-item">
+    thumbs.innerHTML = `<div class="aigen-thumb-item">
       <img src="${ag4Main.dataUrl}">
-      <button class="ag4-thumb-remove" id="ag4-mainRemove"><i class="ph ph-x"></i></button>
+      <button class="aigen-thumb-remove" id="ag4-mainRemove"><i class="ph ph-x"></i></button>
     </div>`;
     document.getElementById('ag4-mainRemove').addEventListener('click', e => {
       e.stopPropagation(); ag4Main = null; renderMainThumb();
@@ -3293,13 +3292,9 @@ function getGeminiApiKey() {
   }
 
   // ── Subject images zone ──
-  const subjZone = document.getElementById('ag4-subjectZone');
   const subjInput = document.getElementById('ag4-subjectInput');
+  const subjZone  = document.getElementById('ag4-subjectZone');
 
-  subjZone.addEventListener('click', e => {
-    if (e.target === subjZone || e.target.closest('#ag4-subjectPlaceholder') || e.target.closest('#ag4-subjectThumbs'))
-      subjInput.click();
-  });
   subjInput.addEventListener('change', () => {
     [...subjInput.files].forEach(file => {
       const reader = new FileReader();
@@ -3326,11 +3321,11 @@ function getGeminiApiKey() {
     thumbs.innerHTML = '';
     ag4Subjects.forEach((img, i) => {
       const item = document.createElement('div');
-      item.className = 'ag4-thumb-item';
-      item.innerHTML = `<img src="${img.dataUrl}"><button class="ag4-thumb-remove" data-i="${i}"><i class="ph ph-x"></i></button>`;
+      item.className = 'aigen-thumb-item';
+      item.innerHTML = `<img src="${img.dataUrl}"><button class="aigen-thumb-remove" data-i="${i}"><i class="ph ph-x"></i></button>`;
       thumbs.appendChild(item);
     });
-    thumbs.querySelectorAll('.ag4-thumb-remove').forEach(btn => {
+    thumbs.querySelectorAll('.aigen-thumb-remove').forEach(btn => {
       btn.addEventListener('click', e => { e.stopPropagation(); ag4Subjects.splice(+btn.dataset.i, 1); renderSubjectThumbs(); });
     });
   }
@@ -3341,7 +3336,6 @@ function getGeminiApiKey() {
     if (!ag4Subjects.length) { showToast('Please upload at least one subject image.'); return; }
 
     const btn = document.getElementById('ag4-generateBtn');
-    const status = document.getElementById('ag4-status');
     btn.disabled = true;
     btn.innerHTML = '<i class="ph ph-circle-notch" style="animation:spin 0.8s linear infinite;"></i> Generating…';
 
@@ -3355,7 +3349,6 @@ function getGeminiApiKey() {
 
     // Generate icons in parallel, one per subject
     const results = await Promise.all(ag4Subjects.map(async (subj, i) => {
-      status.textContent = `Generating ${i + 1} / ${ag4Subjects.length}…`;
       const subjPart = { inlineData: { mimeType: subj.file.type || 'image/png', data: subj.dataUrl.split(',')[1] } };
       try {
         const resp = await fetch(
@@ -3424,7 +3417,6 @@ function getGeminiApiKey() {
       };
     }
 
-    status.textContent = generated.length ? `✓ ${generated.length} icon${generated.length > 1 ? 's' : ''} generated` : '';
     btn.disabled = false;
     btn.innerHTML = '<i class="ph ph-sparkle"></i> Generate';
   };
@@ -3679,53 +3671,6 @@ function askName(confirmLabel = 'Export', prefill = '') {
 }
 </script>
 
-<!-- ═══════════ AI GEN 4 VIEW ═══════════ -->
-<div id="view-aigen4">
-  <div class="ag4-layout">
-    <div class="ag4-inputs">
-      <!-- Main image -->
-      <div class="ag4-input-block" style="max-width:220px;">
-        <div class="ag4-input-label">Main Image</div>
-        <div class="ag4-drop-zone" id="ag4-mainZone">
-          <input type="file" id="ag4-mainInput" accept="image/*" style="display:none;">
-          <div class="ag4-drop-placeholder" id="ag4-mainPlaceholder">
-            <i class="ph ph-image" style="font-size:26px;opacity:0.3;"></i>
-            <span class="aigen-upload-label">Drop or click</span>
-            <span class="aigen-upload-hint">Single image</span>
-          </div>
-          <div class="ag4-thumbs" id="ag4-mainThumbs"></div>
-        </div>
-      </div>
-      <!-- Subject images -->
-      <div class="ag4-input-block">
-        <div class="ag4-input-label">Subject Images</div>
-        <div class="ag4-drop-zone" id="ag4-subjectZone">
-          <input type="file" id="ag4-subjectInput" accept="image/*" multiple style="display:none;">
-          <div class="ag4-drop-placeholder" id="ag4-subjectPlaceholder">
-            <i class="ph ph-images" style="font-size:26px;opacity:0.3;"></i>
-            <span class="aigen-upload-label">Drop or click to add subjects</span>
-            <span class="aigen-upload-hint">One Icon will be generated per subject</span>
-          </div>
-          <div class="ag4-thumbs" id="ag4-subjectThumbs"></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="ag4-actions">
-      <button class="ag4-generate-btn" id="ag4-generateBtn" onclick="ag4Generate()">
-        <i class="ph ph-sparkle"></i> Generate
-      </button>
-      <span id="ag4-status" style="font-size:11px;color:#7b7b7b;"></span>
-    </div>
-
-    <div class="ag4-results">
-      <div class="ag4-results-header" id="ag4-resultsHeader" style="display:none;">
-        <span class="preview-header-title">Generated Icons</span>
-        <div style="display:flex;gap:8px;">
-          <button class="export-all-btn" id="ag4-exportPNGs">Export PNGs</button>
-          <button class="export-all-btn" id="ag4-exportZip">Export ZIP</button>
-        </div>
-      </div>
 <!-- ═══════════ BRAND PREVIEW MODAL ═══════════ -->
 <div id="brandPreviewModal" class="bp-overlay" style="display:none;">
   <div class="bp-modal">
