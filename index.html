@@ -192,6 +192,26 @@
       line-height: 1.7;
     }
 
+    /* ── Auto-adjust Button ── */
+    .auto-adjust-btn {
+      width: 100%;
+      padding: 9px 14px;
+      background: transparent;
+      border: 1px solid #333;
+      border-radius: 8px;
+      color: #ebebeb;
+      font-size: 11px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .auto-adjust-btn:hover { border-color: #555; background: #1c1c1c; }
+    .auto-adjust-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
     /* ── Save Brand Button ── */
     .save-brand-btn {
       width: 100%;
@@ -1430,6 +1450,12 @@
     </div>
   </div>
 
+  <div class="divider"></div>
+
+  <button class="auto-adjust-btn" id="m1AutoBtn" onclick="m1AutoScale()">
+    <i class="ph ph-sparkle"></i> Auto-adjust scale &amp; position
+  </button>
+
 </aside>
 
 <!-- ═══════════ PREVIEW PANEL ═══════════ -->
@@ -2177,6 +2203,120 @@ bindSlider('iconScale',  'iconScaleVal',  'iconScale',  'x');
 bindSlider('iconOffset', 'iconOffsetVal', 'iconOffset', 'px');
 bindSlider('imgScale',   'imgScaleVal',   'imgScale',   'x');
 bindSlider('imgOffset',  'imgOffsetVal',  'imgOffset',  'px');
+
+// ── Auto-adjust (AI-powered scale & position) ───────────────────────────
+async function m1AutoScale() {
+  if (!S.logoImg && !S.productImg) {
+    showToast('Upload a logo or product image first.');
+    return;
+  }
+
+  const btn = document.getElementById('m1AutoBtn');
+  btn.disabled = true;
+  const origHtml = btn.innerHTML;
+  btn.innerHTML = '<i class="ph ph-circle-notch" style="animation:spin 0.8s linear infinite;"></i> Analysing…';
+
+  try {
+    const GEMINI_API_KEY = await getGeminiApiKey();
+
+    // Convert an HTMLImageElement to a base64 PNG string
+    function imgToBase64(img) {
+      const c = document.createElement('canvas');
+      c.width  = img.naturalWidth  || img.width  || 256;
+      c.height = img.naturalHeight || img.height || 256;
+      c.getContext('2d').drawImage(img, 0, 0);
+      return c.toDataURL('image/png').split(',')[1];
+    }
+
+    const parts = [];
+
+    if (S.logoImg) {
+      parts.push({ text: 'Image 1: brand logo' });
+      parts.push({ inlineData: { mimeType: 'image/png', data: imgToBase64(S.logoImg) } });
+    }
+    if (S.productImg) {
+      parts.push({ text: 'Image 2: product / subject image' });
+      parts.push({ inlineData: { mimeType: 'image/png', data: imgToBase64(S.productImg) } });
+    }
+
+    parts.push({ text: `You are a brand asset composition expert.
+
+Analyze the provided image(s) and recommend optimal scale and vertical-offset values for composing a Listing1 brand asset (208×232 px canvas):
+- Logo zone: top 30% of canvas (94×52 px), centered horizontally
+- Product zone: bottom 60% of canvas (104×60 px), anchored to bottom edge
+
+Scale is a percentage of the zone: 100 = fills zone exactly, 70 = 70% of zone, 150 = 150% (overflows zone).
+
+Guidelines:
+- Wide logo (aspect > 2:1): iconScale 65–85
+- Tall/square logo: iconScale 90–120
+- Very sparse logo (lots of transparent padding): iconScale 110–140
+- Product image with little whitespace: imgScale 95–110
+- Product image with significant empty space around subject: imgScale 120–150
+- Keep offsets at 0 unless composition clearly benefits from adjustment
+- If only logo provided, use imgScale 100, imgOffset 0
+- If only product provided, use iconScale 100, iconOffset 0
+
+Return ONLY valid JSON — no markdown fences, no extra text:
+{
+  "iconScale": <integer 50–180>,
+  "iconOffset": <integer -30 to 30>,
+  "imgScale": <integer 50–180>,
+  "imgOffset": <integer -30 to 30>,
+  "reasoning": "<one short sentence explaining the choice>"
+}` });
+
+    const resp = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ role: 'user', parts }],
+          generationConfig: { responseModalities: ['TEXT'] }
+        })
+      }
+    );
+
+    if (!resp.ok) {
+      const e = await resp.json().catch(() => ({}));
+      throw new Error(e?.error?.message || `HTTP ${resp.status}`);
+    }
+
+    const data = await resp.json();
+    const text = data?.candidates?.[0]?.content?.parts?.find(p => p.text)?.text || '';
+
+    const jsonMatch = text.match(/\{[\s\S]*?\}/);
+    if (!jsonMatch) throw new Error('No JSON returned by model');
+    const vals = JSON.parse(jsonMatch[0]);
+
+    function applySlider(sliderId, valId, stateKey, unit, value) {
+      const el  = document.getElementById(sliderId);
+      const vel = document.getElementById(valId);
+      if (!el || value == null) return;
+      const v = Math.round(Number(value));
+      el.value   = v;
+      S[stateKey] = v;
+      vel.textContent = unit === 'x'
+        ? (v / 100).toFixed(2).replace(/\.?0+$/, '') + 'x'
+        : v + unit;
+    }
+
+    applySlider('iconScale',  'iconScaleVal',  'iconScale',  'x',  vals.iconScale);
+    applySlider('iconOffset', 'iconOffsetVal', 'iconOffset', 'px', vals.iconOffset);
+    applySlider('imgScale',   'imgScaleVal',   'imgScale',   'x',  vals.imgScale);
+    applySlider('imgOffset',  'imgOffsetVal',  'imgOffset',  'px', vals.imgOffset);
+
+    renderAll();
+    if (vals.reasoning) showToast(vals.reasoning);
+
+  } catch (err) {
+    showToast('Auto-adjust failed: ' + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = origHtml;
+  }
+}
 
 // ── Squircle clip-path (16px radius, 60% smoothing) ────────────────────
 function squirclePath(w, h, r, s) {
