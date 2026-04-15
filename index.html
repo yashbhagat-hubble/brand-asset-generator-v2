@@ -2113,7 +2113,7 @@ function getGeminiApiKey() {
 (function initAigen() {
   const GEMINI_MODEL   = 'gemini-3-pro-image-preview';
   let PROMPT = '';
-  fetch('/prompts.json').then(r => r.json()).then(d => { PROMPT = d.assets?.[0]?.prompt || ''; }).catch(() => {});
+  fetch('/prompts.json').then(r => r.json()).then(d => { const raw = d.assets?.[0]?.prompt || ''; PROMPT = Array.isArray(raw) ? raw.join('\n') : raw; }).catch(() => {});
 
   const images = []; // array of { file, dataUrl }
 
@@ -2635,7 +2635,7 @@ function getGeminiApiKey() {
         const resp = await fetch(
           `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`,
           { method:'POST', headers:{'Content-Type':'application/json'},
-            body: JSON.stringify({ contents:[{role:'user',parts:[...imgParts,{text:asset.prompt}]}], generationConfig:{responseModalities:modalities} }) }
+            body: JSON.stringify({ contents:[{role:'user',parts:[...imgParts,{text:Array.isArray(asset.prompt)?asset.prompt.join('\n'):asset.prompt}]}], generationConfig:{responseModalities:modalities} }) }
         );
         if (!resp.ok) { const e=await resp.json().catch(()=>({})); throw new Error(e?.error?.message||`HTTP ${resp.status}`); }
         const data = await resp.json();
@@ -3053,7 +3053,7 @@ function getGeminiApiKey() {
       const resp = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`,
         { method:'POST', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ contents:[{role:'user',parts:[...uploadedParts,{text:ag3Assets[0].prompt}]}], generationConfig:{responseModalities:['IMAGE','TEXT']} }) }
+          body: JSON.stringify({ contents:[{role:'user',parts:[...uploadedParts,{text:Array.isArray(ag3Assets[0].prompt)?ag3Assets[0].prompt.join('\n'):ag3Assets[0].prompt}]}], generationConfig:{responseModalities:['IMAGE','TEXT']} }) }
       );
       if (!resp.ok) { const e=await resp.json().catch(()=>({})); throw new Error(e?.error?.message||`HTTP ${resp.status}`); }
       const data = await resp.json();
@@ -3095,7 +3095,7 @@ function getGeminiApiKey() {
         const resp = await fetch(
           `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`,
           { method:'POST', headers:{'Content-Type':'application/json'},
-            body: JSON.stringify({ contents:[{role:'user',parts:[seedPart,{text:asset.prompt}]}], generationConfig:{responseModalities:modalities} }) }
+            body: JSON.stringify({ contents:[{role:'user',parts:[seedPart,{text:Array.isArray(asset.prompt)?asset.prompt.join('\n'):asset.prompt}]}], generationConfig:{responseModalities:modalities} }) }
         );
         if (!resp.ok) { const e=await resp.json().catch(()=>({})); throw new Error(e?.error?.message||`HTTP ${resp.status}`); }
         const data = await resp.json();
