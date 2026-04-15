@@ -1467,12 +1467,13 @@
     <div class="asset-card">
       <div class="asset-card-head">
         <span class="asset-card-name">Voucher Colour</span>
-        <span class="asset-card-dims">259 × 94</span>
+        <span id="c-voucher-hex" style="font-family:monospace;letter-spacing:0.04em;">—</span>
       </div>
-      <div class="asset-canvas-wrap">
-        <canvas id="c-voucher" width="259" height="94"></canvas>
+      <div class="asset-canvas-wrap" style="position:relative;">
+        <canvas id="c-voucher" width="518" height="188" style="width:259px;height:94px;display:block;"></canvas>
+        <span id="c-voucher-label" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:11px;font-weight:600;letter-spacing:0.08em;pointer-events:none;opacity:0;"></span>
       </div>
-      <button class="download-btn" onclick="downloadAsset('voucher')"><i class="ph ph-download-simple"></i> PNG</button>
+      <button class="download-btn" onclick="m1CopyVoucherHex()"><i class="ph ph-copy"></i> Copy Hex</button>
     </div>
   </div>
 
@@ -1779,16 +1780,33 @@ function renderLogo() {
 }
 
 /*
- * Asset 5 — Voucher Colour (259 × 94) — solid colour rect
+ * Asset 5 — Voucher Colour (259 × 94) — solid colour rect + hex display
  */
 function renderVoucher() {
-  const ctx = prepCanvas('c-voucher', 259, 94);
+  const c = document.getElementById('c-voucher');
+  const ctx = c.getContext('2d');
   ctx.save();
-  roundedRectPath(ctx, 0, 0, 259, 94, 8);
+  roundedRectPath(ctx, 0, 0, c.width, c.height, 16);
   ctx.clip();
   ctx.fillStyle = S.color;
-  ctx.fillRect(0, 0, 259, 94);
+  ctx.fillRect(0, 0, c.width, c.height);
   ctx.restore();
+  // Update hex label overlay
+  const label = document.getElementById('c-voucher-label');
+  if (label) {
+    label.textContent = S.color;
+    label.style.color = isColorDark(S.color) ? '#fff' : '#111';
+    label.style.opacity = '1';
+  }
+  const hexEl = document.getElementById('c-voucher-hex');
+  if (hexEl) hexEl.textContent = S.color;
+  c.dataset.hex = S.color;
+}
+
+function m1CopyVoucherHex() {
+  const hex = document.getElementById('c-voucher')?.dataset?.hex;
+  if (!hex) return;
+  navigator.clipboard.writeText(hex).then(() => showToast('Copied ' + hex));
 }
 
 /*
