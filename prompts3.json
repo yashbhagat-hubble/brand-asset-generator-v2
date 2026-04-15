@@ -1,7 +1,7 @@
 {
   "assets": [
     {
-      "label": "Icon",
+      "label": "Listing1",
       "prompt": [
         "Task: Create a high-resolution digital brand asset with fixed size 208px * 232px, fixed aspect ratio (104x116).",
         "Background: The background is a single, uniform, solid fill of [Pick from image].",
@@ -15,7 +15,7 @@
       ]
     },
     {
-      "label": "Square Icon",
+      "label": "Listing2",
       "prompt": [
         "Task: Create a high-resolution digital brand asset with fixed size 232px * 232px, fixed aspect ratio (116x116).",
         "Background: The background is a single, uniform, solid fill of [Pick from image].",
@@ -29,7 +29,7 @@
       ]
     },
     {
-      "label": "Solid Square Logo",
+      "label": "Logo_square",
       "prompt": [
         "Task: Create a high-resolution digital brand asset with fixed size 232px * 232px, fixed aspect ratio (116x116).",
         "Background: The background is a single, uniform, solid fill of [Pick from image].",
@@ -41,7 +41,7 @@
       ]
     },
     {
-      "label": "Logo",
+      "label": "Logo_card",
       "prompt": [
         "Task: Create a high-resolution digital brand asset with fixed size 176px * 80px, fixed aspect ratio (88x40).",
         "Background: The background is a single, uniform, solid fill of [Pick from image].",
@@ -53,14 +53,14 @@
       ]
     },
     {
-      "label": "Voucher",
+      "label": "Background",
       "prompt": [
         "Task: Return background color hexcode only as text in the format '#------'",
         "Background: The background is a single, uniform, solid fill of [Pick from image]."
       ]
     },
     {
-      "label": "WhatsApp Card",
+      "label": "Whatsapp",
       "prompt": [
         "Task: Create a high-resolution digital brand asset with fixed size 1500px * 750px, fixed aspect ratio (1500x750).",
         "Background (Source): The background of the entire frame must be a solid, consistent color derived directly from a sample of the top-right area of the background in Input Image 1. This should be a clean color field, free of the subject from Input Image 1.",
