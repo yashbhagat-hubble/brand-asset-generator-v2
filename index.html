@@ -3390,5 +3390,123 @@ function askName(confirmLabel = 'Export', prefill = '') {
   </div>
 </div>
 
+<script>
+// ── Brand Preview Modal ──────────────────────────────────────────────────
+function openBrandModal(brand) {
+  const source = brand.sliders?.ag3 ? 'ag3' : (brand.sliders?.ag2 ? 'ag2' : null);
+  const sliders = source ? brand.sliders[source] : null;
+  const sourceLabel = source === 'ag3' ? 'AI Gen 3' : (source === 'ag2' ? 'AI Gen 2' : 'AI Gen 1');
+
+  document.getElementById('bpName').textContent = brand.name || 'Untitled';
+  document.getElementById('bpSource').textContent = sourceLabel;
+
+  const assetTypes = [
+    { key: 'icon',    label: 'Icon',             dims: '104 × 116', cw: 208, ch: 232, dw: 104, dh: 116, r: 32 },
+    { key: 'sq',      label: 'Square Icon',       dims: '116 × 116', cw: 232, ch: 232, dw: 116, dh: 116, r: 32 },
+    { key: 'solid',   label: 'Solid Square Logo', dims: '116 × 116', cw: 232, ch: 232, dw: 116, dh: 116, r: 0  },
+    { key: 'logo',    label: 'Logo',              dims: '88 × 40',   cw: 176, ch: 80,  dw: 88,  dh: 40,  r: 0  },
+    { key: 'voucher', label: 'Voucher Colour',    dims: null,        cw: 518, ch: 188, dw: 259, dh: 94,  r: 16 },
+  ];
+
+  const assetsRow = document.getElementById('bpAssetsRow');
+  assetsRow.innerHTML = '';
+
+  assetTypes.forEach(t => {
+    const dataUrl = sliders ? sliders[t.key] : (t.key === 'icon' ? brand.solid_logo : null);
+    const voucherHex = t.key === 'voucher' ? (sliders?.voucherHex || null) : null;
+    const dimsHtml = voucherHex
+      ? `<span style="font-family:monospace;letter-spacing:0.04em;">${voucherHex}</span>`
+      : `<span class="asset-card-dims">${t.dims || ''}</span>`;
+
+    const card = document.createElement('div');
+    card.className = 'asset-card';
+    card.innerHTML = `
+      <div class="asset-card-head"><span class="asset-card-name">${t.label}</span>${dimsHtml}</div>
+      <div class="asset-canvas-wrap">
+        <canvas id="bp-${t.key}" width="${t.cw}" height="${t.ch}" style="width:${t.dw}px;height:${t.dh}px;display:block;"></canvas>
+      </div>
+      <button class="download-btn" id="bp-dl-${t.key}"><i class="ph ph-download-simple"></i> PNG</button>`;
+    assetsRow.appendChild(card);
+
+    const c = document.getElementById('bp-' + t.key);
+    if (dataUrl) {
+      const img = new Image();
+      img.onload = () => {
+        const ctx = c.getContext('2d');
+        ctx.clearRect(0, 0, c.width, c.height);
+        if (t.r) { roundedRectPath(ctx, 0, 0, c.width, c.height, t.r * 2); ctx.clip(); }
+        ctx.drawImage(img, 0, 0, c.width, c.height);
+      };
+      img.src = dataUrl;
+    } else if (voucherHex) {
+      const ctx = c.getContext('2d');
+      roundedRectPath(ctx, 0, 0, c.width, c.height, t.r * 2); ctx.clip();
+      ctx.fillStyle = voucherHex; ctx.fillRect(0, 0, c.width, c.height);
+    }
+
+    document.getElementById('bp-dl-' + t.key).addEventListener('click', () => {
+      const a = document.createElement('a');
+      a.download = (brand.name || 'brand') + '-' + t.key + '.png';
+      a.href = c.toDataURL('image/png'); a.click();
+    });
+  });
+
+  // WA card
+  const waRow = document.getElementById('bpWaRow');
+  waRow.innerHTML = '';
+  if (sliders && sliders.wa) {
+    waRow.innerHTML = `
+      <div class="asset-card" style="width:100%">
+        <div class="asset-card-head"><span class="asset-card-name">WA Brand Card</span><span class="asset-card-dims">1500 × 750</span></div>
+        <div class="asset-canvas-wrap"><canvas id="bp-wa" width="1500" height="750"></canvas></div>
+        <button class="download-btn" id="bp-dl-wa"><i class="ph ph-download-simple"></i> PNG — full resolution</button>
+      </div>`;
+    const img = new Image();
+    img.onload = () => { document.getElementById('bp-wa').getContext('2d').drawImage(img, 0, 0, 1500, 750); };
+    img.src = sliders.wa;
+    document.getElementById('bp-dl-wa').addEventListener('click', () => {
+      const a = document.createElement('a');
+      a.download = (brand.name || 'brand') + '-wa.png';
+      a.href = document.getElementById('bp-wa').toDataURL('image/png'); a.click();
+    });
+  }
+
+  function getAllBpCanvases() {
+    return [...document.querySelectorAll('#bpAssetsRow canvas, #bpWaRow canvas')];
+  }
+
+  document.getElementById('bpExportPNGs').onclick = () => {
+    getAllBpCanvases().forEach(c => {
+      const key = c.id.replace('bp-', '');
+      const a = document.createElement('a');
+      a.download = (brand.name || 'brand') + '-' + key + '.png';
+      a.href = c.toDataURL('image/png'); a.click();
+    });
+  };
+
+  document.getElementById('bpExportZip').onclick = async () => {
+    const zip = new JSZip();
+    getAllBpCanvases().forEach(c => {
+      const key = c.id.replace('bp-', '');
+      zip.file((brand.name || 'brand') + '-' + key + '.png', c.toDataURL('image/png').split(',')[1], { base64: true });
+    });
+    const blob = await zip.generateAsync({ type: 'blob' });
+    const a = document.createElement('a');
+    a.download = (brand.name || 'brand') + '-assets.zip';
+    a.href = URL.createObjectURL(blob); a.click();
+  };
+
+  document.getElementById('brandPreviewModal').style.display = 'flex';
+}
+
+document.getElementById('bpClose').addEventListener('click', () => {
+  document.getElementById('brandPreviewModal').style.display = 'none';
+});
+document.getElementById('brandPreviewModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('brandPreviewModal'))
+    document.getElementById('brandPreviewModal').style.display = 'none';
+});
+</script>
+
 </body>
 </html>
