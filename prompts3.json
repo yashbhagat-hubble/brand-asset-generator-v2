@@ -63,12 +63,10 @@
       "label": "WhatsApp Card",
       "prompt": [
         "Task: Create a high-resolution digital brand asset with fixed size 1500px * 750px, fixed aspect ratio (1500x750).",
-        "Background: The background is a single, uniform, solid fill of [Pick from image].",
-        "Isolating logo: Retain any texts if there in logo, do not remove anything except background.",
-        "There are no gradients, textures, soft blurs, or shadows on this layer; it is perfectly flat and consistent from top to bottom.",
-        "Logo Placement: Centered horizontally and vertically within the center of the canvas. The logo must have a fully transparent background (no cards, panels, or bounding boxes). Logo has to be constrained within a bounding container of 30 percent of frame height and 20 percent frame width, and should not exceed these boundaries in any case.",
-        "Logo Styling: Render the logo in a high-contrast color [pick intelligently] to ensure it is perfectly legible against the solid background—no subtext, taglines, or decorative elements.",
-        "The final output is premium, clean, and editorial with no visible dividers or borders."
+        "Background (Source): The background of the entire frame must be a solid, consistent color derived directly from a sample of the top-right area of the background in Input Image 1. This should be a clean color field, free of the subject from Input Image 1.",
+        "Logo (Action and Source): Isolate the text logo from the top half of input image. Retain any texts if there in logo, do not remove anything except background.",
+        "Logo (Positioning): Position this isolated logo centrally in the frame.",
+        "Logo (Size Constraints): The width of the logo in the new frame must be a maximum of 40% of the entire frame width, and its height must be a maximum of 50% of the entire frame height. (Ensure the text is clearly legible but does not fill the screen)."
       ]
     }
   ]
