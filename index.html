@@ -158,8 +158,6 @@
       backdrop-filter: blur(4px);
       transition: background 0.15s;
     }
-    .brand-tile-btn.edit  { background: rgba(255,255,255,0.1); color: #ebebeb; }
-    .brand-tile-btn.edit:hover  { background: rgba(255,255,255,0.18); }
     .brand-tile-btn.delete { background: rgba(220,50,50,0.7); color: #fff; }
     .brand-tile-btn.delete:hover { background: rgba(220,50,50,0.95); }
     .brand-tile-add {
@@ -3538,11 +3536,9 @@ async function renderBrandsGrid() {
         <img src="${b.solid_logo}" alt="${b.name}">
         <div class="brand-tile-name">${b.name}</div>
         <div class="brand-tile-actions">
-          <button class="brand-tile-btn edit" title="Edit"><i class="ph ph-pencil-simple"></i></button>
           <button class="brand-tile-btn delete" title="Move to trash"><i class="ph ph-trash-simple"></i></button>
         </div>`;
 
-      tile.querySelector('.edit').addEventListener('click', e => { e.stopPropagation(); loadBrand(b); });
       tile.querySelector('.delete').addEventListener('click', async e => {
         e.stopPropagation();
         if (!confirm(`Move "${b.name}" to trash?`)) return;
