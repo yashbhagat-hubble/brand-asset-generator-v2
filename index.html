@@ -994,6 +994,39 @@
       display: flex; align-items: center;
     }
     .toast-close:hover { opacity: 1; }
+  
+    /* ── Brand Preview Modal ── */
+    .bp-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.72); z-index: 900;
+      display: flex; align-items: center; justify-content: center; padding: 24px;
+    }
+    .bp-modal {
+      background: #161616; border: 1px solid #2e2e2e; border-radius: 14px;
+      display: flex; flex-direction: column; max-height: 90vh;
+      width: 100%; max-width: 900px; overflow: hidden;
+    }
+    .bp-header {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      padding: 18px 20px 14px; border-bottom: 1px solid #242424; flex-shrink: 0;
+    }
+    .bp-name { font-size: 16px; font-weight: 600; color: #f0f0f0; margin-bottom: 4px; }
+    .bp-source-tag {
+      display: inline-block; font-size: 10px; font-weight: 600; letter-spacing: 0.06em;
+      text-transform: uppercase; color: #8a63d2; background: rgba(138,99,210,0.12);
+      border: 1px solid rgba(138,99,210,0.3); border-radius: 4px; padding: 2px 7px;
+    }
+    .bp-close {
+      background: none; border: none; cursor: pointer; color: #7b7b7b;
+      font-size: 16px; padding: 4px; line-height: 1; flex-shrink: 0;
+    }
+    .bp-close:hover { color: #f0f0f0; }
+    .bp-body { overflow-y: auto; padding: 20px; flex: 1; }
+    .bp-footer {
+      display: flex; gap: 8px; padding: 14px 20px;
+      border-top: 1px solid #242424; flex-shrink: 0;
+    }
+    .bp-footer .export-all-btn { flex: 1; }
+
   </style>
 </head>
 <body>
@@ -3202,11 +3235,7 @@ async function renderBrandsGrid() {
         await _sb.from('brands').update({ deleted_at: new Date().toISOString() }).eq('id', b.id);
         renderBrandsGrid();
       });
-      tile.addEventListener('click', () => {
-        _currentBrandName = b.name || '';
-        showTab('aigen2');
-        ag2LoadBrand(b);
-      });
+      tile.addEventListener('click', () => { openBrandModal(b); });
       grid.appendChild(tile);
     });
   }
@@ -3339,5 +3368,27 @@ function askName(confirmLabel = 'Export', prefill = '') {
   });
 }
 </script>
+
+<!-- ═══════════ BRAND PREVIEW MODAL ═══════════ -->
+<div id="brandPreviewModal" class="bp-overlay" style="display:none;">
+  <div class="bp-modal">
+    <div class="bp-header">
+      <div>
+        <div class="bp-name" id="bpName">Brand</div>
+        <span class="bp-source-tag" id="bpSource">AI Gen 2</span>
+      </div>
+      <button class="bp-close" id="bpClose"><i class="ph ph-x"></i></button>
+    </div>
+    <div class="bp-body">
+      <div class="assets-row" id="bpAssetsRow" style="flex-wrap:wrap;"></div>
+      <div class="wa-row" id="bpWaRow" style="margin-top:16px;"></div>
+    </div>
+    <div class="bp-footer">
+      <button class="export-all-btn" id="bpExportPNGs"><i class="ph ph-images"></i> Export PNGs</button>
+      <button class="export-all-btn" id="bpExportZip"><i class="ph ph-file-zip"></i> Export ZIP</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
