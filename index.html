@@ -2231,21 +2231,30 @@ async function m1AutoScale() {
       parts.push({ inlineData: { mimeType: 'image/png', data: imgToBase64(S.productImg) } });
     }
 
-    parts.push({ text: `You are a brand asset composition expert.
+    parts.push({ text: `You are a brand asset composition expert specialising in visual weight and optical centering.
 
 Analyze the provided image(s) and recommend optimal scale and vertical-offset values for composing a Listing1 brand asset (208×232 px canvas):
 - Logo zone: top 30% of canvas (94×52 px), centered horizontally
 - Product zone: bottom 60% of canvas (104×60 px), anchored to bottom edge
 
 Scale is a percentage of the zone: 100 = fills zone exactly, 70 = 70% of zone, 150 = 150% (overflows zone).
+Offset is vertical shift in px: positive = shift down, negative = shift up.
 
-Guidelines:
+SCALE guidelines:
 - Wide logo (aspect > 2:1): iconScale 65–85
 - Tall/square logo: iconScale 90–120
-- Very sparse logo (lots of transparent padding): iconScale 110–140
-- Product image with little whitespace: imgScale 95–110
-- Product image with significant empty space around subject: imgScale 120–150
-- Keep offsets at 0 unless composition clearly benefits from adjustment
+- Logo with lots of transparent padding: iconScale 110–140
+- Product image tightly cropped: imgScale 95–110
+- Product with significant empty space around it: imgScale 120–150
+
+VISUAL CENTERING — this is critical:
+- Inspect where the visual center of mass actually sits within the image bounding box.
+- If the logo's visual weight is concentrated in the top portion of its bounding box (e.g. tall icon above short text), shift it down (positive iconOffset) so it appears optically centered in its zone.
+- If the logo's visual weight is concentrated in the bottom portion (e.g. text below icon), shift it up (negative iconOffset).
+- If the logo has heavy elements on one side only (left-heavy wordmark, right-heavy emblem), the geometric center is misleading — compensate with a small offset so it reads as balanced.
+- Apply the same logic to the product image: if the subject sits in the top half of its bounding box with empty space below, shift it down (positive imgOffset); if it floats above the bottom, bring it down.
+- Default offset to 0 only when the visual center genuinely matches the geometric center.
+
 - If only logo provided, use imgScale 100, imgOffset 0
 - If only product provided, use iconScale 100, iconOffset 0
 
@@ -2255,7 +2264,7 @@ Return ONLY valid JSON — no markdown fences, no extra text:
   "iconOffset": <integer -30 to 30>,
   "imgScale": <integer 50–180>,
   "imgOffset": <integer -30 to 30>,
-  "reasoning": "<one short sentence explaining the choice>"
+  "reasoning": "<one sentence covering both scale and centering decisions>"
 }` });
 
     const resp = await fetch(
