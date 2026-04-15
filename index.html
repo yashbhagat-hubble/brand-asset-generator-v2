@@ -2585,10 +2585,13 @@ function getGeminiApiKey() {
       inlineData: { mimeType: img.file.type || 'image/png', data: img.dataUrl.split(',')[1] }
     }));
 
-    // Determine which assets are selected
-    const selectedIndices = new Set(
-      [...document.querySelectorAll('.ag2-asset-selector input[type="checkbox"]:checked')].map(cb => +cb.value)
-    );
+    // Determine which assets are selected (use .checked property — works even when accordion is collapsed)
+    const ag2Cbs = [...document.querySelectorAll('.ag2-asset-selector input[type="checkbox"]')];
+    const ag2Checked = ag2Cbs.filter(cb => cb.checked);
+    // If all checked or none found, generate all; otherwise respect partial selection
+    const selectedIndices = (ag2Checked.length === 0 || ag2Checked.length === ag2Cbs.length)
+      ? new Set(ag2Assets.map((_, i) => i))
+      : new Set(ag2Checked.map(cb => +cb.value));
     if (!selectedIndices.size) { showToast('Select at least one asset to generate.'); btn.disabled = false; btn.innerHTML = '<i class="ph ph-sparkle"></i> Generate'; return; }
 
     // Run selected asset types in parallel
@@ -3018,10 +3021,13 @@ function getGeminiApiKey() {
       inlineData: { mimeType: img.file.type || 'image/png', data: img.dataUrl.split(',')[1] }
     }));
 
-    // Determine which assets are selected
-    const selectedIndices = new Set(
-      [...document.querySelectorAll('.ag3-asset-selector input[type="checkbox"]:checked')].map(cb => +cb.value)
-    );
+    // Determine which assets are selected (use .checked property — works even when accordion is collapsed)
+    const ag3Cbs = [...document.querySelectorAll('.ag3-asset-selector input[type="checkbox"]')];
+    const ag3Checked = ag3Cbs.filter(cb => cb.checked);
+    // If all checked or none found, generate all; otherwise respect partial selection
+    const selectedIndices = (ag3Checked.length === 0 || ag3Checked.length === ag3Cbs.length)
+      ? new Set(ag3Assets.map((_, i) => i))
+      : new Set(ag3Checked.map(cb => +cb.value));
     if (!selectedIndices.size) { showToast('Select at least one asset to generate.'); btn.disabled = false; btn.innerHTML = '<i class="ph ph-sparkle"></i> Generate'; return; }
 
     // Run selected asset types in parallel
