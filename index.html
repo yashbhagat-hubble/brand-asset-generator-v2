@@ -1082,10 +1082,10 @@
 <!-- ═══════════ TAB NAV ═══════════ -->
 <nav class="tab-nav">
   <button class="tab-btn" data-tab="brands" onclick="showTab('brands')">All Brands</button>
-  <button class="tab-btn" data-tab="aigen" onclick="showTab('aigen')">AI Gen 1</button>
-  <button class="tab-btn active" data-tab="aigen2" onclick="showTab('aigen2')">AI Gen 2</button>
-  <button class="tab-btn" data-tab="aigen3" onclick="showTab('aigen3')">AI Gen 3</button>
-  <button class="tab-btn" data-tab="aigen4" onclick="showTab('aigen4')">AI Gen 4</button>
+  <button class="tab-btn active" data-tab="aigen2" onclick="showTab('aigen2')">Method 1</button>
+  <button class="tab-btn" data-tab="aigen3" onclick="showTab('aigen3')">Method 2</button>
+  <button class="tab-btn" data-tab="aigen4" onclick="showTab('aigen4')">Method 3</button>
+  <button class="tab-btn" data-tab="add" onclick="showTab('add')">Method 4</button>
   <button class="tab-btn" id="trashBtn" data-tab="trash" onclick="showTab('trash')" style="margin-left:auto">Deleted assets</button>
 </nav>
 
@@ -1150,7 +1150,7 @@
 <!-- ═══════════ AI GEN 2 VIEW ═══════════ -->
 <div id="view-aigen2" class="active">
   <aside class="controls">
-    <div class="app-title">AI Gen 2</div>
+    <div class="app-title">Method 1</div>
 
     <!-- Images -->
     <div>
@@ -1199,7 +1199,7 @@
 <!-- ═══════════ AI GEN 3 VIEW ═══════════ -->
 <div id="view-aigen3">
   <aside class="controls">
-    <div class="app-title">AI Gen 3</div>
+    <div class="app-title">Method 2</div>
 
     <!-- Images -->
     <div>
@@ -1248,7 +1248,7 @@
 <!-- ═══════════ AI GEN 4 VIEW ═══════════ -->
 <div id="view-aigen4">
   <aside class="controls">
-    <div class="app-title">AI Gen 4</div>
+    <div class="app-title">Method 3</div>
 
     <!-- Main Image -->
     <div>
@@ -1302,7 +1302,7 @@
 
 <!-- ═══════════ CONTROLS ═══════════ -->
 <aside class="controls">
-  <div class="app-title">Brand Assets</div>
+  <div class="app-title">Method 4</div>
 
   <!-- Brand Logo -->
   <div>
@@ -2172,7 +2172,6 @@ function showTab(tab, fromEdit = false) {
   document.getElementById('view-add').classList.toggle('active', tab === 'add');
   document.getElementById('view-brands').classList.toggle('active', tab === 'brands');
   document.getElementById('view-trash').classList.toggle('active', tab === 'trash');
-  document.getElementById('view-aigen').classList.toggle('active', tab === 'aigen');
   document.getElementById('view-aigen2').classList.toggle('active', tab === 'aigen2');
   document.getElementById('view-aigen3').classList.toggle('active', tab === 'aigen3');
   document.getElementById('view-aigen4').classList.toggle('active', tab === 'aigen4');
@@ -3676,7 +3675,7 @@ function askName(confirmLabel = 'Export', prefill = '') {
   <div class="bp-modal">
     <div class="bp-header">
       <span class="bp-name" id="bpName">Brand</span>
-      <span class="bp-source-tag" id="bpSource">AI Gen 2</span>
+      <span class="bp-source-tag" id="bpSource">Method 1</span>
       <div class="bp-header-actions">
         <button class="export-all-btn" id="bpExportPNGs">Export PNGs</button>
         <button class="export-all-btn" id="bpExportZip">Export ZIP</button>
@@ -3695,7 +3694,7 @@ function askName(confirmLabel = 'Export', prefill = '') {
 function openBrandModal(brand) {
   const source = brand.sliders?.ag3 ? 'ag3' : (brand.sliders?.ag2 ? 'ag2' : null);
   const sliders = source ? brand.sliders[source] : null;
-  const sourceLabel = source === 'ag3' ? 'AI Gen 3' : (source === 'ag2' ? 'AI Gen 2' : 'AI Gen 1');
+  const sourceLabel = source === 'ag3' ? 'Method 2' : (source === 'ag2' ? 'Method 1' : 'Method 4');
 
   document.getElementById('bpName').textContent = brand.name || 'Untitled';
   document.getElementById('bpSource').textContent = sourceLabel;
