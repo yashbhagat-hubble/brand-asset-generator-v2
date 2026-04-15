@@ -1352,42 +1352,28 @@
   <!-- Brand Logo -->
   <div>
     <div class="section-label">Brand Logo</div>
-    <div class="upload-zone" id="logoZone">
-      <input type="file" id="logoFile" accept=".png,.jpg,.jpeg,.svg">
-      <div class="upload-placeholder" id="logoPlaceholder">
-        <i class="ph ph-upload-simple upload-icon"></i>
-        <span class="upload-title">Upload or paste logo</span>
-        <span class="upload-hint">PNG · JPG · SVG</span>
-        <span class="paste-hint">or ⌘V anywhere to paste</span>
+    <div class="aigen-drop-zone" id="logoZone">
+      <input type="file" id="logoFile" accept="image/*,.svg">
+      <div class="aigen-drop-placeholder" id="logoPlaceholder">
+        <i class="ph ph-upload-simple" style="font-size:28px;opacity:0.35;"></i>
+        <span class="aigen-upload-label">Drop, paste, or click</span>
+        <span class="aigen-upload-hint">PNG · JPG · SVG</span>
       </div>
-      <div class="upload-preview-wrap" id="logoPreviewWrap">
-        <img class="upload-preview-thumb" id="logoThumb" src="" alt="">
-        <div class="upload-preview-info">
-          <div class="upload-preview-name" id="logoFileName">—</div>
-        </div>
-        <button class="upload-preview-clear" id="logoClear" title="Remove"><i class="ph ph-x"></i></button>
-      </div>
+      <div class="aigen-thumbs" id="logoThumbs"></div>
     </div>
   </div>
 
   <!-- Product Image -->
   <div>
     <div class="section-label">Product Image</div>
-    <div class="upload-zone" id="imageZone">
-      <input type="file" id="imageFile" accept=".png,.jpg,.jpeg,.svg">
-      <div class="upload-placeholder" id="imagePlaceholder">
-        <i class="ph ph-image upload-icon"></i>
-        <span class="upload-title">Upload or paste image</span>
-        <span class="upload-hint">PNG · JPG · SVG</span>
-        <span class="paste-hint">or ⌘V anywhere to paste</span>
+    <div class="aigen-drop-zone" id="imageZone">
+      <input type="file" id="imageFile" accept="image/*,.svg">
+      <div class="aigen-drop-placeholder" id="imagePlaceholder">
+        <i class="ph ph-image" style="font-size:28px;opacity:0.35;"></i>
+        <span class="aigen-upload-label">Drop, paste, or click</span>
+        <span class="aigen-upload-hint">PNG · JPG · SVG</span>
       </div>
-      <div class="upload-preview-wrap" id="imagePreviewWrap">
-        <img class="upload-preview-thumb" id="imageThumb" src="" alt="">
-        <div class="upload-preview-info">
-          <div class="upload-preview-name" id="imageFileName">—</div>
-        </div>
-        <button class="upload-preview-clear" id="imageClear" title="Remove"><i class="ph ph-x"></i></button>
-      </div>
+      <div class="aigen-thumbs" id="imageThumbs"></div>
     </div>
   </div>
 
@@ -2044,14 +2030,26 @@ async function loadFile(file) {
 }
 
 // ── Upload handlers ────────────────────────────────────────────────────
-function setupUpload(inputId, zoneId, placeholderId, previewWrapId, thumbId, fileNameId, clearId, stateKey) {
-  const input    = document.getElementById(inputId);
-  const zone     = document.getElementById(zoneId);
-  const ph       = document.getElementById(placeholderId);
-  const wrap     = document.getElementById(previewWrapId);
-  const thumb    = document.getElementById(thumbId);
-  const nameEl   = document.getElementById(fileNameId);
-  const clearBtn = document.getElementById(clearId);
+function setupUpload(inputId, zoneId, placeholderId, thumbsId, stateKey) {
+  const input  = document.getElementById(inputId);
+  const zone   = document.getElementById(zoneId);
+  const ph     = document.getElementById(placeholderId);
+  const thumbs = document.getElementById(thumbsId);
+
+  function showThumb(img) {
+    ph.classList.add('hidden');
+    thumbs.innerHTML = `<div class="aigen-thumb-item">
+      <img src="${img.src}" style="width:100%;height:100%;object-fit:cover;">
+      <button class="aigen-thumb-remove" data-zone="${stateKey}"><i class="ph ph-x"></i></button>
+    </div>`;
+    thumbs.querySelector('.aigen-thumb-remove').addEventListener('click', e => {
+      e.stopPropagation();
+      S[stateKey] = null;
+      thumbs.innerHTML = '';
+      ph.classList.remove('hidden');
+      renderAll();
+    });
+  }
 
   input.addEventListener('change', async (e) => {
     const file = e.target.files[0];
@@ -2059,33 +2057,32 @@ function setupUpload(inputId, zoneId, placeholderId, previewWrapId, thumbId, fil
     try {
       const img = await loadFile(file);
       S[stateKey] = img;
-      // Show preview
-      thumb.src = img.src;
-      nameEl.textContent = file.name;
-      ph.style.display = 'none';
-      wrap.classList.add('visible');
-      zone.classList.add('active');
+      showThumb(img);
       renderAll();
-    } catch(err) {
-      console.error('Failed to load file:', err);
-    }
-    input.value = ''; // allow re-uploading same file
+    } catch(err) { console.error('Failed to load file:', err); }
+    input.value = '';
   });
 
-  clearBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    S[stateKey] = null;
-    thumb.src = '';
-    nameEl.textContent = '—';
-    ph.style.display = '';
-    wrap.classList.remove('visible');
-    zone.classList.remove('active');
-    renderAll();
+  // Drag-and-drop
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+  zone.addEventListener('drop', async e => {
+    e.preventDefault(); zone.classList.remove('drag-over');
+    const file = [...(e.dataTransfer.files || [])].find(f => f.type.startsWith('image/') || f.name.toLowerCase().endsWith('.svg'));
+    if (!file) return;
+    try {
+      const img = await loadFile(file);
+      S[stateKey] = img;
+      showThumb(img);
+      renderAll();
+    } catch(err) { console.error('Failed to load file:', err); }
   });
+
+  zone._showThumb = showThumb; // expose for paste handler
 }
 
-setupUpload('logoFile',  'logoZone',  'logoPlaceholder',  'logoPreviewWrap',  'logoThumb',  'logoFileName',  'logoClear',  'logoImg');
-setupUpload('imageFile', 'imageZone', 'imagePlaceholder', 'imagePreviewWrap', 'imageThumb', 'imageFileName', 'imageClear', 'productImg');
+setupUpload('logoFile',  'logoZone',  'logoPlaceholder',  'logoThumbs',  'logoImg');
+setupUpload('imageFile', 'imageZone', 'imagePlaceholder', 'imageThumbs', 'productImg');
 
 // ── Paste support ──────────────────────────────────────────────────────
 let hoveredZone = null; // 'logoImg' | 'productImg' | null
@@ -2093,25 +2090,18 @@ let pendingPasteImg = null;
 
 // Track which zone the mouse is over
 ['logoZone', 'imageZone'].forEach(zoneId => {
-  const el   = document.getElementById(zoneId);
-  const key  = zoneId === 'logoZone' ? 'logoImg' : 'productImg';
-  el.addEventListener('mouseenter', () => { hoveredZone = key; el.classList.add('paste-hover'); });
-  el.addEventListener('mouseleave', () => { hoveredZone = null; el.classList.remove('paste-hover'); });
+  const el  = document.getElementById(zoneId);
+  const key = zoneId === 'logoZone' ? 'logoImg' : 'productImg';
+  el.addEventListener('mouseenter', () => { hoveredZone = key; });
+  el.addEventListener('mouseleave', () => { hoveredZone = null; });
 });
 
 function applyPastedImage(stateKey, img) {
-  const isLogo   = stateKey === 'logoImg';
-  const thumbId  = isLogo ? 'logoThumb'        : 'imageThumb';
-  const nameId   = isLogo ? 'logoFileName'     : 'imageFileName';
-  const phId     = isLogo ? 'logoPlaceholder'  : 'imagePlaceholder';
-  const wrapId   = isLogo ? 'logoPreviewWrap'  : 'imagePreviewWrap';
-  const zoneId   = isLogo ? 'logoZone'         : 'imageZone';
-  S[stateKey] = img;
-  document.getElementById(thumbId).src = img.src;
-  document.getElementById(nameId).textContent = 'pasted image';
-  document.getElementById(phId).style.display = 'none';
-  document.getElementById(wrapId).classList.add('visible');
-  document.getElementById(zoneId).classList.add('active');
+  const isLogo  = stateKey === 'logoImg';
+  const zoneId  = isLogo ? 'logoZone'  : 'imageZone';
+  const zone    = document.getElementById(zoneId);
+  S[stateKey]   = img;
+  zone._showThumb(img);
   renderAll();
 }
 
