@@ -2,7 +2,7 @@
 .env.*
 venv/
 *.json
-!prompts.json
+!prompts2.json
 !prompts3.json
 !vercel.json
 .DS_Store

@@ -2113,7 +2113,7 @@ function getGeminiApiKey() {
 (function initAigen() {
   const GEMINI_MODEL   = 'gemini-3-pro-image-preview';
   let PROMPT = '';
-  fetch('/prompts.json').then(r => r.json()).then(d => { const raw = d.assets?.[0]?.prompt || ''; PROMPT = Array.isArray(raw) ? raw.join('\n') : raw; }).catch(() => {});
+  fetch('/prompts2.json').then(r => r.json()).then(d => { const raw = d.assets?.[0]?.prompt || ''; PROMPT = Array.isArray(raw) ? raw.join('\n') : raw; }).catch(() => {});
 
   const images = []; // array of { file, dataUrl }
 
@@ -2250,9 +2250,9 @@ function getGeminiApiKey() {
   const ag2Images = []; // shared images for all calls
   let ag2Assets = [];
 
-  fetch('/prompts.json')
+  fetch('/prompts2.json')
     .then(r => {
-      if (!r.ok) throw new Error(`Failed to load prompts.json: ${r.status}`);
+      if (!r.ok) throw new Error(`Failed to load prompts2.json: ${r.status}`);
       return r.json();
     })
     .then(d => { ag2Assets = d.assets || []; })
