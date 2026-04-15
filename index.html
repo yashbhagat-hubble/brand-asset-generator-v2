@@ -3014,23 +3014,6 @@ function getGeminiApiKey() {
   };
 
   // ── Generate ──
-  async function generateSubject(prompt) {
-    const GEMINI_API_KEY = await getGeminiApiKey();
-    const imgParts = ag3Images.map(img => ({
-      inlineData: { mimeType: img.file.type || 'image/png', data: img.dataUrl.split(',')[1] }
-    }));
-    const resp = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`,
-      { method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ contents:[{role:'user',parts:[...imgParts,{text:prompt}]}], generationConfig:{responseModalities:['IMAGE','TEXT']} }) }
-    );
-    if (!resp.ok) { const e = await resp.json().catch(()=>({})); throw new Error(e?.error?.message||`HTTP ${resp.status}`); }
-    const data = await resp.json();
-    const imgPart = data?.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
-    if (!imgPart) throw new Error('No image in response');
-    return `data:${imgPart.inlineData.mimeType};base64,${imgPart.inlineData.data}`;
-  }
-
   window.ag3Generate = async function() {
     if (!ag3Images.length) { showToast('Please upload at least one image.'); return; }
     if (!ag3Assets.length) { showToast('Prompts not loaded yet, please try again.'); return; }
@@ -3038,32 +3021,73 @@ function getGeminiApiKey() {
     btn.disabled = true;
     btn.innerHTML = '<i class="ph ph-circle-notch" style="animation:spin 0.8s linear infinite;"></i> Generating…';
 
-    // Reset
+    // Reset UI
     document.getElementById('ag3-row1').style.opacity = '0.2';
     document.getElementById('ag3-row1').style.pointerEvents = 'none';
     document.getElementById('ag3-wa1').style.opacity = '0.2';
     document.getElementById('ag3-wa1').style.pointerEvents = 'none';
     document.getElementById('ag3-hdr1').style.opacity = '0.35';
-    document.getElementById('ag3-s1').textContent = 'Generating…';
+    document.getElementById('ag3-s1').textContent = 'Generating icon…';
 
-    // Build shared image parts from all uploaded images
-    const imgParts = ag3Images.map(img => ({
-      inlineData: { mimeType: img.file.type || 'image/png', data: img.dataUrl.split(',')[1] }
-    }));
+    const canvasTargets = ['icon','sq','solid','logo','voucher','wa'];
+    const GEMINI_API_KEY = await getGeminiApiKey();
 
-    // Determine which assets are selected (use .checked property — works even when accordion is collapsed)
+    // Determine selected indices
     const ag3Cbs = [...document.querySelectorAll('.ag3-asset-selector input[type="checkbox"]')];
     const ag3Checked = ag3Cbs.filter(cb => cb.checked);
-    // If all checked or none found, generate all; otherwise respect partial selection
     const selectedIndices = (ag3Checked.length === 0 || ag3Checked.length === ag3Cbs.length)
       ? new Set(ag3Assets.map((_, i) => i))
       : new Set(ag3Checked.map(cb => +cb.value));
     if (!selectedIndices.size) { showToast('Select at least one asset to generate.'); btn.disabled = false; btn.innerHTML = '<i class="ph ph-sparkle"></i> Generate'; return; }
 
-    // Run selected asset types in parallel
-    const canvasTargets = ['icon','sq','solid','logo','voucher','wa'];
-    const GEMINI_API_KEY = await getGeminiApiKey();
-    const results = await Promise.all(ag3Assets.map(async (asset, idx) => {
+    // Original uploaded image parts
+    const uploadedParts = ag3Images.map(img => ({
+      inlineData: { mimeType: img.file.type || 'image/png', data: img.dataUrl.split(',')[1] }
+    }));
+
+    // ── Step 1: Generate asset 0 (Icon) first using uploaded images ──
+    let seedPart = null;   // full-res output of asset 0, re-used as sole input for 1–5
+    let asset0Img = null;
+
+    try {
+      const resp = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`,
+        { method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ contents:[{role:'user',parts:[...uploadedParts,{text:ag3Assets[0].prompt}]}], generationConfig:{responseModalities:['IMAGE','TEXT']} }) }
+      );
+      if (!resp.ok) { const e=await resp.json().catch(()=>({})); throw new Error(e?.error?.message||`HTTP ${resp.status}`); }
+      const data = await resp.json();
+      const imgPart = data?.candidates?.[0]?.content?.parts?.find(p=>p.inlineData);
+      if (!imgPart) throw new Error('No image returned for Icon');
+
+      // Keep raw inlineData as seedPart for subsequent calls
+      seedPart = { inlineData: { mimeType: imgPart.inlineData.mimeType, data: imgPart.inlineData.data } };
+
+      // Load as Image for canvas rendering
+      const dataUrl = `data:${imgPart.inlineData.mimeType};base64,${imgPart.inlineData.data}`;
+      asset0Img = new Image();
+      await new Promise((res, rej) => { asset0Img.onload=res; asset0Img.onerror=rej; asset0Img.src=dataUrl; });
+    } catch(err) {
+      console.error('Asset 0 (Icon) error:', err);
+      showToast(`Failed to generate Icon: ${err.message}`);
+      btn.disabled = false; btn.innerHTML = '<i class="ph ph-sparkle"></i> Generate';
+      document.getElementById('ag3-row1').style.opacity = '1'; document.getElementById('ag3-row1').style.pointerEvents = '';
+      document.getElementById('ag3-wa1').style.opacity = '1'; document.getElementById('ag3-wa1').style.pointerEvents = '';
+      document.getElementById('ag3-hdr1').style.opacity = '1'; document.getElementById('ag3-s1').textContent = '—';
+      return;
+    }
+
+    // Paint asset 0 immediately if selected
+    if (selectedIndices.has(0) && asset0Img) {
+      const c0 = document.getElementById('ag3-v1-icon');
+      if (c0) ag3DrawToCanvas(c0, 'icon', asset0Img);
+    }
+
+    // ── Step 2: Generate assets 1–5 in parallel using ONLY asset 0 output as input ──
+    document.getElementById('ag3-s1').textContent = 'Generating assets…';
+
+    const results = await Promise.all(ag3Assets.slice(1).map(async (asset, relIdx) => {
+      const idx = relIdx + 1;
       if (!selectedIndices.has(idx)) return null;
       try {
         const isVoucher = canvasTargets[idx] === 'voucher';
@@ -3071,7 +3095,7 @@ function getGeminiApiKey() {
         const resp = await fetch(
           `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`,
           { method:'POST', headers:{'Content-Type':'application/json'},
-            body: JSON.stringify({ contents:[{role:'user',parts:[...imgParts,{text:asset.prompt}]}], generationConfig:{responseModalities:modalities} }) }
+            body: JSON.stringify({ contents:[{role:'user',parts:[seedPart,{text:asset.prompt}]}], generationConfig:{responseModalities:modalities} }) }
         );
         if (!resp.ok) { const e=await resp.json().catch(()=>({})); throw new Error(e?.error?.message||`HTTP ${resp.status}`); }
         const data = await resp.json();
@@ -3094,7 +3118,7 @@ function getGeminiApiKey() {
       }
     }));
 
-    // Paint each result with correct clipping per canvas type
+    // Paint results 1–5
     results.forEach(r => {
       if (!r) return;
       const type = canvasTargets[r.idx];
@@ -3112,7 +3136,7 @@ function getGeminiApiKey() {
     document.getElementById('ag3-hdr1').style.opacity = '1';
     document.getElementById('ag3-s1').textContent = '✓';
     btn.disabled = false;
-    btn.innerHTML = '<i class="ph ph-sparkle"></i> Generate All';
+    btn.innerHTML = '<i class="ph ph-sparkle"></i> Generate';
   };
 })();
 
