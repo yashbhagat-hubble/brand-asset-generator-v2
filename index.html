@@ -1245,6 +1245,58 @@
   </main>
 </div>
 
+<!-- ═══════════ AI GEN 4 VIEW ═══════════ -->
+<div id="view-aigen4">
+  <div class="ag4-layout">
+    <div class="ag4-inputs">
+      <!-- Main image -->
+      <div class="ag4-input-block" style="max-width:220px;">
+        <div class="ag4-input-label">Main Image</div>
+        <div class="ag4-drop-zone" id="ag4-mainZone">
+          <input type="file" id="ag4-mainInput" accept="image/*" style="display:none;">
+          <div class="ag4-drop-placeholder" id="ag4-mainPlaceholder">
+            <i class="ph ph-image" style="font-size:26px;opacity:0.3;"></i>
+            <span class="aigen-upload-label">Drop or click</span>
+            <span class="aigen-upload-hint">Single image</span>
+          </div>
+          <div class="ag4-thumbs" id="ag4-mainThumbs"></div>
+        </div>
+      </div>
+      <!-- Subject images -->
+      <div class="ag4-input-block">
+        <div class="ag4-input-label">Subject Images</div>
+        <div class="ag4-drop-zone" id="ag4-subjectZone">
+          <input type="file" id="ag4-subjectInput" accept="image/*" multiple style="display:none;">
+          <div class="ag4-drop-placeholder" id="ag4-subjectPlaceholder">
+            <i class="ph ph-images" style="font-size:26px;opacity:0.3;"></i>
+            <span class="aigen-upload-label">Drop or click to add subjects</span>
+            <span class="aigen-upload-hint">One Icon will be generated per subject</span>
+          </div>
+          <div class="ag4-thumbs" id="ag4-subjectThumbs"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ag4-actions">
+      <button class="ag4-generate-btn" id="ag4-generateBtn" onclick="ag4Generate()">
+        <i class="ph ph-sparkle"></i> Generate
+      </button>
+      <span id="ag4-status" style="font-size:11px;color:#7b7b7b;"></span>
+    </div>
+
+    <div class="ag4-results">
+      <div class="ag4-results-header" id="ag4-resultsHeader" style="display:none;">
+        <span class="preview-header-title">Generated Icons</span>
+        <div style="display:flex;gap:8px;">
+          <button class="export-all-btn" id="ag4-exportPNGs">Export PNGs</button>
+          <button class="export-all-btn" id="ag4-exportZip">Export ZIP</button>
+        </div>
+      </div>
+      <div class="ag4-grid" id="ag4-grid"></div>
+    </div>
+  </div>
+</div>
+
 <!-- ═══════════ ADD BRAND VIEW ═══════════ -->
 <div id="view-add">
 
@@ -3678,12 +3730,6 @@ function askName(confirmLabel = 'Export', prefill = '') {
           <button class="export-all-btn" id="ag4-exportZip">Export ZIP</button>
         </div>
       </div>
-      <div class="ag4-grid" id="ag4-grid"></div>
-    </div>
-  </div>
-</div>
-
-
 <!-- ═══════════ BRAND PREVIEW MODAL ═══════════ -->
 <div id="brandPreviewModal" class="bp-overlay" style="display:none;">
   <div class="bp-modal">
