@@ -3,6 +3,7 @@
 venv/
 *.json
 !prompts.json
+!prompts3.json
 !vercel.json
 .DS_Store
 .claude/

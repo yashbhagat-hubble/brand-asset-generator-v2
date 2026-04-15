@@ -2686,9 +2686,9 @@ function getGeminiApiKey() {
   const ag3Images = []; // shared images for all calls
   let ag3Assets = [];
 
-  fetch('/prompts.json')
+  fetch('/prompts3.json')
     .then(r => {
-      if (!r.ok) throw new Error(`Failed to load prompts.json: ${r.status}`);
+      if (!r.ok) throw new Error(`Failed to load prompts3.json: ${r.status}`);
       return r.json();
     })
     .then(d => { ag3Assets = d.assets || []; })
