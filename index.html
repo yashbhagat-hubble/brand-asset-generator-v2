@@ -801,11 +801,16 @@
     .aigen-drop-zone input[type="file"] {
       position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
     }
-    /* AG2 drop zone: input is hidden off-screen; zone click triggers it programmatically */
-    #ag2-dropZone input[type="file"] {
+    /* AG1/AG2/AG3 drop zones: input hidden, zone click triggers it programmatically */
+    #aigenDropZone input[type="file"],
+    #ag2-dropZone input[type="file"],
+    #ag3-dropZone input[type="file"] {
       position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none;
     }
-    #ag2-dropZone { cursor: pointer; }
+    #aigenDropZone { cursor: pointer; }
+    #ag2-dropZone  { cursor: pointer; }
+    #ag3-dropZone  { cursor: pointer; }
+    .aigen-thumbs { margin-top: 8px; }
     .aigen-drop-placeholder {
       display: flex;
       flex-direction: column;
@@ -1030,7 +1035,7 @@
       <!-- Image uploads -->
       <div class="aigen-field">
         <label class="aigen-label">Images</label>
-        <div class="aigen-drop-zone" id="aigenDropZone">
+        <div class="aigen-drop-zone" id="aigenDropZone" onclick="if(event.target===this||event.target.closest('#aigenDropPlaceholder'))document.getElementById('aigenFileInput').click()">
           <input type="file" id="aigenFileInput" accept="image/*" multiple>
           <div class="aigen-drop-placeholder" id="aigenDropPlaceholder">
             <i class="ph ph-images" style="font-size:30px;opacity:0.35;"></i>
@@ -1081,8 +1086,8 @@
           <span class="aigen-upload-label">Drop, paste, or click to add images</span>
           <span class="aigen-upload-hint">Logo, subject & brand color</span>
         </div>
+        <div class="aigen-thumbs" id="ag2-thumbs"></div>
       </div>
-      <div class="aigen-thumbs" id="ag2-thumbs"></div>
     </div>
 
     <!-- Asset selection accordion -->
@@ -1130,8 +1135,8 @@
           <span class="aigen-upload-label">Drop, paste, or click to add images</span>
           <span class="aigen-upload-hint">Logo, subject & brand color</span>
         </div>
+        <div class="aigen-thumbs" id="ag3-thumbs"></div>
       </div>
-      <div class="aigen-thumbs" id="ag3-thumbs"></div>
     </div>
 
     <!-- Asset selection accordion -->
@@ -1682,7 +1687,7 @@ function renderWA() {
 
   // 2. Bow
   if (bowImg.complete && bowImg.naturalWidth > 0) {
-    ctx.drawImage(bowImg, -122, 0, 1818, 753);
+    ctx.drawImage(bowImg, 0, 0, 1500, 750);
   }
 
   // 3. Content zone: (411, 199, 678, 352)
@@ -2084,7 +2089,6 @@ function getGeminiApiKey() {
 
   function renderThumbs() {
     const thumbs = document.getElementById('aigenThumbs');
-    const placeholder = document.getElementById('aigenDropPlaceholder');
     thumbs.innerHTML = '';
     images.forEach((img, i) => {
       const item = document.createElement('div');
@@ -2092,15 +2096,6 @@ function getGeminiApiKey() {
       item.innerHTML = `<img src="${img.dataUrl}"><button class="aigen-thumb-remove" data-i="${i}"><i class="ph ph-x"></i></button>`;
       thumbs.appendChild(item);
     });
-    if (images.length > 0) {
-      const add = document.createElement('div');
-      add.className = 'aigen-thumb-add';
-      add.innerHTML = '<i class="ph ph-plus"></i>';
-      thumbs.appendChild(add);
-      placeholder.classList.add('hidden');
-    } else {
-      placeholder.classList.remove('hidden');
-    }
     thumbs.querySelectorAll('.aigen-thumb-remove').forEach(btn => {
       btn.addEventListener('click', e => {
         e.stopPropagation();
@@ -2314,11 +2309,11 @@ function getGeminiApiKey() {
     { const c = document.getElementById('ag2-v1-wa'); const ctx = c.getContext('2d');
       ctx.fillStyle = fill; ctx.fillRect(0,0,1500,750);
       if (bowImg.complete && bowImg.naturalWidth > 0) {
-        ctx.drawImage(bowImg,-122,0,1818,753);
+        ctx.drawImage(bowImg,0,0,1500,750);
       } else {
         bowImg.addEventListener('load', () => {
           ctx.fillStyle = fill; ctx.fillRect(0,0,1500,750);
-          ctx.drawImage(bowImg,-122,0,1818,753);
+          ctx.drawImage(bowImg,0,0,1500,750);
         }, { once: true });
       } }
   }
@@ -2326,9 +2321,7 @@ function getGeminiApiKey() {
 
   // ── Shared multi-image upload ──
   function ag2RenderThumbs() {
-    const thumbs   = document.getElementById('ag2-thumbs');
-    const zone     = document.getElementById('ag2-dropZone');
-    const placeholder = document.getElementById('ag2-dropPlaceholder');
+    const thumbs = document.getElementById('ag2-thumbs');
     thumbs.innerHTML = '';
     ag2Images.forEach((img, i) => {
       const item = document.createElement('div');
@@ -2336,17 +2329,6 @@ function getGeminiApiKey() {
       item.innerHTML = `<img src="${img.dataUrl}"><button class="aigen-thumb-remove" data-i="${i}"><i class="ph ph-x"></i></button>`;
       thumbs.appendChild(item);
     });
-    if (ag2Images.length > 0) {
-      const add = document.createElement('div');
-      add.className = 'aigen-thumb-add';
-      add.innerHTML = '<i class="ph ph-plus"></i>';
-      add.addEventListener('click', () => document.getElementById('ag2-fileInput').click());
-      thumbs.appendChild(add);
-      zone.style.display = 'none';
-    } else {
-      zone.style.display = '';
-      placeholder.classList.remove('hidden');
-    }
     thumbs.querySelectorAll('.aigen-thumb-remove').forEach(btn => {
       btn.addEventListener('click', e => { e.stopPropagation(); ag2Images.splice(+btn.dataset.i, 1); ag2RenderThumbs(); });
     });
@@ -2434,7 +2416,7 @@ function getGeminiApiKey() {
       c.width=1500; c.height=750; c.style.width=''; c.style.height='';
       const ctx = c.getContext('2d');
       ctx.fillStyle = color; ctx.fillRect(0,0,1500,750);
-      if (bowImg.complete && bowImg.naturalWidth > 0) ctx.drawImage(bowImg,-122,0,1818,753);
+      if (bowImg.complete && bowImg.naturalWidth > 0) ctx.drawImage(bowImg,0,0,1500,750);
       const ZX=411,ZY=199,ZW=678,ZH=352;
       ctx.save(); ctx.beginPath(); ctx.rect(ZX,ZY,ZW,ZH); ctx.clip();
       if (logo) drawContained(ctx,logo,ZX,ZY,ZW,ZH,100,0,'center','center');
@@ -2514,7 +2496,7 @@ function getGeminiApiKey() {
     ctx.clearRect(0, 0, c.width, c.height);
     if (type === 'wa') {
       ctx.drawImage(img, 0, 0, 1500, 750);
-      if (bowImg.complete && bowImg.naturalWidth > 0) ctx.drawImage(bowImg, -122, 0, 1818, 753);
+      if (bowImg.complete && bowImg.naturalWidth > 0) ctx.drawImage(bowImg, 0, 0, 1500, 750);
     } else {
       const radii = { icon: 32, sq: 32, voucher: 16 };
       const r = radii[type] || 0;
@@ -2760,11 +2742,11 @@ function getGeminiApiKey() {
     { const c = document.getElementById('ag3-v1-wa'); const ctx = c.getContext('2d');
       ctx.fillStyle = fill; ctx.fillRect(0,0,1500,750);
       if (bowImg.complete && bowImg.naturalWidth > 0) {
-        ctx.drawImage(bowImg,-122,0,1818,753);
+        ctx.drawImage(bowImg,0,0,1500,750);
       } else {
         bowImg.addEventListener('load', () => {
           ctx.fillStyle = fill; ctx.fillRect(0,0,1500,750);
-          ctx.drawImage(bowImg,-122,0,1818,753);
+          ctx.drawImage(bowImg,0,0,1500,750);
         }, { once: true });
       } }
   }
@@ -2772,9 +2754,7 @@ function getGeminiApiKey() {
 
   // ── Shared multi-image upload ──
   function ag3RenderThumbs() {
-    const thumbs   = document.getElementById('ag3-thumbs');
-    const zone     = document.getElementById('ag3-dropZone');
-    const placeholder = document.getElementById('ag3-dropPlaceholder');
+    const thumbs = document.getElementById('ag3-thumbs');
     thumbs.innerHTML = '';
     ag3Images.forEach((img, i) => {
       const item = document.createElement('div');
@@ -2782,17 +2762,6 @@ function getGeminiApiKey() {
       item.innerHTML = `<img src="${img.dataUrl}"><button class="aigen-thumb-remove" data-i="${i}"><i class="ph ph-x"></i></button>`;
       thumbs.appendChild(item);
     });
-    if (ag3Images.length > 0) {
-      const add = document.createElement('div');
-      add.className = 'aigen-thumb-add';
-      add.innerHTML = '<i class="ph ph-plus"></i>';
-      add.addEventListener('click', () => document.getElementById('ag3-fileInput').click());
-      thumbs.appendChild(add);
-      zone.style.display = 'none';
-    } else {
-      zone.style.display = '';
-      placeholder.classList.remove('hidden');
-    }
     thumbs.querySelectorAll('.aigen-thumb-remove').forEach(btn => {
       btn.addEventListener('click', e => { e.stopPropagation(); ag3Images.splice(+btn.dataset.i, 1); ag3RenderThumbs(); });
     });
@@ -2880,7 +2849,7 @@ function getGeminiApiKey() {
       c.width=1500; c.height=750; c.style.width=''; c.style.height='';
       const ctx = c.getContext('2d');
       ctx.fillStyle = color; ctx.fillRect(0,0,1500,750);
-      if (bowImg.complete && bowImg.naturalWidth > 0) ctx.drawImage(bowImg,-122,0,1818,753);
+      if (bowImg.complete && bowImg.naturalWidth > 0) ctx.drawImage(bowImg,0,0,1500,750);
       const ZX=411,ZY=199,ZW=678,ZH=352;
       ctx.save(); ctx.beginPath(); ctx.rect(ZX,ZY,ZW,ZH); ctx.clip();
       if (logo) drawContained(ctx,logo,ZX,ZY,ZW,ZH,100,0,'center','center');
@@ -2960,7 +2929,7 @@ function getGeminiApiKey() {
     ctx.clearRect(0, 0, c.width, c.height);
     if (type === 'wa') {
       ctx.drawImage(img, 0, 0, 1500, 750);
-      if (bowImg.complete && bowImg.naturalWidth > 0) ctx.drawImage(bowImg, -122, 0, 1818, 753);
+      if (bowImg.complete && bowImg.naturalWidth > 0) ctx.drawImage(bowImg, 0, 0, 1500, 750);
     } else {
       const radii = { icon: 32, sq: 32, voucher: 16 };
       const r = radii[type] || 0;
