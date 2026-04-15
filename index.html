@@ -686,7 +686,7 @@
       padding: 0 10px;
     }
 
-    .ag2-asset-selector {
+    .ag2-asset-selector, .ag3-asset-selector {
       display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding-bottom: 10px;
     }
     .ag2-asset-option {
@@ -1146,7 +1146,7 @@
         <i class="ph ph-caret-down ag2-accordion-arrow"></i>
       </div>
       <div class="ag2-accordion-body" id="ag3-accordionBody" style="max-height:0px">
-        <div class="ag2-asset-selector">
+        <div class="ag3-asset-selector">
           <label class="ag2-asset-option"><input type="checkbox" value="0" checked><div class="ag2-asset-tile">Icon<i class="ph ph-check ag2-tile-check"></i></div></label>
           <label class="ag2-asset-option"><input type="checkbox" value="1" checked><div class="ag2-asset-tile">Square Icon<i class="ph ph-check ag2-tile-check"></i></div></label>
           <label class="ag2-asset-option"><input type="checkbox" value="2" checked><div class="ag2-asset-tile">Solid Logo<i class="ph ph-check ag2-tile-check"></i></div></label>
@@ -2658,7 +2658,7 @@ function getGeminiApiKey() {
       if (!r.ok) throw new Error(`Failed to load prompts.json: ${r.status}`);
       return r.json();
     })
-    .then(d => { ag3Assets = d.assets3 || []; })
+    .then(d => { ag3Assets = d.assets || []; })
     .catch(err => console.error(err));
 
   // ── Build variant sections in DOM ──
@@ -3020,7 +3020,7 @@ function getGeminiApiKey() {
 
     // Determine which assets are selected
     const selectedIndices = new Set(
-      [...document.querySelectorAll('.ag2-asset-selector input[type="checkbox"]:checked')].map(cb => +cb.value)
+      [...document.querySelectorAll('.ag3-asset-selector input[type="checkbox"]:checked')].map(cb => +cb.value)
     );
     if (!selectedIndices.size) { showToast('Select at least one asset to generate.'); btn.disabled = false; btn.innerHTML = '<i class="ph ph-sparkle"></i> Generate'; return; }
 
