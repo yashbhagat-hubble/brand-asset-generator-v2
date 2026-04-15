@@ -1024,6 +1024,51 @@
     .bp-close:hover { color: #f0f0f0; }
     .bp-body { overflow-y: auto; padding: 20px; flex: 1; display: flex; flex-direction: column; gap: 16px; }
 
+  
+    /* ── AI Gen 4 ── */
+    #view-aigen4 { display: none; flex: 1; overflow: hidden; }
+    #view-aigen4.active { display: flex; }
+    .ag4-layout { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+    .ag4-inputs { display: flex; gap: 12px; padding: 20px 20px 0; flex-shrink: 0; }
+    .ag4-input-block { display: flex; flex-direction: column; gap: 6px; flex: 1; }
+    .ag4-input-label { font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #7b7b7b; }
+    .ag4-drop-zone {
+      border: 1.5px dashed #333; border-radius: 10px; padding: 14px 10px;
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+      cursor: pointer; min-height: 90px; background: #111;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .ag4-drop-zone:hover { border-color: #555; background: #161616; }
+    .ag4-drop-zone.drag-over { border-color: #7b5ea7; background: rgba(123,94,167,0.07); }
+    .ag4-drop-placeholder { display: flex; flex-direction: column; align-items: center; gap: 4px; pointer-events: none; }
+    .ag4-thumbs { display: flex; flex-wrap: wrap; gap: 6px; width: 100%; }
+    .ag4-thumb-item { position: relative; }
+    .ag4-thumb-item img { width: 48px; height: 48px; object-fit: cover; border-radius: 6px; display: block; }
+    .ag4-thumb-remove {
+      position: absolute; top: -5px; right: -5px; width: 16px; height: 16px;
+      border-radius: 50%; background: #333; border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: #ccc; font-size: 9px; line-height: 1;
+    }
+    .ag4-thumb-remove:hover { background: #e05; color: #fff; }
+    .ag4-actions { display: flex; gap: 8px; padding: 14px 20px; flex-shrink: 0; align-items: center; }
+    .ag4-generate-btn {
+      background: #5c3ea8; border: none; border-radius: 8px;
+      padding: 9px 20px; color: #fff; font-size: 12px; font-weight: 600;
+      cursor: pointer; display: flex; align-items: center; gap: 6px;
+      transition: background 0.15s;
+    }
+    .ag4-generate-btn:hover { background: #6e4ec4; }
+    .ag4-generate-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .ag4-results { flex: 1; overflow-y: auto; padding: 0 20px 20px; }
+    .ag4-results-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 0 10px; }
+    .ag4-grid { display: flex; flex-wrap: wrap; gap: 14px; }
+    .ag4-icon-card {
+      background: #1c1c1c; border: 1px solid #262626; border-radius: 12px;
+      padding: 12px; display: flex; flex-direction: column; gap: 8px; align-items: center;
+    }
+    .ag4-icon-label { font-size: 10px; color: #7b7b7b; text-align: center; }
+
   </style>
 </head>
 <body>
@@ -1040,6 +1085,7 @@
   <button class="tab-btn" data-tab="aigen" onclick="showTab('aigen')">AI Gen 1</button>
   <button class="tab-btn active" data-tab="aigen2" onclick="showTab('aigen2')">AI Gen 2</button>
   <button class="tab-btn" data-tab="aigen3" onclick="showTab('aigen3')">AI Gen 3</button>
+  <button class="tab-btn" data-tab="aigen4" onclick="showTab('aigen4')">AI Gen 4</button>
   <button class="tab-btn" id="trashBtn" data-tab="trash" onclick="showTab('trash')" style="margin-left:auto">Deleted assets</button>
 </nav>
 
@@ -2077,6 +2123,7 @@ function showTab(tab, fromEdit = false) {
   document.getElementById('view-aigen').classList.toggle('active', tab === 'aigen');
   document.getElementById('view-aigen2').classList.toggle('active', tab === 'aigen2');
   document.getElementById('view-aigen3').classList.toggle('active', tab === 'aigen3');
+  document.getElementById('view-aigen4').classList.toggle('active', tab === 'aigen4');
   if (tab === 'brands') renderBrandsGrid();
   if (tab === 'trash') renderTrashGrid();
   if (tab === 'add' && !fromEdit) { editingBrandId = null; setSaveBrandMode(false); }
@@ -3140,6 +3187,200 @@ function getGeminiApiKey() {
   };
 })();
 
+// ── AI Gen 4 ─────────────────────────────────────────────────────────────
+(function initAg4() {
+  const AG4_PROMPT = [
+    "Task: Create a high-resolution digital brand asset with fixed size 208px * 232px, fixed aspect ratio (104x116).",
+    "Background: Use the exact same solid background color from the main image (Image 1).",
+    "Logo: Use the logo exactly as it appears in the main image — position it centered horizontally within the top 30 percent of the canvas. Retain any text in the logo, remove only the background.",
+    "Subject: Replace the subject from Image 1 with the subject provided in Image 2. Remove the background from the new subject. Anchor the new subject to the bottom edge of the canvas.",
+    "Do not change any other creative elements — preserve the background color, logo position, and overall layout exactly as in Image 1.",
+    "The final output is premium, clean, and editorial with no visible dividers or borders."
+  ].join('\n');
+
+  let ag4Main = null;     // { file, dataUrl }
+  let ag4Subjects = [];   // [{ file, dataUrl }, ...]
+
+  // ── Main image zone ──
+  const mainZone = document.getElementById('ag4-mainZone');
+  const mainInput = document.getElementById('ag4-mainInput');
+
+  mainZone.addEventListener('click', e => {
+    if (e.target === mainZone || e.target.closest('#ag4-mainPlaceholder') || e.target.closest('#ag4-mainThumbs'))
+      mainInput.click();
+  });
+  mainInput.addEventListener('change', () => {
+    const file = mainInput.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => { ag4Main = { file, dataUrl: e.target.result }; renderMainThumb(); };
+    reader.readAsDataURL(file);
+    mainInput.value = '';
+  });
+  mainZone.addEventListener('dragover', e => { e.preventDefault(); mainZone.classList.add('drag-over'); });
+  mainZone.addEventListener('dragleave', () => mainZone.classList.remove('drag-over'));
+  mainZone.addEventListener('drop', e => {
+    e.preventDefault(); mainZone.classList.remove('drag-over');
+    const file = [...(e.dataTransfer.files || [])].find(f => f.type.startsWith('image/'));
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => { ag4Main = { file, dataUrl: ev.target.result }; renderMainThumb(); };
+    reader.readAsDataURL(file);
+  });
+
+  function renderMainThumb() {
+    const thumbs = document.getElementById('ag4-mainThumbs');
+    const placeholder = document.getElementById('ag4-mainPlaceholder');
+    if (!ag4Main) { thumbs.innerHTML = ''; placeholder.style.display = ''; return; }
+    placeholder.style.display = 'none';
+    thumbs.innerHTML = `<div class="ag4-thumb-item">
+      <img src="${ag4Main.dataUrl}">
+      <button class="ag4-thumb-remove" id="ag4-mainRemove"><i class="ph ph-x"></i></button>
+    </div>`;
+    document.getElementById('ag4-mainRemove').addEventListener('click', e => {
+      e.stopPropagation(); ag4Main = null; renderMainThumb();
+    });
+  }
+
+  // ── Subject images zone ──
+  const subjZone = document.getElementById('ag4-subjectZone');
+  const subjInput = document.getElementById('ag4-subjectInput');
+
+  subjZone.addEventListener('click', e => {
+    if (e.target === subjZone || e.target.closest('#ag4-subjectPlaceholder') || e.target.closest('#ag4-subjectThumbs'))
+      subjInput.click();
+  });
+  subjInput.addEventListener('change', () => {
+    [...subjInput.files].forEach(file => {
+      const reader = new FileReader();
+      reader.onload = e => { ag4Subjects.push({ file, dataUrl: e.target.result }); renderSubjectThumbs(); };
+      reader.readAsDataURL(file);
+    });
+    subjInput.value = '';
+  });
+  subjZone.addEventListener('dragover', e => { e.preventDefault(); subjZone.classList.add('drag-over'); });
+  subjZone.addEventListener('dragleave', () => subjZone.classList.remove('drag-over'));
+  subjZone.addEventListener('drop', e => {
+    e.preventDefault(); subjZone.classList.remove('drag-over');
+    [...(e.dataTransfer.files || [])].filter(f => f.type.startsWith('image/')).forEach(file => {
+      const reader = new FileReader();
+      reader.onload = ev => { ag4Subjects.push({ file, dataUrl: ev.target.result }); renderSubjectThumbs(); };
+      reader.readAsDataURL(file);
+    });
+  });
+
+  function renderSubjectThumbs() {
+    const thumbs = document.getElementById('ag4-subjectThumbs');
+    const placeholder = document.getElementById('ag4-subjectPlaceholder');
+    placeholder.style.display = ag4Subjects.length ? 'none' : '';
+    thumbs.innerHTML = '';
+    ag4Subjects.forEach((img, i) => {
+      const item = document.createElement('div');
+      item.className = 'ag4-thumb-item';
+      item.innerHTML = `<img src="${img.dataUrl}"><button class="ag4-thumb-remove" data-i="${i}"><i class="ph ph-x"></i></button>`;
+      thumbs.appendChild(item);
+    });
+    thumbs.querySelectorAll('.ag4-thumb-remove').forEach(btn => {
+      btn.addEventListener('click', e => { e.stopPropagation(); ag4Subjects.splice(+btn.dataset.i, 1); renderSubjectThumbs(); });
+    });
+  }
+
+  // ── Generate ──
+  window.ag4Generate = async function() {
+    if (!ag4Main) { showToast('Please upload a main image.'); return; }
+    if (!ag4Subjects.length) { showToast('Please upload at least one subject image.'); return; }
+
+    const btn = document.getElementById('ag4-generateBtn');
+    const status = document.getElementById('ag4-status');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="ph ph-circle-notch" style="animation:spin 0.8s linear infinite;"></i> Generating…';
+
+    const grid = document.getElementById('ag4-grid');
+    const resultsHeader = document.getElementById('ag4-resultsHeader');
+    grid.innerHTML = '';
+    resultsHeader.style.display = 'none';
+
+    const GEMINI_API_KEY = await getGeminiApiKey();
+    const mainPart = { inlineData: { mimeType: ag4Main.file.type || 'image/png', data: ag4Main.dataUrl.split(',')[1] } };
+
+    // Generate icons in parallel, one per subject
+    const results = await Promise.all(ag4Subjects.map(async (subj, i) => {
+      status.textContent = `Generating ${i + 1} / ${ag4Subjects.length}…`;
+      const subjPart = { inlineData: { mimeType: subj.file.type || 'image/png', data: subj.dataUrl.split(',')[1] } };
+      try {
+        const resp = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`,
+          { method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ contents: [{ role: 'user', parts: [mainPart, subjPart, { text: AG4_PROMPT }] }], generationConfig: { responseModalities: ['IMAGE', 'TEXT'] } }) }
+        );
+        if (!resp.ok) { const e = await resp.json().catch(() => ({})); throw new Error(e?.error?.message || `HTTP ${resp.status}`); }
+        const data = await resp.json();
+        const imgPart = data?.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
+        if (!imgPart) throw new Error('No image returned');
+        const dataUrl = `data:${imgPart.inlineData.mimeType};base64,${imgPart.inlineData.data}`;
+        const img = new Image();
+        await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = dataUrl; });
+        return { i, img, dataUrl };
+      } catch(err) {
+        console.error(`Subject ${i + 1} error:`, err);
+        showToast(`Subject ${i + 1} failed: ${err.message}`);
+        return null;
+      }
+    }));
+
+    // Render results
+    results.forEach(r => {
+      if (!r) return;
+      const card = document.createElement('div');
+      card.className = 'ag4-icon-card';
+      card.innerHTML = `
+        <div class="ag4-icon-label">Subject ${r.i + 1}</div>
+        <div class="asset-canvas-wrap">
+          <canvas id="ag4-c${r.i}" width="208" height="232" style="width:104px;height:116px;display:block;"></canvas>
+        </div>
+        <button class="download-btn" id="ag4-dl${r.i}"><i class="ph ph-download-simple"></i> PNG</button>`;
+      grid.appendChild(card);
+
+      const c = document.getElementById(`ag4-c${r.i}`);
+      const ctx = c.getContext('2d');
+      roundedRectPath(ctx, 0, 0, 208, 232, 32); ctx.clip();
+      ctx.drawImage(r.img, 0, 0, 208, 232);
+
+      document.getElementById(`ag4-dl${r.i}`).addEventListener('click', () => {
+        const a = document.createElement('a');
+        a.download = `icon-subject-${r.i + 1}.png`;
+        a.href = c.toDataURL('image/png'); a.click();
+      });
+    });
+
+    const generated = results.filter(Boolean);
+    if (generated.length) {
+      resultsHeader.style.display = 'flex';
+      document.getElementById('ag4-exportPNGs').onclick = () => {
+        generated.forEach(r => {
+          const a = document.createElement('a');
+          a.download = `icon-subject-${r.i + 1}.png`;
+          a.href = document.getElementById(`ag4-c${r.i}`).toDataURL('image/png'); a.click();
+        });
+      };
+      document.getElementById('ag4-exportZip').onclick = async () => {
+        const zip = new JSZip();
+        generated.forEach(r => {
+          zip.file(`icon-subject-${r.i + 1}.png`, document.getElementById(`ag4-c${r.i}`).toDataURL('image/png').split(',')[1], { base64: true });
+        });
+        const blob = await zip.generateAsync({ type: 'blob' });
+        const a = document.createElement('a'); a.download = 'ag4-icons.zip';
+        a.href = URL.createObjectURL(blob); a.click();
+      };
+    }
+
+    status.textContent = generated.length ? `✓ ${generated.length} icon${generated.length > 1 ? 's' : ''} generated` : '';
+    btn.disabled = false;
+    btn.innerHTML = '<i class="ph ph-sparkle"></i> Generate';
+  };
+})();
+
+
 // ── Supabase ────────────────────────────────────────────────────────────
 const _sb = supabase.createClient(
   'https://ddewjocplyzokykcwpvn.supabase.co',
@@ -3389,6 +3630,59 @@ function askName(confirmLabel = 'Export', prefill = '') {
   });
 }
 </script>
+
+<!-- ═══════════ AI GEN 4 VIEW ═══════════ -->
+<div id="view-aigen4">
+  <div class="ag4-layout">
+    <div class="ag4-inputs">
+      <!-- Main image -->
+      <div class="ag4-input-block" style="max-width:220px;">
+        <div class="ag4-input-label">Main Image</div>
+        <div class="ag4-drop-zone" id="ag4-mainZone">
+          <input type="file" id="ag4-mainInput" accept="image/*" style="display:none;">
+          <div class="ag4-drop-placeholder" id="ag4-mainPlaceholder">
+            <i class="ph ph-image" style="font-size:26px;opacity:0.3;"></i>
+            <span class="aigen-upload-label">Drop or click</span>
+            <span class="aigen-upload-hint">Single image</span>
+          </div>
+          <div class="ag4-thumbs" id="ag4-mainThumbs"></div>
+        </div>
+      </div>
+      <!-- Subject images -->
+      <div class="ag4-input-block">
+        <div class="ag4-input-label">Subject Images</div>
+        <div class="ag4-drop-zone" id="ag4-subjectZone">
+          <input type="file" id="ag4-subjectInput" accept="image/*" multiple style="display:none;">
+          <div class="ag4-drop-placeholder" id="ag4-subjectPlaceholder">
+            <i class="ph ph-images" style="font-size:26px;opacity:0.3;"></i>
+            <span class="aigen-upload-label">Drop or click to add subjects</span>
+            <span class="aigen-upload-hint">One Icon will be generated per subject</span>
+          </div>
+          <div class="ag4-thumbs" id="ag4-subjectThumbs"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ag4-actions">
+      <button class="ag4-generate-btn" id="ag4-generateBtn" onclick="ag4Generate()">
+        <i class="ph ph-sparkle"></i> Generate
+      </button>
+      <span id="ag4-status" style="font-size:11px;color:#7b7b7b;"></span>
+    </div>
+
+    <div class="ag4-results">
+      <div class="ag4-results-header" id="ag4-resultsHeader" style="display:none;">
+        <span class="preview-header-title">Generated Icons</span>
+        <div style="display:flex;gap:8px;">
+          <button class="export-all-btn" id="ag4-exportPNGs">Export PNGs</button>
+          <button class="export-all-btn" id="ag4-exportZip">Export ZIP</button>
+        </div>
+      </div>
+      <div class="ag4-grid" id="ag4-grid"></div>
+    </div>
+  </div>
+</div>
+
 
 <!-- ═══════════ BRAND PREVIEW MODAL ═══════════ -->
 <div id="brandPreviewModal" class="bp-overlay" style="display:none;">
