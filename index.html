@@ -4092,39 +4092,18 @@ function getReplicateApiKey() {
     return out.toDataURL('image/png');
   }
 
-  // ── Replicate: create prediction + poll until done ──
-  async function replicateRemoveBg(dataUrl, apiKey) {
-    const createResp = await fetch('https://api.replicate.com/v1/models/bria/remove-background/predictions', {
+  // ── Background removal via server-side proxy (/api/replicate-remove-bg) ──
+  async function replicateRemoveBg(dataUrl) {
+    const resp = await fetch('/api/replicate-remove-bg', {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-        'Prefer': 'wait=30', // synchronous wait up to 30s
-      },
-      body: JSON.stringify({ input: { image: dataUrl } })
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ image: dataUrl }),
     });
-    if (!createResp.ok) {
-      const e = await createResp.json().catch(() => ({}));
-      throw new Error(e?.detail || `HTTP ${createResp.status}`);
+    if (!resp.ok) {
+      const e = await resp.json().catch(() => ({}));
+      throw new Error(e?.error || `HTTP ${resp.status}`);
     }
-    let prediction = await createResp.json();
-
-    // Poll if not yet complete
-    while (prediction.status !== 'succeeded' && prediction.status !== 'failed' && prediction.status !== 'canceled') {
-      await new Promise(r => setTimeout(r, 1200));
-      const pollResp = await fetch(`https://api.replicate.com/v1/predictions/${prediction.id}`, {
-        headers: { 'Authorization': `Bearer ${apiKey}` }
-      });
-      if (!pollResp.ok) throw new Error(`Poll failed: HTTP ${pollResp.status}`);
-      prediction = await pollResp.json();
-    }
-    if (prediction.status !== 'succeeded') throw new Error(`Prediction ${prediction.status}${prediction.error ? ': ' + prediction.error : ''}`);
-
-    // Fetch the output image as a data URL (avoids canvas taint from cross-origin URL)
-    const outputUrl = Array.isArray(prediction.output) ? prediction.output[0] : prediction.output;
-    const imgResp = await fetch(outputUrl);
-    if (!imgResp.ok) throw new Error('Failed to fetch output image');
-    const blob = await imgResp.blob();
+    const blob = await resp.blob();
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = () => resolve(reader.result);
@@ -4149,10 +4128,6 @@ function getReplicateApiKey() {
       showToast('Upload a logo and/or subject image to extract.'); return;
     }
 
-    let apiKey;
-    try { apiKey = await getReplicateApiKey(); }
-    catch(e) { showToast(e.message); return; }
-
     const btn = document.getElementById('ag7-generateBtn');
     btn.disabled = true;
     btn.innerHTML = '<i class="ph ph-circle-notch" style="animation:spin 0.8s linear infinite;"></i> Extracting…';
@@ -4168,7 +4143,7 @@ function getReplicateApiKey() {
 
     const processSlot = async (key) => {
       if (!ag7Slots[key].dataUrl) return;
-      const dataUrl = await replicateRemoveBg(ag7Slots[key].dataUrl, apiKey);
+      const dataUrl = await replicateRemoveBg(ag7Slots[key].dataUrl);
       const img = new Image();
       await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = dataUrl; });
       const cropped = ag7CropToContent(img, 10);
