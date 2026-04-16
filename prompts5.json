@@ -1,0 +1,16 @@
+{
+  "extract": [
+    {
+      "label": "Isolate_Logo",
+      "prompt": "Task: Replace every background pixel in this image with pure solid #FF00FF magenta. Do not crop, resize, reframe, or recompose the image — output dimensions and layout must be identical to the input. Do not alter the logo's colours, shapes, text, or any other detail. Only the background changes to #FF00FF. Output image only, no text."
+    },
+    {
+      "label": "Isolate_Subject",
+      "prompt": "Task: Replace every background pixel in this image with pure solid #FF00FF magenta. Do not crop, resize, reframe, or recompose the image — output dimensions and layout must be identical to the input. Do not alter the subject's colours, shapes, textures, or any other detail. Only the background changes to #FF00FF. Output image only, no text."
+    },
+    {
+      "label": "Background_Color",
+      "prompt": "Task: Analyse this image and return the dominant background colour as a single hex code in the format '#RRGGBB'. Return only the hex code, nothing else."
+    }
+  ]
+}

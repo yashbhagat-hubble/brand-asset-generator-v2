@@ -5,6 +5,7 @@ venv/
 !prompts2.json
 !prompts3.json
 !prompts4.json
+!prompts5.json
 !vercel.json
 .DS_Store
 .claude/
