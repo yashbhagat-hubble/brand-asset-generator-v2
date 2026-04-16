@@ -401,6 +401,17 @@
     .hex-input:focus { border-color: #5c5c5c; }
     .hex-input.invalid { border-color: #e93544; color: #e93544; }
 
+    /* ── Colour ref swatches (Method 6) ── */
+    .ag6-swatch {
+      height: 24px;
+      border-radius: 5px;
+      border: 1.5px solid rgba(255,255,255,0.08);
+      cursor: pointer;
+      transition: transform 0.12s, box-shadow 0.12s;
+    }
+    .ag6-swatch:hover { transform: scale(1.14); box-shadow: 0 2px 8px rgba(0,0,0,0.45); }
+    .ag6-swatch.selected { border-color: rgba(255,255,255,0.7); box-shadow: 0 0 0 2px rgba(255,255,255,0.2); }
+
     /* ── Brand Name ── */
     .brand-name-input {
       width: 100%;
@@ -1065,6 +1076,8 @@
     #view-aigen4.active { display: flex; }
     #view-aigen5 { display: none; flex: 1; overflow: hidden; }
     #view-aigen5.active { display: flex; }
+    #view-aigen6 { display: none; flex: 1; overflow: hidden; }
+    #view-aigen6.active { display: flex; }
     .ag4-layout { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
     .ag4-inputs { display: flex; gap: 12px; padding: 20px 20px 0; flex-shrink: 0; }
     .ag4-input-block { display: flex; flex-direction: column; gap: 6px; flex: 1; }
@@ -1124,6 +1137,7 @@
   <button class="tab-btn" data-tab="aigen5" onclick="showTab('aigen5')">Method 3</button>
   <button class="tab-btn" data-tab="aigen4" onclick="showTab('aigen4')">Method 4</button>
   <button class="tab-btn" data-tab="aigen3" onclick="showTab('aigen3')">Method 5</button>
+  <button class="tab-btn" data-tab="aigen6" onclick="showTab('aigen6')">Method 6</button>
   <button class="tab-btn" id="trashBtn" data-tab="trash" onclick="showTab('trash')" style="margin-left:auto">Deleted assets</button>
 </nav>
 
@@ -1242,7 +1256,7 @@
   <aside class="controls">
     <div class="app-header">
       <div class="app-title">Method 5</div>
-      <div class="app-subtitle">Step 1 — Extract clean elements (logo, subject, background colour) as inputs for asset generation.</div>
+      <div class="app-subtitle">Extract clean elements (logo, subject, background colour) as inputs for asset generation.</div>
     </div>
 
     <!-- Inputs -->
@@ -1404,7 +1418,7 @@
   <aside class="controls">
     <div class="app-header">
       <div class="app-title">Method 3</div>
-      <div class="app-subtitle">Generate all brand assets directly from uploaded images.</div>
+      <div class="app-subtitle">Generate brand assets using one as input for anohter. Listing1 acts as input for rest.</div>
     </div>
 
     <!-- Images -->
@@ -1448,6 +1462,126 @@
   <!-- Preview -->
   <main class="preview-panel" id="ag5-previewPanel" style="overflow-y:auto;">
     <div id="ag5-sections" style="display:flex;flex-direction:column;gap:20px;"></div>
+  </main>
+</div>
+
+<!-- ═══════════ AI GEN 6 VIEW ═══════════ -->
+<div id="view-aigen6">
+  <aside class="controls">
+    <div class="app-header">
+      <div class="app-title">Method 6</div>
+      <div class="app-subtitle">Extract logo &amp; subject using the brand background colour as chroma key — no fixed screen colour.</div>
+    </div>
+
+    <!-- Inputs: colour reference first, then logo, then subject -->
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div>
+        <div class="section-label">Colour reference</div>
+        <div id="ag6-colorRef" style="display:flex;flex-direction:column;gap:8px;">
+
+          <!-- Selected colour preview -->
+          <div id="ag6-colorPreviewBar" style="height:32px;border-radius:8px;border:1px solid #333;background:#1c1c1c;display:flex;align-items:center;justify-content:center;transition:background 0.2s;">
+            <span id="ag6-colorPreviewLabel" style="font-size:11px;font-family:monospace;color:#5c5c5c;letter-spacing:0.05em;pointer-events:none;">No colour selected</span>
+          </div>
+
+          <!-- 12 preset swatches -->
+          <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:5px;">
+            <div class="ag6-swatch" data-hex="#FFFFFF" style="background:#FFFFFF;" title="White"></div>
+            <div class="ag6-swatch" data-hex="#F5F5F5" style="background:#F5F5F5;" title="#F5F5F5"></div>
+            <div class="ag6-swatch" data-hex="#8A8A8A" style="background:#8A8A8A;" title="#8A8A8A"></div>
+            <div class="ag6-swatch" data-hex="#3A3A3A" style="background:#3A3A3A;" title="#3A3A3A"></div>
+            <div class="ag6-swatch" data-hex="#1A1A1A" style="background:#1A1A1A;" title="#1A1A1A"></div>
+            <div class="ag6-swatch" data-hex="#000000" style="background:#000000;" title="Black"></div>
+            <div class="ag6-swatch" data-hex="#FF3B30" style="background:#FF3B30;" title="#FF3B30"></div>
+            <div class="ag6-swatch" data-hex="#FF9500" style="background:#FF9500;" title="#FF9500"></div>
+            <div class="ag6-swatch" data-hex="#FFCC00" style="background:#FFCC00;" title="#FFCC00"></div>
+            <div class="ag6-swatch" data-hex="#34C759" style="background:#34C759;" title="#34C759"></div>
+            <div class="ag6-swatch" data-hex="#007AFF" style="background:#007AFF;" title="#007AFF"></div>
+            <div class="ag6-swatch" data-hex="#9B59B6" style="background:#9B59B6;" title="#9B59B6"></div>
+          </div>
+
+          <!-- Hex input + colour picker -->
+          <div class="color-row">
+            <div class="color-swatch" id="ag6-colorSwatch">
+              <input type="color" id="ag6-colorPicker" value="#FFFFFF">
+            </div>
+            <input type="text" class="hex-input" id="ag6-hexInput" placeholder="#RRGGBB" maxlength="7">
+          </div>
+
+          <!-- Image upload — detect dominant colour from image -->
+          <div style="font-size:10px;color:#5c5c5c;text-align:center;letter-spacing:0.04em;line-height:1;">— or detect from image —</div>
+          <div class="aigen-drop-zone" id="ag6-bgZone" style="min-height:52px;" onclick="if(!event.target.closest('.aigen-thumb-item'))document.getElementById('ag6-bgInput').click()">
+            <input type="file" id="ag6-bgInput" accept="image/*" style="display:none">
+            <div class="aigen-drop-placeholder" id="ag6-bgPlaceholder" style="padding:8px 0;gap:4px;">
+              <i class="ph ph-upload-simple" style="font-size:16px;opacity:0.35;"></i>
+              <span class="aigen-upload-label" style="font-size:11px;">Drop or click to detect colour</span>
+            </div>
+            <div class="aigen-thumbs" id="ag6-bgThumbs"></div>
+          </div>
+
+        </div>
+      </div>
+      <div>
+        <div class="section-label">Logo image</div>
+        <div class="aigen-drop-zone" id="ag6-logoZone" onclick="if(!event.target.closest('.aigen-thumb-item'))document.getElementById('ag6-logoInput').click()">
+          <input type="file" id="ag6-logoInput" accept="image/*" style="display:none">
+          <div class="aigen-drop-placeholder" id="ag6-logoPlaceholder">
+            <i class="ph ph-upload-simple" style="font-size:20px;opacity:0.35;"></i>
+            <span class="aigen-upload-label">Drop, paste, or click</span>
+          </div>
+          <div class="aigen-thumbs" id="ag6-logoThumbs"></div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">Subject image</div>
+        <div class="aigen-drop-zone" id="ag6-subjectZone" onclick="if(!event.target.closest('.aigen-thumb-item'))document.getElementById('ag6-subjectInput').click()">
+          <input type="file" id="ag6-subjectInput" accept="image/*" style="display:none">
+          <div class="aigen-drop-placeholder" id="ag6-subjectPlaceholder">
+            <i class="ph ph-upload-simple" style="font-size:20px;opacity:0.35;"></i>
+            <span class="aigen-upload-label">Drop, paste, or click</span>
+          </div>
+          <div class="aigen-thumbs" id="ag6-subjectThumbs"></div>
+        </div>
+      </div>
+    </div>
+
+    <button class="ag2-generate-btn" id="ag6-generateBtn" onclick="ag6Generate()" style="margin-top:auto;">
+      <i class="ph ph-magic-wand"></i> Extract
+    </button>
+  </aside>
+
+  <main class="preview-panel" id="ag6-previewPanel" style="overflow-y:auto;">
+    <div id="ag6-sections" style="display:flex;flex-direction:column;gap:20px;padding:20px;">
+
+      <div class="preview-header" id="ag6-extractHdr" style="opacity:0.35;padding:0;">
+        <span class="preview-header-title">Extracted Elements</span>
+        <span id="ag6-extractStatus" style="font-size:11px;color:#7b7b7b;margin-left:8px;">—</span>
+        <div style="margin-left:auto;">
+          <button class="export-all-btn" onclick="ag6DownloadAllExtracted()">Export PNGs</button>
+        </div>
+      </div>
+
+      <div class="assets-row" id="ag6-extractRow" style="opacity:0.2;pointer-events:none;">
+        <div class="asset-card">
+          <div class="asset-card-head"><span class="asset-card-name">Logo</span><span class="asset-card-dims">Isolated</span></div>
+          <div class="asset-canvas-wrap"><canvas id="ag6-ext-logo" width="240" height="240" style="width:120px;height:120px;display:block;"></canvas></div>
+          <button class="download-btn" onclick="ag6DownloadExtracted('logo')"><i class="ph ph-download-simple"></i> PNG</button>
+        </div>
+        <div class="asset-card">
+          <div class="asset-card-head"><span class="asset-card-name">Subject</span><span class="asset-card-dims">Isolated</span></div>
+          <div class="asset-canvas-wrap"><canvas id="ag6-ext-subject" width="240" height="240" style="width:120px;height:120px;display:block;"></canvas></div>
+          <button class="download-btn" onclick="ag6DownloadExtracted('subject')"><i class="ph ph-download-simple"></i> PNG</button>
+        </div>
+        <div class="asset-card">
+          <div class="asset-card-head"><span class="asset-card-name">Background</span><span class="asset-card-dims" id="ag6-ext-bgHexLabel" style="font-family:monospace;letter-spacing:0.04em;">—</span></div>
+          <div class="asset-canvas-wrap" style="position:relative;">
+            <canvas id="ag6-ext-bg" width="240" height="120" style="width:120px;height:60px;display:block;"></canvas>
+            <span id="ag6-ext-bgOverlay" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:11px;font-weight:600;letter-spacing:0.08em;pointer-events:none;opacity:0;"></span>
+          </div>
+          <button class="download-btn" onclick="ag6CopyExtractedHex()"><i class="ph ph-copy"></i> Copy Hex</button>
+        </div>
+      </div>
+    </div>
   </main>
 </div>
 
@@ -2470,6 +2604,7 @@ function showTab(tab, fromEdit = false) {
   document.getElementById('view-aigen3').classList.toggle('active', tab === 'aigen3');
   document.getElementById('view-aigen4').classList.toggle('active', tab === 'aigen4');
   document.getElementById('view-aigen5').classList.toggle('active', tab === 'aigen5');
+  document.getElementById('view-aigen6').classList.toggle('active', tab === 'aigen6');
   if (tab === 'brands') renderBrandsGrid();
   if (tab === 'trash') renderTrashGrid();
   if (tab === 'add' && !fromEdit) { editingBrandId = null; setSaveBrandMode(false); }
@@ -3074,7 +3209,7 @@ function getGeminiApiKey() {
 })();
 
 (function initAg3() {
-  const GEMINI_MODEL = 'gemini-3-pro-image-preview';
+  const GEMINI_MODEL = 'gemini-3.1-flash-image-preview'; // flash model for extraction
 
   const ag3Images = [];
   let ag3Assets = [];          // kept for Step 2 (asset generation)
@@ -3148,6 +3283,38 @@ function getGeminiApiKey() {
   }
 
   // ── Chroma key: remove #00FF00 green screen, return transparent data URL ──
+  // ── Option A: Mask-based removal ──────────────────────────────────────────
+  // Gemini returns a B&W matte (white=keep, black=remove).
+  // We apply it to the ORIGINAL uploaded image — no color touching at all.
+  function ag3ApplyMask(originalImg, maskImg) {
+    const w = originalImg.naturalWidth, h = originalImg.naturalHeight;
+
+    // Draw original at its native size
+    const oc = document.createElement('canvas');
+    oc.width = w; oc.height = h;
+    const ctx = oc.getContext('2d');
+    ctx.drawImage(originalImg, 0, 0);
+    const imgData = ctx.getImageData(0, 0, w, h);
+
+    // Draw mask scaled to match original dimensions
+    const mc = document.createElement('canvas');
+    mc.width = w; mc.height = h;
+    mc.getContext('2d').drawImage(maskImg, 0, 0, w, h);
+    const maskData = mc.getContext('2d').getImageData(0, 0, w, h);
+
+    // Convert mask luminance → alpha channel on original pixels
+    // White (lum=255) → fully opaque, Black (lum=0) → fully transparent, grey → partial
+    for (let i = 0; i < imgData.data.length; i += 4) {
+      const lum = maskData.data[i] * 0.299 + maskData.data[i+1] * 0.587 + maskData.data[i+2] * 0.114;
+      imgData.data[i+3] = Math.round(lum);
+    }
+
+    ctx.putImageData(imgData, 0, 0);
+    return oc.toDataURL('image/png');
+  }
+
+  // ── Option B: Magenta chroma key (active) ────────────────────────────────
+  // Ask Gemini to fill background with #FF00FF, then remove it in JS.
   function ag3ChromaKey(img) {
     const oc = document.createElement('canvas');
     oc.width = img.naturalWidth; oc.height = img.naturalHeight;
@@ -3157,19 +3324,14 @@ function getGeminiApiKey() {
     const d = id.data;
     for (let i = 0; i < d.length; i += 4) {
       const r = d[i], g = d[i+1], b = d[i+2];
-      // Magenta key: high R + high B, low G.
-      // #FF00FF and its blends with dark subjects pass this test.
-      // Natural colours (food, green logos, blue logos, red food) never have
-      // both R and B high while G is low simultaneously.
       if (r > 120 && b > 120 && g < 100 && r > g * 1.5 && b > g * 1.5) {
         const magentaness = Math.min(r, b) - g;
         const keying = Math.min(1, magentaness / 120);
         d[i+3] = Math.round(d[i+3] * (1 - keying));
-        // Despill: reduce magenta tinge on surviving edge pixels
         if (d[i+3] > 0) {
           const avg = (r + b) / 2;
-          d[i]   = Math.min(r, avg + 20); // clamp red
-          d[i+2] = Math.min(b, avg + 20); // clamp blue
+          d[i]   = Math.min(r, avg + 20);
+          d[i+2] = Math.min(b, avg + 20);
         }
       }
     }
@@ -3350,10 +3512,10 @@ function getGeminiApiKey() {
       if (imgPart) {
         const img = new Image();
         await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = `data:${imgPart.inlineData.mimeType};base64,${imgPart.inlineData.data}`; });
-        const keyed = ag3ChromaKey(img);           // remove magenta → true alpha
+        const keyed = ag3ChromaKey(img);
         const keyedImg = new Image();
         await new Promise((res, rej) => { keyedImg.onload = res; keyedImg.onerror = rej; keyedImg.src = keyed; });
-        const cropped = ag3CropToContent(keyedImg, 10); // tight crop + 10px margin
+        const cropped = ag3CropToContent(keyedImg, 10);
         ag3Extracted.logo = cropped;
         const croppedImg = new Image();
         await new Promise((res, rej) => { croppedImg.onload = res; croppedImg.onerror = rej; croppedImg.src = cropped; });
@@ -3367,10 +3529,10 @@ function getGeminiApiKey() {
       if (imgPart) {
         const img = new Image();
         await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = `data:${imgPart.inlineData.mimeType};base64,${imgPart.inlineData.data}`; });
-        const keyed = ag3ChromaKey(img);           // remove magenta → true alpha
+        const keyed = ag3ChromaKey(img);
         const keyedImg = new Image();
         await new Promise((res, rej) => { keyedImg.onload = res; keyedImg.onerror = rej; keyedImg.src = keyed; });
-        const cropped = ag3CropToContent(keyedImg, 10); // tight crop + 10px margin
+        const cropped = ag3CropToContent(keyedImg, 10);
         ag3Extracted.subject = cropped;
         const croppedImg = new Image();
         await new Promise((res, rej) => { croppedImg.onload = res; croppedImg.onerror = rej; croppedImg.src = cropped; });
@@ -3391,7 +3553,7 @@ function getGeminiApiKey() {
     extractRow.style.pointerEvents = '';
     extractHdr.style.opacity = '1';
     extractStatus.textContent = errors.length ? `⚠ ${errors.length} issue(s)` : '✓ Done';
-    if (errors.length) errors.forEach(e => console.warn('[ag3Extract]', e));
+    errors.forEach(e => { console.warn('[ag3Extract]', e); showToast(e); });
 
     btn.disabled = false;
     btn.innerHTML = '<i class="ph ph-magic-wand"></i> Extract';
@@ -3889,6 +4051,317 @@ function getGeminiApiKey() {
     document.getElementById('ag5-s1').textContent = '✓';
     btn.disabled = false;
     btn.innerHTML = '<i class="ph ph-sparkle"></i> Generate';
+  };
+})();
+
+// ── AI Gen 6 (extraction using detected brand bg colour as chroma key) ──
+(function initAg6() {
+  const GEMINI_MODEL = 'gemini-3.1-flash-image-preview';
+
+  const ag6Slots = {
+    bg:      { file: null, dataUrl: null },
+    logo:    { file: null, dataUrl: null },
+    subject: { file: null, dataUrl: null },
+  };
+  const ag6Extracted = { logo: null, subject: null, bgHex: null };
+  let ag6SelectedHex = null; // set by swatch / hex input / picker / image algo
+
+  // ── Dominant colour (client-side, no AI) ──
+  function ag6DominantColor(dataUrl) {
+    return new Promise(resolve => {
+      const img = new Image();
+      img.onload = () => {
+        const SIZE = 64;
+        const oc = document.createElement('canvas');
+        oc.width = SIZE; oc.height = SIZE;
+        const ctx = oc.getContext('2d');
+        ctx.drawImage(img, 0, 0, SIZE, SIZE);
+        const { data } = ctx.getImageData(0, 0, SIZE, SIZE);
+        const counts = {};
+        for (let i = 0; i < data.length; i += 4) {
+          if (data[i+3] < 128) continue;
+          // Quantize to 4-bit per channel (16 steps of 16)
+          const r = data[i]   & 0xF0;
+          const g = data[i+1] & 0xF0;
+          const b = data[i+2] & 0xF0;
+          const key = (r << 16) | (g << 8) | b;
+          counts[key] = (counts[key] || 0) + 1;
+        }
+        let maxCnt = 0, dominant = 0xFFFFFF;
+        for (const [key, cnt] of Object.entries(counts)) {
+          if (cnt > maxCnt) { maxCnt = cnt; dominant = +key; }
+        }
+        const r = (dominant >> 16) & 0xFF;
+        const g = (dominant >> 8)  & 0xFF;
+        const b =  dominant        & 0xFF;
+        resolve('#' + [r,g,b].map(v => v.toString(16).padStart(2,'0')).join('').toUpperCase());
+      };
+      img.onerror = () => resolve(null);
+      img.src = dataUrl;
+    });
+  }
+
+  // ── Set colour ref from any source ──
+  function ag6SetColorRef(hex) {
+    if (!hex || !/^#[0-9a-fA-F]{6}$/.test(hex)) return;
+    hex = hex.toUpperCase();
+    ag6SelectedHex = hex;
+    const bar = document.getElementById('ag6-colorPreviewBar');
+    const lbl = document.getElementById('ag6-colorPreviewLabel');
+    if (bar) bar.style.background = hex;
+    if (lbl) { lbl.textContent = hex; lbl.style.color = isColorDark(hex) ? '#eee' : '#222'; }
+    const picker = document.getElementById('ag6-colorPicker');
+    const hexInp = document.getElementById('ag6-hexInput');
+    if (picker) picker.value = hex;
+    if (hexInp && document.activeElement !== hexInp) hexInp.value = hex;
+    document.querySelectorAll('.ag6-swatch').forEach(s => {
+      s.classList.toggle('selected', s.dataset.hex?.toUpperCase() === hex);
+    });
+  }
+
+  // ── Upload slots ──
+  function ag6SetSlot(key, file) {
+    if (!file || !file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = async e => {
+      ag6Slots[key] = { file, dataUrl: e.target.result };
+      ag6RenderSlotThumb(key);
+      if (key === 'bg') {
+        const hex = await ag6DominantColor(e.target.result);
+        if (hex) ag6SetColorRef(hex);
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+  function ag6RenderSlotThumb(key) {
+    const slot = ag6Slots[key];
+    const thumbs = document.getElementById(`ag6-${key}Thumbs`);
+    const placeholder = document.getElementById(`ag6-${key}Placeholder`);
+    thumbs.innerHTML = '';
+    if (!slot.dataUrl) { placeholder.style.display = ''; return; }
+    placeholder.style.display = 'none';
+    const item = document.createElement('div');
+    item.className = 'aigen-thumb-item';
+    item.innerHTML = `<img src="${slot.dataUrl}"><button class="aigen-thumb-remove"><i class="ph ph-x"></i></button>`;
+    item.querySelector('.aigen-thumb-remove').addEventListener('click', e => {
+      e.stopPropagation(); ag6Slots[key] = { file: null, dataUrl: null }; ag6RenderSlotThumb(key);
+    });
+    thumbs.appendChild(item);
+  }
+  ['bg','logo','subject'].forEach(key => {
+    const zone  = document.getElementById(`ag6-${key}Zone`);
+    const input = document.getElementById(`ag6-${key}Input`);
+    input.addEventListener('change', () => { ag6SetSlot(key, input.files[0]); input.value = ''; });
+    zone.addEventListener('dragover',  e => { e.preventDefault(); zone.classList.add('drag-over'); });
+    zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+    zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('drag-over'); ag6SetSlot(key, e.dataTransfer.files[0]); });
+  });
+
+  // ── Canvas helpers ──
+  function ag6DrawCheckerboard(ctx, w, h) {
+    const light = '#3a3a3a', dark = '#2a2a2a', s = 8;
+    for (let row = 0; row * s < h; row++)
+      for (let col = 0; col * s < w; col++) {
+        ctx.fillStyle = (row + col) % 2 === 0 ? light : dark;
+        ctx.fillRect(col * s, row * s, s, s);
+      }
+  }
+  function ag6InitCanvases() {
+    ['logo','subject'].forEach(key => {
+      const c = document.getElementById(`ag6-ext-${key}`); if (!c) return;
+      ag6DrawCheckerboard(c.getContext('2d'), c.width, c.height);
+    });
+    const bgC = document.getElementById('ag6-ext-bg');
+    if (bgC) { bgC.getContext('2d').fillStyle = '#262626'; bgC.getContext('2d').fillRect(0, 0, bgC.width, bgC.height); }
+  }
+  ag6InitCanvases();
+
+  // ── Colour ref event wiring ──
+  document.querySelectorAll('.ag6-swatch').forEach(s => {
+    s.addEventListener('click', () => ag6SetColorRef(s.dataset.hex));
+  });
+  document.getElementById('ag6-colorPicker').addEventListener('input', e => ag6SetColorRef(e.target.value));
+  document.getElementById('ag6-hexInput').addEventListener('input', e => {
+    const val = e.target.value.trim();
+    if (/^#[0-9a-fA-F]{6}$/.test(val)) ag6SetColorRef(val);
+  });
+  document.getElementById('ag6-hexInput').addEventListener('blur', e => {
+    // Normalise on blur
+    const val = e.target.value.trim();
+    if (ag6SelectedHex) e.target.value = ag6SelectedHex;
+  });
+
+  function ag6PaintExtractedImage(canvasId, img) {
+    const c = document.getElementById(canvasId); if (!c) return;
+    const ctx = c.getContext('2d');
+    ctx.clearRect(0, 0, c.width, c.height);
+    ag6DrawCheckerboard(ctx, c.width, c.height);
+    const scale = Math.min(c.width / img.naturalWidth, c.height / img.naturalHeight);
+    const dw = img.naturalWidth * scale, dh = img.naturalHeight * scale;
+    ctx.drawImage(img, (c.width - dw) / 2, (c.height - dh) / 2, dw, dh);
+  }
+  function ag6FillBgHex(hex) {
+    const c = document.getElementById('ag6-ext-bg'); if (!c) return;
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = hex; ctx.fillRect(0, 0, c.width, c.height);
+    const overlay = document.getElementById('ag6-ext-bgOverlay');
+    if (overlay) { overlay.textContent = hex; overlay.style.color = isColorDark(hex) ? '#fff' : '#111'; overlay.style.opacity = '1'; }
+    const lbl = document.getElementById('ag6-ext-bgHexLabel');
+    if (lbl) lbl.textContent = hex;
+    c.dataset.hex = hex; ag6Extracted.bgHex = hex;
+  }
+
+  // ── Colour-based chroma key using detected brand hex ──
+  function ag6ChromaKey(img, hex) {
+    const tr = parseInt(hex.slice(1,3), 16);
+    const tg = parseInt(hex.slice(3,5), 16);
+    const tb = parseInt(hex.slice(5,7), 16);
+    const oc = document.createElement('canvas');
+    oc.width = img.naturalWidth; oc.height = img.naturalHeight;
+    const ctx = oc.getContext('2d');
+    ctx.drawImage(img, 0, 0);
+    const id = ctx.getImageData(0, 0, oc.width, oc.height);
+    const d = id.data;
+    const THRESHOLD = 80; // Euclidean RGB distance to consider "background"
+    for (let i = 0; i < d.length; i += 4) {
+      const dr = d[i] - tr, dg = d[i+1] - tg, db = d[i+2] - tb;
+      const dist = Math.sqrt(dr*dr + dg*dg + db*db);
+      if (dist < THRESHOLD) {
+        const keying = Math.min(1, (THRESHOLD - dist) / THRESHOLD);
+        d[i+3] = Math.round(d[i+3] * (1 - keying));
+      }
+    }
+    ctx.putImageData(id, 0, 0);
+    return oc.toDataURL('image/png');
+  }
+
+  // ── Crop to content ──
+  function ag6CropToContent(img, margin = 10) {
+    const oc = document.createElement('canvas');
+    oc.width = img.naturalWidth; oc.height = img.naturalHeight;
+    const ctx = oc.getContext('2d');
+    ctx.drawImage(img, 0, 0);
+    const { data, width, height } = ctx.getImageData(0, 0, oc.width, oc.height);
+    let minX = width, maxX = 0, minY = height, maxY = 0;
+    for (let y = 0; y < height; y++)
+      for (let x = 0; x < width; x++)
+        if (data[(y * width + x) * 4 + 3] > 20) {
+          if (x < minX) minX = x; if (x > maxX) maxX = x;
+          if (y < minY) minY = y; if (y > maxY) maxY = y;
+        }
+    if (minX > maxX || minY > maxY) return img.src;
+    const cropX = Math.max(0, minX - margin), cropY = Math.max(0, minY - margin);
+    const cropW = Math.min(width, maxX + margin + 1) - cropX;
+    const cropH = Math.min(height, maxY + margin + 1) - cropY;
+    const out = document.createElement('canvas');
+    out.width = cropW; out.height = cropH;
+    out.getContext('2d').drawImage(oc, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
+    return out.toDataURL('image/png');
+  }
+
+  // ── Download helpers ──
+  window.ag6CopyExtractedHex = function() {
+    const hex = document.getElementById('ag6-ext-bg')?.dataset?.hex;
+    if (hex) navigator.clipboard.writeText(hex).then(() => showToast(`Copied ${hex}`));
+    else showToast('No colour extracted yet.');
+  };
+  window.ag6DownloadExtracted = async function(key) {
+    if (key === 'bg') {
+      const c = document.getElementById('ag6-ext-bg'); if (!c) return;
+      const blob = await new Promise(res => c.toBlob(res, 'image/png'));
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'extract-bg.png'; a.click(); URL.revokeObjectURL(a.href);
+      return;
+    }
+    const rawUrl = ag6Extracted[key];
+    if (!rawUrl) { showToast('No extracted image yet.'); return; }
+    const a = document.createElement('a'); a.href = rawUrl; a.download = `extract-${key}.png`; a.click();
+  };
+  window.ag6DownloadAllExtracted = async function() {
+    for (const key of ['logo','subject','bg']) { await window.ag6DownloadExtracted(key); await new Promise(r => setTimeout(r, 150)); }
+  };
+
+  // ── Generate ──
+  window.ag6Generate = async function() {
+    if (!ag6Slots.logo.dataUrl && !ag6Slots.subject.dataUrl) {
+      showToast('Upload a logo and/or subject image to extract.'); return;
+    }
+    if (!ag6SelectedHex) {
+      showToast('Pick a colour reference first (swatch, hex, picker, or upload an image).'); return;
+    }
+
+    const btn = document.getElementById('ag6-generateBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="ph ph-circle-notch" style="animation:spin 0.8s linear infinite;"></i> Extracting…';
+
+    const extractRow = document.getElementById('ag6-extractRow');
+    const extractHdr = document.getElementById('ag6-extractHdr');
+    const extractStatus = document.getElementById('ag6-extractStatus');
+    extractRow.style.opacity = '0.2'; extractRow.style.pointerEvents = 'none';
+    extractHdr.style.opacity = '0.35'; extractStatus.textContent = 'Extracting logo & subject…';
+    ag6InitCanvases();
+
+    // Fill the bg swatch in the results panel with the selected hex
+    const detectedHex = ag6SelectedHex;
+    ag6FillBgHex(detectedHex);
+
+    const GEMINI_API_KEY = await getGeminiApiKey();
+    const slotPart = key => ag6Slots[key]?.dataUrl ? [{ inlineData: { mimeType: ag6Slots[key].file?.type || 'image/png', data: ag6Slots[key].dataUrl.split(',')[1] } }] : [];
+
+    let errors = [];
+
+    // ── Single phase: Logo + Subject in parallel using selected hex ──
+
+    const buildIsolatePrompt = (type, hex) => {
+      const fill = hex || '#FF00FF';
+      return `Task: Replace every background pixel in this image with pure solid ${fill}. Do not crop, resize, reframe, or recompose the image — output dimensions and layout must be identical to the input. Do not alter the ${type}'s colours, shapes, or any detail. Only the background changes to ${fill}. Output image only, no text.`;
+    };
+
+    const makeImageCall = async (promptText, imageParts) => {
+      if (!imageParts.length) throw new Error('No image uploaded for this slot');
+      const resp = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`,
+        { method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents: [{ role: 'user', parts: [...imageParts, { text: promptText }] }], generationConfig: { responseModalities: ['IMAGE', 'TEXT'] } }) }
+      );
+      if (!resp.ok) { const e = await resp.json().catch(() => ({})); throw new Error(e?.error?.message || `HTTP ${resp.status}`); }
+      return resp.json();
+    };
+
+    const logoPartsArr  = slotPart('logo');
+    const subjectPartsArr = slotPart('subject');
+    const [logoData, subjectData] = await Promise.allSettled([
+      logoPartsArr.length    ? makeImageCall(buildIsolatePrompt('logo',    detectedHex), logoPartsArr)    : Promise.resolve(null),
+      subjectPartsArr.length ? makeImageCall(buildIsolatePrompt('subject', detectedHex), subjectPartsArr) : Promise.resolve(null),
+    ]);
+
+    // ── Shared paint helper ──
+    const ag6PaintSlot = async (data, key) => {
+      if (data.status === 'rejected') { errors.push(`${key}: ${data.reason?.message}`); return; }
+      if (!data.value) return; // slot was empty — skip silently
+      const imgPart = data.value?.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
+      if (!imgPart) { errors.push(`${key[0].toUpperCase() + key.slice(1)}: no image in response`); return; }
+      const img = new Image();
+      await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = `data:${imgPart.inlineData.mimeType};base64,${imgPart.inlineData.data}`; });
+      const keyed = ag6ChromaKey(img, detectedHex);
+      const keyedImg = new Image();
+      await new Promise((res, rej) => { keyedImg.onload = res; keyedImg.onerror = rej; keyedImg.src = keyed; });
+      const cropped = ag6CropToContent(keyedImg, 10);
+      ag6Extracted[key] = cropped;
+      const croppedImg = new Image();
+      await new Promise((res, rej) => { croppedImg.onload = res; croppedImg.onerror = rej; croppedImg.src = cropped; });
+      ag6PaintExtractedImage(`ag6-ext-${key}`, croppedImg);
+    };
+
+    await ag6PaintSlot(logoData, 'logo');
+    await ag6PaintSlot(subjectData, 'subject');
+
+    // ── Reveal ──
+    extractRow.style.opacity = '1'; extractRow.style.pointerEvents = '';
+    extractHdr.style.opacity = '1';
+    extractStatus.textContent = errors.length ? `⚠ ${errors.length} issue(s)` : '✓ Done';
+    errors.forEach(e => { console.warn('[ag6]', e); showToast(e); });
+    btn.disabled = false;
+    btn.innerHTML = '<i class="ph ph-magic-wand"></i> Extract';
   };
 })();
 
