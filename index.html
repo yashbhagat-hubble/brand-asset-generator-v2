@@ -1077,6 +1077,8 @@
     #view-aigen5.active { display: flex; }
     #view-aigen6 { display: none; flex: 1; overflow: hidden; }
     #view-aigen6.active { display: flex; }
+    #view-aigen7 { display: none; flex: 1; overflow: hidden; }
+    #view-aigen7.active { display: flex; }
     .ag4-layout { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
     .ag4-inputs { display: flex; gap: 12px; padding: 20px 20px 0; flex-shrink: 0; }
     .ag4-input-block { display: flex; flex-direction: column; gap: 6px; flex: 1; }
@@ -1136,6 +1138,7 @@
   <button class="tab-btn" data-tab="aigen5" onclick="showTab('aigen5')">Method 3</button>
   <button class="tab-btn" data-tab="aigen4" onclick="showTab('aigen4')">Method 4</button>
   <button class="tab-btn" data-tab="aigen6" onclick="showTab('aigen6')">Method 5</button>
+  <button class="tab-btn" data-tab="aigen7" onclick="showTab('aigen7')">Method 6</button>
   <button class="tab-btn" id="trashBtn" data-tab="trash" onclick="showTab('trash')" style="margin-left:auto">Deleted assets</button>
 </nav>
 
@@ -1470,6 +1473,73 @@
           <button class="download-btn" onclick="ag6CopyExtractedHex()"><i class="ph ph-copy"></i> Copy Hex</button>
         </div>
       </div>
+    </div>
+  </main>
+</div>
+
+<!-- ═══════════ AI GEN 7 VIEW (Method 6 — Replicate bg removal) ═══════════ -->
+<div id="view-aigen7">
+  <aside class="controls">
+    <div class="app-header">
+      <div class="app-title">Method 6</div>
+      <div class="app-subtitle">Remove background using Bria AI — no colour reference needed.</div>
+      <span style="display:inline-block;font-size:10px;color:#7b7b7b;background:#262626;border:1px solid #333;border-radius:4px;padding:2px 7px;letter-spacing:0.04em;margin-top:8px;">bria/remove-background · Replicate</span>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div>
+        <div class="section-label">Logo image</div>
+        <div class="aigen-drop-zone" id="ag7-logoZone" onclick="if(!event.target.closest('.aigen-thumb-item'))document.getElementById('ag7-logoInput').click()">
+          <input type="file" id="ag7-logoInput" accept="image/*" style="display:none">
+          <div class="aigen-drop-placeholder" id="ag7-logoPlaceholder">
+            <i class="ph ph-upload-simple" style="font-size:20px;opacity:0.35;"></i>
+            <span class="aigen-upload-label">Drop, paste, or click</span>
+          </div>
+          <div class="aigen-thumbs" id="ag7-logoThumbs"></div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">Subject image</div>
+        <div class="aigen-drop-zone" id="ag7-subjectZone" onclick="if(!event.target.closest('.aigen-thumb-item'))document.getElementById('ag7-subjectInput').click()">
+          <input type="file" id="ag7-subjectInput" accept="image/*" style="display:none">
+          <div class="aigen-drop-placeholder" id="ag7-subjectPlaceholder">
+            <i class="ph ph-upload-simple" style="font-size:20px;opacity:0.35;"></i>
+            <span class="aigen-upload-label">Drop, paste, or click</span>
+          </div>
+          <div class="aigen-thumbs" id="ag7-subjectThumbs"></div>
+        </div>
+      </div>
+    </div>
+
+    <button class="ag2-generate-btn" id="ag7-generateBtn" onclick="ag7Generate()" style="margin-top:auto;">
+      <i class="ph ph-magic-wand"></i> Extract
+    </button>
+  </aside>
+
+  <main class="preview-panel" id="ag7-previewPanel" style="overflow-y:auto;">
+    <div id="ag7-sections" style="display:flex;flex-direction:column;gap:20px;padding:20px;">
+
+      <div class="preview-header" id="ag7-extractHdr" style="opacity:0.35;padding:0;">
+        <span class="preview-header-title">Extracted Elements</span>
+        <span id="ag7-extractStatus" style="font-size:11px;color:#7b7b7b;margin-left:8px;">—</span>
+        <div style="margin-left:auto;">
+          <button class="export-all-btn" onclick="ag7DownloadAllExtracted()">Export PNGs</button>
+        </div>
+      </div>
+
+      <div class="assets-row" id="ag7-extractRow" style="opacity:0.2;pointer-events:none;">
+        <div class="asset-card">
+          <div class="asset-card-head"><span class="asset-card-name">Logo</span><span class="asset-card-dims">Isolated</span></div>
+          <div class="asset-canvas-wrap"><canvas id="ag7-ext-logo" width="240" height="240" style="width:120px;height:120px;display:block;"></canvas></div>
+          <button class="download-btn" onclick="ag7DownloadExtracted('logo')"><i class="ph ph-download-simple"></i> PNG</button>
+        </div>
+        <div class="asset-card">
+          <div class="asset-card-head"><span class="asset-card-name">Subject</span><span class="asset-card-dims">Isolated</span></div>
+          <div class="asset-canvas-wrap"><canvas id="ag7-ext-subject" width="240" height="240" style="width:120px;height:120px;display:block;"></canvas></div>
+          <button class="download-btn" onclick="ag7DownloadExtracted('subject')"><i class="ph ph-download-simple"></i> PNG</button>
+        </div>
+      </div>
+
     </div>
   </main>
 </div>
@@ -2493,6 +2563,7 @@ function showTab(tab, fromEdit = false) {
   document.getElementById('view-aigen4').classList.toggle('active', tab === 'aigen4');
   document.getElementById('view-aigen5').classList.toggle('active', tab === 'aigen5');
   document.getElementById('view-aigen6').classList.toggle('active', tab === 'aigen6');
+  document.getElementById('view-aigen7').classList.toggle('active', tab === 'aigen7');
   if (tab === 'brands') renderBrandsGrid();
   if (tab === 'trash') renderTrashGrid();
   if (tab === 'add' && !fromEdit) { editingBrandId = null; setSaveBrandMode(false); }
@@ -3898,6 +3969,230 @@ function getGeminiApiKey() {
     btn.disabled = false;
     btn.innerHTML = '<i class="ph ph-magic-wand"></i> Extract';
   };
+})();
+
+// ── Replicate API key ────────────────────────────────────────────────────
+let _replicateApiKeyPromise = null;
+function getReplicateApiKey() {
+  if (!_replicateApiKeyPromise) {
+    _replicateApiKeyPromise = fetch('/api/replicate-key')
+      .then(r => {
+        if (r.ok) return r.json().then(d => {
+          if (!d.key) throw new Error('No key in response');
+          return d.key;
+        });
+        // Fallback: read from .env.aistudio
+        return fetch('/.env.aistudio')
+          .then(r2 => {
+            if (!r2.ok) throw new Error('Replicate API key not found');
+            return r2.text();
+          })
+          .then(text => {
+            const match = text.match(/^REPLICATE_API_KEY=(.+)$/m);
+            if (!match) throw new Error('REPLICATE_API_KEY not found in .env.aistudio');
+            return match[1].trim();
+          });
+      })
+      .catch(() => {
+        _replicateApiKeyPromise = null; // allow retry
+        return Promise.reject(new Error('Could not load Replicate API key'));
+      });
+  }
+  return _replicateApiKeyPromise;
+}
+
+// ── Method 6 — Bria background removal via Replicate ─────────────────────
+(function initAg7() {
+
+  const ag7Slots = {
+    logo:    { file: null, dataUrl: null },
+    subject: { file: null, dataUrl: null },
+  };
+  const ag7Extracted = { logo: null, subject: null };
+
+  // ── Upload slots ──
+  function ag7SetSlot(key, file) {
+    if (!file || !file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = e => { ag7Slots[key] = { file, dataUrl: e.target.result }; ag7RenderSlotThumb(key); };
+    reader.readAsDataURL(file);
+  }
+  function ag7RenderSlotThumb(key) {
+    const slot = ag7Slots[key];
+    const thumbs = document.getElementById(`ag7-${key}Thumbs`);
+    const placeholder = document.getElementById(`ag7-${key}Placeholder`);
+    thumbs.innerHTML = '';
+    if (!slot.dataUrl) { placeholder.style.display = ''; return; }
+    placeholder.style.display = 'none';
+    const item = document.createElement('div');
+    item.className = 'aigen-thumb-item';
+    item.innerHTML = `<img src="${slot.dataUrl}"><button class="aigen-thumb-remove"><i class="ph ph-x"></i></button>`;
+    item.querySelector('.aigen-thumb-remove').addEventListener('click', e => {
+      e.stopPropagation(); ag7Slots[key] = { file: null, dataUrl: null }; ag7RenderSlotThumb(key);
+    });
+    thumbs.appendChild(item);
+  }
+  ['logo','subject'].forEach(key => {
+    const zone  = document.getElementById(`ag7-${key}Zone`);
+    const input = document.getElementById(`ag7-${key}Input`);
+    input.addEventListener('change', () => { ag7SetSlot(key, input.files[0]); input.value = ''; });
+    zone.addEventListener('dragover',  e => { e.preventDefault(); zone.classList.add('drag-over'); });
+    zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+    zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('drag-over'); ag7SetSlot(key, e.dataTransfer.files[0]); });
+  });
+
+  // ── Canvas helpers ──
+  function ag7DrawCheckerboard(ctx, w, h) {
+    const light = '#3a3a3a', dark = '#2a2a2a', s = 8;
+    for (let row = 0; row * s < h; row++)
+      for (let col = 0; col * s < w; col++) {
+        ctx.fillStyle = (row + col) % 2 === 0 ? light : dark;
+        ctx.fillRect(col * s, row * s, s, s);
+      }
+  }
+  function ag7InitCanvases() {
+    ['logo','subject'].forEach(key => {
+      const c = document.getElementById(`ag7-ext-${key}`); if (!c) return;
+      ag7DrawCheckerboard(c.getContext('2d'), c.width, c.height);
+    });
+  }
+  ag7InitCanvases();
+
+  function ag7PaintExtractedImage(canvasId, img) {
+    const c = document.getElementById(canvasId); if (!c) return;
+    const ctx = c.getContext('2d');
+    ctx.clearRect(0, 0, c.width, c.height);
+    ag7DrawCheckerboard(ctx, c.width, c.height);
+    const scale = Math.min(c.width / img.naturalWidth, c.height / img.naturalHeight);
+    const dw = img.naturalWidth * scale, dh = img.naturalHeight * scale;
+    ctx.drawImage(img, (c.width - dw) / 2, (c.height - dh) / 2, dw, dh);
+  }
+
+  // ── Crop to content (same as other methods) ──
+  function ag7CropToContent(img, margin = 10) {
+    const oc = document.createElement('canvas');
+    oc.width = img.naturalWidth; oc.height = img.naturalHeight;
+    const ctx = oc.getContext('2d');
+    ctx.drawImage(img, 0, 0);
+    const { data, width, height } = ctx.getImageData(0, 0, oc.width, oc.height);
+    let minX = width, maxX = 0, minY = height, maxY = 0;
+    for (let y = 0; y < height; y++)
+      for (let x = 0; x < width; x++)
+        if (data[(y * width + x) * 4 + 3] > 20) {
+          if (x < minX) minX = x; if (x > maxX) maxX = x;
+          if (y < minY) minY = y; if (y > maxY) maxY = y;
+        }
+    if (minX > maxX || minY > maxY) return img.src;
+    const cropX = Math.max(0, minX - margin), cropY = Math.max(0, minY - margin);
+    const cropW = Math.min(width, maxX + margin + 1) - cropX;
+    const cropH = Math.min(height, maxY + margin + 1) - cropY;
+    const out = document.createElement('canvas');
+    out.width = cropW; out.height = cropH;
+    out.getContext('2d').drawImage(oc, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
+    return out.toDataURL('image/png');
+  }
+
+  // ── Replicate: create prediction + poll until done ──
+  async function replicateRemoveBg(dataUrl, apiKey) {
+    const createResp = await fetch('https://api.replicate.com/v1/models/bria/remove-background/predictions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'wait=30', // synchronous wait up to 30s
+      },
+      body: JSON.stringify({ input: { image: dataUrl } })
+    });
+    if (!createResp.ok) {
+      const e = await createResp.json().catch(() => ({}));
+      throw new Error(e?.detail || `HTTP ${createResp.status}`);
+    }
+    let prediction = await createResp.json();
+
+    // Poll if not yet complete
+    while (prediction.status !== 'succeeded' && prediction.status !== 'failed' && prediction.status !== 'canceled') {
+      await new Promise(r => setTimeout(r, 1200));
+      const pollResp = await fetch(`https://api.replicate.com/v1/predictions/${prediction.id}`, {
+        headers: { 'Authorization': `Bearer ${apiKey}` }
+      });
+      if (!pollResp.ok) throw new Error(`Poll failed: HTTP ${pollResp.status}`);
+      prediction = await pollResp.json();
+    }
+    if (prediction.status !== 'succeeded') throw new Error(`Prediction ${prediction.status}${prediction.error ? ': ' + prediction.error : ''}`);
+
+    // Fetch the output image as a data URL (avoids canvas taint from cross-origin URL)
+    const outputUrl = Array.isArray(prediction.output) ? prediction.output[0] : prediction.output;
+    const imgResp = await fetch(outputUrl);
+    if (!imgResp.ok) throw new Error('Failed to fetch output image');
+    const blob = await imgResp.blob();
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  // ── Download helpers ──
+  window.ag7DownloadExtracted = async function(key) {
+    const rawUrl = ag7Extracted[key];
+    if (!rawUrl) { showToast('No extracted image yet.'); return; }
+    const a = document.createElement('a'); a.href = rawUrl; a.download = `extract-${key}.png`; a.click();
+  };
+  window.ag7DownloadAllExtracted = async function() {
+    for (const key of ['logo','subject']) { await window.ag7DownloadExtracted(key); await new Promise(r => setTimeout(r, 150)); }
+  };
+
+  // ── Generate ──
+  window.ag7Generate = async function() {
+    if (!ag7Slots.logo.dataUrl && !ag7Slots.subject.dataUrl) {
+      showToast('Upload a logo and/or subject image to extract.'); return;
+    }
+
+    let apiKey;
+    try { apiKey = await getReplicateApiKey(); }
+    catch(e) { showToast(e.message); return; }
+
+    const btn = document.getElementById('ag7-generateBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="ph ph-circle-notch" style="animation:spin 0.8s linear infinite;"></i> Extracting…';
+
+    const extractRow  = document.getElementById('ag7-extractRow');
+    const extractHdr  = document.getElementById('ag7-extractHdr');
+    const extractStatus = document.getElementById('ag7-extractStatus');
+    extractRow.style.opacity = '0.2'; extractRow.style.pointerEvents = 'none';
+    extractHdr.style.opacity = '0.35'; extractStatus.textContent = 'Removing backgrounds…';
+    ag7InitCanvases();
+
+    const errors = [];
+
+    const processSlot = async (key) => {
+      if (!ag7Slots[key].dataUrl) return;
+      const dataUrl = await replicateRemoveBg(ag7Slots[key].dataUrl, apiKey);
+      const img = new Image();
+      await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = dataUrl; });
+      const cropped = ag7CropToContent(img, 10);
+      ag7Extracted[key] = cropped;
+      const croppedImg = new Image();
+      await new Promise((res, rej) => { croppedImg.onload = res; croppedImg.onerror = rej; croppedImg.src = cropped; });
+      ag7PaintExtractedImage(`ag7-ext-${key}`, croppedImg);
+    };
+
+    const [logoRes, subjRes] = await Promise.allSettled([
+      processSlot('logo'),
+      processSlot('subject'),
+    ]);
+    if (logoRes.status  === 'rejected') errors.push(`Logo: ${logoRes.reason?.message}`);
+    if (subjRes.status  === 'rejected') errors.push(`Subject: ${subjRes.reason?.message}`);
+
+    extractRow.style.opacity = '1'; extractRow.style.pointerEvents = '';
+    extractHdr.style.opacity = '1';
+    extractStatus.textContent = errors.length ? `⚠ ${errors.length} issue(s)` : '✓ Done';
+    errors.forEach(e => { console.warn('[ag7]', e); showToast(e); });
+    btn.disabled = false;
+    btn.innerHTML = '<i class="ph ph-magic-wand"></i> Extract';
+  };
+
 })();
 
 // ── Supabase ────────────────────────────────────────────────────────────
