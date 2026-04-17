@@ -1547,19 +1547,18 @@
   </main>
 </div>
 
-<!-- ═══════════ AI GEN 8 VIEW (Method 7 — Replicate bg removal + colour ref + brand assets) ═══════════ -->
+<!-- ═══════════ AI GEN 8 VIEW (Method 7 — AI SVG brand asset generator) ═══════════ -->
 <div id="view-aigen8">
   <aside class="controls" style="overflow-y:auto;">
     <div class="app-header">
       <div class="app-title">Method 7</div>
-      <div class="app-subtitle">Remove background using Bria AI, apply colour reference chroma key, then generate brand assets.</div>
-      <span style="display:inline-block;font-size:10px;color:#7b7b7b;background:#262626;border:1px solid #333;border-radius:4px;padding:2px 7px;letter-spacing:0.04em;margin-top:8px;">bria/remove-background · Replicate</span>
+      <div class="app-subtitle">Generate brand assets as responsive SVGs using AI with your custom rules.</div>
+      <span style="display:inline-block;font-size:10px;color:#7b7b7b;background:#262626;border:1px solid #333;border-radius:4px;padding:2px 7px;letter-spacing:0.04em;margin-top:8px;">gemini-2.0-flash · Gemini API</span>
     </div>
 
     <div style="display:flex;flex-direction:column;gap:10px;">
-      <!-- Colour reference -->
       <div>
-        <div class="section-label">Colour reference</div>
+        <div class="section-label">Brand colour</div>
         <div id="ag8-colorRef" style="display:flex;flex-direction:column;gap:7px;">
           <input type="text" class="hex-input" id="ag8-hexInput" placeholder="#RRGGBB" maxlength="7">
           <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
@@ -1576,7 +1575,7 @@
             <div class="ag6-swatch" data-hex="#007AFF" style="background:#007AFF;" title="Blue"></div>
             <div class="ag6-swatch" data-hex="#9B59B6" style="background:#9B59B6;" title="Purple"></div>
             <div class="ag6-swatch ag6-picker-swatch" id="ag8-colorSwatch" title="Custom colour" onclick="document.getElementById('ag8-colorPicker').click()">
-              <input type="color" id="ag8-colorPicker" style="position:absolute;opacity:0;width:0;height:0;pointer-events:none;">
+              <input type="color" id="ag8-colorPicker" value="#83C9C4" style="position:absolute;opacity:0;width:0;height:0;pointer-events:none;">
               <i class="ph ph-palette" style="font-size:14px;color:rgba(255,255,255,0.55);pointer-events:none;"></i>
             </div>
           </div>
@@ -1591,7 +1590,6 @@
         </div>
       </div>
 
-      <!-- Logo upload -->
       <div>
         <div class="section-label">Logo image</div>
         <div class="aigen-drop-zone" id="ag8-logoZone" onclick="if(!event.target.closest('.aigen-thumb-item'))document.getElementById('ag8-logoInput').click()">
@@ -1604,7 +1602,6 @@
         </div>
       </div>
 
-      <!-- Subject upload -->
       <div>
         <div class="section-label">Subject image</div>
         <div class="aigen-drop-zone" id="ag8-subjectZone" onclick="if(!event.target.closest('.aigen-thumb-item'))document.getElementById('ag8-subjectInput').click()">
@@ -1616,123 +1613,82 @@
           <div class="aigen-thumbs" id="ag8-subjectThumbs"></div>
         </div>
       </div>
-    </div>
 
-    <button class="ag2-generate-btn" id="ag8-generateBtn" onclick="ag8Generate()">
-      <i class="ph ph-magic-wand"></i> Extract
-    </button>
-
-    <!-- Controls revealed after extraction -->
-    <div id="ag8-controls" style="display:none;flex-direction:column;gap:14px;margin-top:4px;">
-      <!-- Brand colour -->
       <div>
-        <div class="section-label" style="margin-bottom:6px;">Brand colour</div>
-        <div style="display:flex;gap:8px;align-items:center;">
-          <input type="color" id="ag8-brandColorPicker" style="width:32px;height:32px;border:none;background:none;cursor:pointer;padding:0;border-radius:6px;">
-          <input type="text" class="hex-input" id="ag8-brandHexInput" placeholder="#83C9C4" maxlength="7" style="flex:1;">
-        </div>
-      </div>
-      <!-- Icon scale -->
-      <div class="slider-block">
-        <div class="slider-label-row">
-          <span class="slider-label">Logo scale</span>
-          <span class="slider-val" id="ag8-iconScaleVal">1x</span>
-        </div>
-        <input type="range" id="ag8-iconScale" min="20" max="500" value="100">
-      </div>
-      <!-- Icon offset -->
-      <div class="slider-block">
-        <div class="slider-label-row">
-          <span class="slider-label">Logo offset</span>
-          <span class="slider-val" id="ag8-iconOffsetVal">0px</span>
-        </div>
-        <input type="range" id="ag8-iconOffset" min="-50" max="50" value="0">
-      </div>
-      <!-- Img scale -->
-      <div class="slider-block">
-        <div class="slider-label-row">
-          <span class="slider-label">Subject scale</span>
-          <span class="slider-val" id="ag8-imgScaleVal">1x</span>
-        </div>
-        <input type="range" id="ag8-imgScale" min="20" max="500" value="100">
-      </div>
-      <!-- Img offset -->
-      <div class="slider-block">
-        <div class="slider-label-row">
-          <span class="slider-label">Subject offset</span>
-          <span class="slider-val" id="ag8-imgOffsetVal">0px</span>
-        </div>
-        <input type="range" id="ag8-imgOffset" min="-50" max="50" value="0">
+        <div class="section-label">Generation rules</div>
+        <textarea id="ag8-rulesInput" placeholder="e.g. Rounded corners everywhere, subtle drop shadow on logo, bold product presence, vibrant gradient..." style="width:100%;box-sizing:border-box;background:#111;border:1.5px solid #2a2a2a;border-radius:8px;color:#e8e8e8;font-size:12px;padding:10px;resize:vertical;min-height:80px;font-family:inherit;line-height:1.5;outline:none;"></textarea>
       </div>
     </div>
 
+    <button class="ag2-generate-btn" id="ag8-generateBtn" onclick="ag8Generate()" style="margin-top:auto;">
+      <i class="ph ph-magic-wand"></i> Generate SVGs
+    </button>
   </aside>
 
-  <main class="preview-panel" id="ag8-previewPanel" style="overflow-y:auto;">
-    <div id="ag8-sections" style="display:flex;flex-direction:column;gap:20px;padding:20px;">
+  <main class="preview-panel" style="overflow-y:auto;">
+    <div style="display:flex;flex-direction:column;gap:20px;padding:20px;">
 
-      <!-- Extracted elements -->
-      <div class="preview-header" id="ag8-extractHdr" style="opacity:0.35;padding:0;">
-        <span class="preview-header-title">Extracted Elements</span>
-        <span id="ag8-extractStatus" style="font-size:11px;color:#7b7b7b;margin-left:8px;">—</span>
+      <div class="preview-header" id="ag8-statusHdr" style="opacity:0.35;padding:0;">
+        <span class="preview-header-title">Brand Assets</span>
+        <span id="ag8-statusText" style="font-size:11px;color:#7b7b7b;margin-left:8px;">—</span>
         <div style="margin-left:auto;">
-          <button class="export-all-btn" onclick="ag8DownloadAllExtracted()">Export PNGs</button>
+          <button class="export-all-btn" onclick="ag8DownloadAllSVGs()">Export SVGs</button>
         </div>
       </div>
 
-      <div class="assets-row" id="ag8-extractRow" style="opacity:0.2;pointer-events:none;">
+      <div class="assets-row" id="ag8-assetsRow" style="opacity:0.2;pointer-events:none;flex-wrap:wrap;">
+
         <div class="asset-card">
-          <div class="asset-card-head"><span class="asset-card-name">Logo</span><span class="asset-card-dims">Isolated</span></div>
-          <div class="asset-canvas-wrap"><canvas id="ag8-ext-logo" width="240" height="240" style="width:120px;height:120px;display:block;"></canvas></div>
-          <button class="download-btn" onclick="ag8DownloadExtracted('logo')"><i class="ph ph-download-simple"></i> PNG</button>
+          <div class="asset-card-head"><span class="asset-card-name">Logo square</span><span class="asset-card-dims">116 × 116</span></div>
+          <div class="asset-canvas-wrap" id="ag8-preview-logo_square" style="width:116px;height:116px;overflow:hidden;border-radius:6px;background:#1a1a1a;display:flex;align-items:center;justify-content:center;">
+            <i class="ph ph-image" style="font-size:28px;opacity:0.15;"></i>
+          </div>
+          <div style="display:flex;gap:5px;">
+            <button class="download-btn" style="flex:1;" onclick="ag8DownloadSVG('logo_square')"><i class="ph ph-download-simple"></i> SVG</button>
+            <button class="download-btn" style="flex:1;" onclick="ag8DownloadPNG('logo_square',116,116)"><i class="ph ph-download-simple"></i> PNG</button>
+          </div>
         </div>
+
         <div class="asset-card">
-          <div class="asset-card-head"><span class="asset-card-name">Subject</span><span class="asset-card-dims">Isolated</span></div>
-          <div class="asset-canvas-wrap"><canvas id="ag8-ext-subject" width="240" height="240" style="width:120px;height:120px;display:block;"></canvas></div>
-          <button class="download-btn" onclick="ag8DownloadExtracted('subject')"><i class="ph ph-download-simple"></i> PNG</button>
-        </div>
-      </div>
-
-      <!-- Brand assets (hidden until extraction done) -->
-      <div id="ag8-assetsSection" style="display:none;flex-direction:column;gap:20px;">
-
-        <div class="preview-header" style="padding:0;">
-          <span class="preview-header-title">Brand Assets</span>
-          <div style="margin-left:auto;">
-            <button class="export-all-btn" onclick="ag8DownloadAllAssets()">Export All</button>
+          <div class="asset-card-head"><span class="asset-card-name">Logo card</span><span class="asset-card-dims">88 × 40</span></div>
+          <div class="asset-canvas-wrap" id="ag8-preview-logo_card" style="width:88px;height:40px;overflow:hidden;border-radius:6px;background:#1a1a1a;display:flex;align-items:center;justify-content:center;">
+            <i class="ph ph-image" style="font-size:18px;opacity:0.15;"></i>
+          </div>
+          <div style="display:flex;gap:5px;">
+            <button class="download-btn" style="flex:1;" onclick="ag8DownloadSVG('logo_card')"><i class="ph ph-download-simple"></i> SVG</button>
+            <button class="download-btn" style="flex:1;" onclick="ag8DownloadPNG('logo_card',88,40)"><i class="ph ph-download-simple"></i> PNG</button>
           </div>
         </div>
 
-        <div class="assets-row">
-          <div class="asset-card">
-            <div class="asset-card-head"><span class="asset-card-name">Logo square</span><span class="asset-card-dims">116 × 116</span></div>
-            <div class="asset-canvas-wrap"><canvas id="ag8-c-solid" width="116" height="116" style="width:116px;height:116px;display:block;"></canvas></div>
-            <button class="download-btn" onclick="ag8DownloadAsset('ag8-c-solid','logo-square')"><i class="ph ph-download-simple"></i> PNG</button>
+        <div class="asset-card">
+          <div class="asset-card-head"><span class="asset-card-name">Listing 1</span><span class="asset-card-dims">104 × 116</span></div>
+          <div class="asset-canvas-wrap" id="ag8-preview-listing1" style="width:104px;height:116px;overflow:hidden;border-radius:6px;background:#1a1a1a;display:flex;align-items:center;justify-content:center;">
+            <i class="ph ph-image" style="font-size:28px;opacity:0.15;"></i>
           </div>
-          <div class="asset-card">
-            <div class="asset-card-head"><span class="asset-card-name">Logo card</span><span class="asset-card-dims">88 × 40</span></div>
-            <div class="asset-canvas-wrap"><canvas id="ag8-c-logo" width="88" height="40" style="width:88px;height:40px;display:block;"></canvas></div>
-            <button class="download-btn" onclick="ag8DownloadAsset('ag8-c-logo','logo-card')"><i class="ph ph-download-simple"></i> PNG</button>
+          <div style="display:flex;gap:5px;">
+            <button class="download-btn" style="flex:1;" onclick="ag8DownloadSVG('listing1')"><i class="ph ph-download-simple"></i> SVG</button>
+            <button class="download-btn" style="flex:1;" onclick="ag8DownloadPNG('listing1',104,116)"><i class="ph ph-download-simple"></i> PNG</button>
           </div>
-          <div class="asset-card">
-            <div class="asset-card-head"><span class="asset-card-name">Listing 1</span><span class="asset-card-dims">104 × 116</span></div>
-            <div class="asset-canvas-wrap"><canvas id="ag8-c-icon" width="104" height="116" style="width:104px;height:116px;display:block;"></canvas></div>
-            <button class="download-btn" onclick="ag8DownloadAsset('ag8-c-icon','listing1')"><i class="ph ph-download-simple"></i> PNG</button>
+        </div>
+
+        <div class="asset-card">
+          <div class="asset-card-head"><span class="asset-card-name">Listing 2</span><span class="asset-card-dims">116 × 116</span></div>
+          <div class="asset-canvas-wrap" id="ag8-preview-listing2" style="width:116px;height:116px;overflow:hidden;border-radius:6px;background:#1a1a1a;display:flex;align-items:center;justify-content:center;">
+            <i class="ph ph-image" style="font-size:28px;opacity:0.15;"></i>
           </div>
-          <div class="asset-card">
-            <div class="asset-card-head"><span class="asset-card-name">Listing 2</span><span class="asset-card-dims">116 × 116</span></div>
-            <div class="asset-canvas-wrap"><canvas id="ag8-c-sq-icon" width="116" height="116" style="width:116px;height:116px;display:block;"></canvas></div>
-            <button class="download-btn" onclick="ag8DownloadAsset('ag8-c-sq-icon','listing2')"><i class="ph ph-download-simple"></i> PNG</button>
+          <div style="display:flex;gap:5px;">
+            <button class="download-btn" style="flex:1;" onclick="ag8DownloadSVG('listing2')"><i class="ph ph-download-simple"></i> SVG</button>
+            <button class="download-btn" style="flex:1;" onclick="ag8DownloadPNG('listing2',116,116)"><i class="ph ph-download-simple"></i> PNG</button>
           </div>
         </div>
 
       </div>
-
     </div>
   </main>
 </div>
 
 <!-- ═══════════ ADD BRAND VIEW ═══════════ -->
+
 <div id="view-add">
 
 <!-- ═══════════ CONTROLS ═══════════ -->
@@ -4359,119 +4315,82 @@ function getReplicateApiKey() {
 
 })();
 
-// ── Method 7 — Bria bg removal + colour ref chroma key + brand assets ──────
+// ── Method 7 — AI SVG brand asset generator ──────────────────────────────
 (function initAg8() {
 
   // ── State ──
-  const S8 = {
-    logoImg:    null,
-    productImg: null,
-    color:      '#83C9C4',
-    iconScale:  100,
-    iconOffset: 0,
-    imgScale:   100,
-    imgOffset:  0,
-  };
-  let ag8SelectedHex = null;
+  let ag8BrandHex = '#83C9C4';
+  const ag8Slots = { logo: { dataUrl: null }, subject: { dataUrl: null } };
+  const ag8SVGs  = {};   // keyed: logo_square | logo_card | listing1 | listing2
 
-  const ag8Slots = {
-    logo:    { file: null, dataUrl: null },
-    subject: { file: null, dataUrl: null },
-  };
-  const ag8Extracted = { logo: null, subject: null };
-
-  // ── Colour reference helpers ──
+  // ── Compact colour picker ──
   function ag8DominantColor(dataUrl) {
     return new Promise(resolve => {
       const img = new Image();
       img.onload = () => {
-        const oc = document.createElement('canvas');
-        oc.width = 64; oc.height = 64;
-        const ctx = oc.getContext('2d');
-        ctx.drawImage(img, 0, 0, 64, 64);
+        const oc = document.createElement('canvas'); oc.width = 64; oc.height = 64;
+        const ctx = oc.getContext('2d'); ctx.drawImage(img, 0, 0, 64, 64);
         const { data } = ctx.getImageData(0, 0, 64, 64);
         const buckets = {};
         for (let i = 0; i < data.length; i += 4) {
-          if (data[i + 3] < 128) continue;
-          const r = data[i]   >> 4;
-          const g = data[i+1] >> 4;
-          const b = data[i+2] >> 4;
-          const key = (r << 8) | (g << 4) | b;
+          if (data[i+3] < 128) continue;
+          const key = ((data[i]>>4)<<8)|((data[i+1]>>4)<<4)|(data[i+2]>>4);
           buckets[key] = (buckets[key] || 0) + 1;
         }
-        let best = null, bestCount = 0;
-        for (const [k, v] of Object.entries(buckets)) {
-          if (v > bestCount) { bestCount = v; best = +k; }
-        }
+        let best = null, bestN = 0;
+        for (const [k,v] of Object.entries(buckets)) { if (v > bestN) { bestN=v; best=+k; } }
         if (best === null) { resolve(null); return; }
-        const r = ((best >> 8) & 0xF) * 17;
-        const g = ((best >> 4) & 0xF) * 17;
-        const b = (best & 0xF) * 17;
-        resolve('#' + [r,g,b].map(c => c.toString(16).padStart(2,'0')).join(''));
+        const r=((best>>8)&0xF)*17, g=((best>>4)&0xF)*17, b=(best&0xF)*17;
+        resolve('#'+[r,g,b].map(c=>c.toString(16).padStart(2,'0')).join(''));
       };
       img.onerror = () => resolve(null);
       img.src = dataUrl;
     });
   }
 
-  function ag8SetColorRef(hex) {
+  function ag8SetColor(hex) {
     if (!hex) return;
-    ag8SelectedHex = hex;
-    const hexInp = document.getElementById('ag8-hexInput');
-    if (hexInp) hexInp.value = hex;
+    ag8BrandHex = hex;
+    const inp = document.getElementById('ag8-hexInput');
+    if (inp) inp.value = hex;
     const picker = document.getElementById('ag8-colorPicker');
     if (picker) picker.value = hex;
     document.querySelectorAll('#ag8-colorRef .ag6-swatch').forEach(s => {
-      s.classList.toggle('selected', s.dataset.hex && s.dataset.hex.toUpperCase() === hex.toUpperCase());
+      s.classList.toggle('selected', !!(s.dataset.hex && s.dataset.hex.toUpperCase() === hex.toUpperCase()));
     });
   }
 
-  // Colour ref swatch events (scoped to #ag8-colorRef)
   document.querySelectorAll('#ag8-colorRef .ag6-swatch').forEach(s => {
     if (!s.dataset.hex) return;
-    s.addEventListener('click', () => ag8SetColorRef(s.dataset.hex));
+    s.addEventListener('click', () => ag8SetColor(s.dataset.hex));
   });
-  document.getElementById('ag8-colorPicker').addEventListener('input', e => {
-    ag8SetColorRef(e.target.value);
-  });
+  document.getElementById('ag8-colorPicker').addEventListener('input', e => ag8SetColor(e.target.value));
   document.getElementById('ag8-hexInput').addEventListener('input', e => {
-    const val = e.target.value.trim();
-    if (/^#[0-9a-fA-F]{6}$/.test(val)) ag8SetColorRef(val);
+    if (/^#[0-9a-fA-F]{6}$/.test(e.target.value)) ag8SetColor(e.target.value);
   });
   document.getElementById('ag8-hexInput').addEventListener('blur', e => {
-    const val = e.target.value.trim();
-    if (!/^#[0-9a-fA-F]{6}$/.test(val)) {
-      if (ag8SelectedHex) e.target.value = ag8SelectedHex;
-      else e.target.value = '';
-    }
+    if (!/^#[0-9a-fA-F]{6}$/.test(e.target.value)) e.target.value = ag8BrandHex;
   });
 
-  // Colour detect from uploaded image
+  // Colour from image drop
   const ag8BgInput = document.getElementById('ag8-bgInput');
   ag8BgInput.addEventListener('change', async () => {
     if (!ag8BgInput.files[0]) return;
     const reader = new FileReader();
     reader.onload = async e => {
-      // Show thumb
       const thumbs = document.getElementById('ag8-bgThumbs');
-      const ph = document.getElementById('ag8-bgPlaceholder');
-      thumbs.innerHTML = '';
-      ph.style.display = 'none';
-      const item = document.createElement('div');
-      item.className = 'aigen-thumb-item';
-      item.innerHTML = `<img src="${e.target.result}"><button class="aigen-thumb-remove"><i class="ph ph-x"></i></button>`;
+      const ph     = document.getElementById('ag8-bgPlaceholder');
+      thumbs.innerHTML = ''; ph.style.display = 'none';
+      const item = document.createElement('div'); item.className = 'aigen-thumb-item';
+      item.innerHTML = '<img src="' + e.target.result + '"><button class="aigen-thumb-remove"><i class="ph ph-x"></i></button>';
       item.querySelector('.aigen-thumb-remove').addEventListener('click', ev => {
-        ev.stopPropagation();
-        thumbs.innerHTML = '';
-        ph.style.display = '';
-        ag8BgInput.value = '';
+        ev.stopPropagation(); thumbs.innerHTML = ''; ph.style.display = ''; ag8BgInput.value = '';
       });
       thumbs.appendChild(item);
       const hex = await ag8DominantColor(e.target.result);
-      if (hex) ag8SetColorRef(hex);
+      if (hex) ag8SetColor(hex);
     };
-    reader.readAsDataURL(ag8BgInput.files[0]);
-    ag8BgInput.value = '';
+    reader.readAsDataURL(ag8BgInput.files[0]); ag8BgInput.value = '';
   });
   const ag8BgZone = document.getElementById('ag8-bgZone');
   ag8BgZone.addEventListener('dragover', e => { e.preventDefault(); ag8BgZone.classList.add('drag-over'); });
@@ -4481,383 +4400,178 @@ function getReplicateApiKey() {
     const f = e.dataTransfer.files[0];
     if (f && f.type.startsWith('image/')) {
       const dt = new DataTransfer(); dt.items.add(f);
-      ag8BgInput.files = dt.files;
-      ag8BgInput.dispatchEvent(new Event('change'));
+      ag8BgInput.files = dt.files; ag8BgInput.dispatchEvent(new Event('change'));
     }
   });
+
+  ag8SetColor(ag8BrandHex);
 
   // ── Upload slots ──
   function ag8SetSlot(key, file) {
     if (!file || !file.type.startsWith('image/')) return;
     const reader = new FileReader();
-    reader.onload = e => { ag8Slots[key] = { file, dataUrl: e.target.result }; ag8RenderSlotThumb(key); };
+    reader.onload = e => { ag8Slots[key] = { dataUrl: e.target.result }; ag8RenderThumb(key); };
     reader.readAsDataURL(file);
   }
-  function ag8RenderSlotThumb(key) {
-    const slot = ag8Slots[key];
-    const thumbs = document.getElementById(`ag8-${key}Thumbs`);
-    const placeholder = document.getElementById(`ag8-${key}Placeholder`);
+  function ag8RenderThumb(key) {
+    const slot   = ag8Slots[key];
+    const thumbs = document.getElementById('ag8-' + key + 'Thumbs');
+    const ph     = document.getElementById('ag8-' + key + 'Placeholder');
     thumbs.innerHTML = '';
-    if (!slot.dataUrl) { placeholder.style.display = ''; return; }
-    placeholder.style.display = 'none';
-    const item = document.createElement('div');
-    item.className = 'aigen-thumb-item';
-    item.innerHTML = `<img src="${slot.dataUrl}"><button class="aigen-thumb-remove"><i class="ph ph-x"></i></button>`;
+    if (!slot.dataUrl) { ph.style.display = ''; return; }
+    ph.style.display = 'none';
+    const item = document.createElement('div'); item.className = 'aigen-thumb-item';
+    item.innerHTML = '<img src="' + slot.dataUrl + '"><button class="aigen-thumb-remove"><i class="ph ph-x"></i></button>';
     item.querySelector('.aigen-thumb-remove').addEventListener('click', ev => {
-      ev.stopPropagation(); ag8Slots[key] = { file: null, dataUrl: null }; ag8RenderSlotThumb(key);
+      ev.stopPropagation(); ag8Slots[key] = { dataUrl: null }; ag8RenderThumb(key);
     });
     thumbs.appendChild(item);
   }
   ['logo','subject'].forEach(key => {
-    const zone  = document.getElementById(`ag8-${key}Zone`);
-    const input = document.getElementById(`ag8-${key}Input`);
+    const zone  = document.getElementById('ag8-' + key + 'Zone');
+    const input = document.getElementById('ag8-' + key + 'Input');
     input.addEventListener('change', () => { ag8SetSlot(key, input.files[0]); input.value = ''; });
     zone.addEventListener('dragover',  e => { e.preventDefault(); zone.classList.add('drag-over'); });
     zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
     zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('drag-over'); ag8SetSlot(key, e.dataTransfer.files[0]); });
   });
 
-  // ── Canvas helpers ──
-  function ag8DrawCheckerboard(ctx, w, h) {
-    const light = '#3a3a3a', dark = '#2a2a2a', s = 8;
-    for (let row = 0; row * s < h; row++)
-      for (let col = 0; col * s < w; col++) {
-        ctx.fillStyle = (row + col) % 2 === 0 ? light : dark;
-        ctx.fillRect(col * s, row * s, s, s);
-      }
-  }
-  function ag8InitExtCanvases() {
-    ['logo','subject'].forEach(key => {
-      const c = document.getElementById(`ag8-ext-${key}`); if (!c) return;
-      ag8DrawCheckerboard(c.getContext('2d'), c.width, c.height);
-    });
-  }
-  function ag8PaintExtracted(canvasId, img) {
-    const c = document.getElementById(canvasId); if (!c) return;
-    const ctx = c.getContext('2d');
-    ctx.clearRect(0, 0, c.width, c.height);
-    ag8DrawCheckerboard(ctx, c.width, c.height);
-    const scale = Math.min(c.width / img.naturalWidth, c.height / img.naturalHeight);
-    const dw = img.naturalWidth * scale, dh = img.naturalHeight * scale;
-    ctx.drawImage(img, (c.width - dw) / 2, (c.height - dh) / 2, dw, dh);
-  }
-  ag8InitExtCanvases();
+  // ── Gemini call ──
+  async function ag8CallGemini(brandHex, rules, logoDU, subjectDU) {
+    const apiKey = await getGeminiApiKey();
+    const MODEL  = 'gemini-2.0-flash';
 
-  // ── Crop to content ──
-  function ag8CropToContent(img, margin = 10) {
-    const oc = document.createElement('canvas');
-    oc.width = img.naturalWidth; oc.height = img.naturalHeight;
-    const ctx = oc.getContext('2d');
-    ctx.drawImage(img, 0, 0);
-    const { data, width, height } = ctx.getImageData(0, 0, oc.width, oc.height);
-    let minX = width, maxX = 0, minY = height, maxY = 0;
-    for (let y = 0; y < height; y++)
-      for (let x = 0; x < width; x++)
-        if (data[(y * width + x) * 4 + 3] > 20) {
-          if (x < minX) minX = x; if (x > maxX) maxX = x;
-          if (y < minY) minY = y; if (y > maxY) maxY = y;
-        }
-    if (minX > maxX || minY > maxY) return img.src;
-    const cropX = Math.max(0, minX - margin), cropY = Math.max(0, minY - margin);
-    const cropW = Math.min(width, maxX + margin + 1) - cropX;
-    const cropH = Math.min(height, maxY + margin + 1) - cropY;
-    const out = document.createElement('canvas');
-    out.width = cropW; out.height = cropH;
-    out.getContext('2d').drawImage(oc, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
-    return out.toDataURL('image/png');
-  }
+    const prompt = [
+      'You are a professional brand asset SVG designer. Generate 4 responsive SVG brand assets.',
+      '',
+      'BRAND COLOR: ' + brandHex,
+      '',
+      'DESIGN RULES:',
+      rules || 'Clean minimal design. Subtle linear gradient background (5% lighter at top, 8% darker at bottom). Rounded corners r=16 on listing cards. Logo centered with generous padding. Product image prominently displayed.',
+      '',
+      'ASSETS (exact viewBox — do NOT add width/height on root SVG):',
+      '1. logo_square  viewBox="0 0 116 116"  — Solid brand-colour fill, logo centered in 98x98 zone (9px padding all sides)',
+      '2. logo_card    viewBox="0 0 88 40"    — Solid brand-colour fill, logo bottom-left 1px margin',
+      '3. listing1     viewBox="0 0 104 116"  — Gradient bg, rounded r=16, logo zone x=5 y=6 w=94 h=52, subject zone x=0 y=56 w=104 h=60',
+      '4. listing2     viewBox="0 0 116 116"  — Gradient bg, rounded r=16, logo zone x=11 y=5 w=94 h=52, subject zone x=0 y=56 w=116 h=60',
+      '',
+      'IMAGE EMBEDDING — use these EXACT placeholder strings as href values:',
+      '  Logo:    href="LOGO_DATA_URL"',
+      '  Subject: href="SUBJECT_DATA_URL"',
+      '  Always add preserveAspectRatio="xMidYMid meet" and set width/height to zone dimensions.',
+      logoDU    ? '' : '(No logo provided — omit logo image elements)',
+      subjectDU ? '' : '(No subject provided — fill subject zone with decorative shape in brand colour)',
+      '',
+      'REQUIREMENTS: xmlns="http://www.w3.org/2000/svg" on root. Use <defs> for gradients/clipPaths. No fixed root width/height.',
+      '',
+      'OUTPUT: Raw JSON only — no markdown fences, no explanation:',
+      '{"logo_square":"<svg...>","logo_card":"<svg...>","listing1":"<svg...>","listing2":"<svg...>"}',
+    ].join('\n');
 
-  // ── Chroma key (same binary threshold as Method 5) ──
-  function ag8ChromaKey(img, hex) {
-    const r0 = parseInt(hex.slice(1,3),16), g0 = parseInt(hex.slice(3,5),16), b0 = parseInt(hex.slice(5,7),16);
-    const THRESHOLD = 100;
-    const oc = document.createElement('canvas');
-    oc.width = img.naturalWidth; oc.height = img.naturalHeight;
-    const ctx = oc.getContext('2d');
-    ctx.drawImage(img, 0, 0);
-    const id = ctx.getImageData(0, 0, oc.width, oc.height);
-    const d = id.data;
-    for (let i = 0; i < d.length; i += 4) {
-      const dr = d[i]-r0, dg = d[i+1]-g0, db = d[i+2]-b0;
-      if (Math.sqrt(dr*dr + dg*dg + db*db) < THRESHOLD) d[i+3] = 0;
+    const parts = [{ text: prompt }];
+    if (logoDU) {
+      parts.push({ inline_data: { mime_type: logoDU.split(';')[0].split(':')[1], data: logoDU.split(',')[1] } });
+      parts.push({ text: '(image above = LOGO, use href="LOGO_DATA_URL")' });
     }
-    ctx.putImageData(id, 0, 0);
-    return oc.toDataURL('image/png');
-  }
-
-  // ── Brand asset rendering (mirrors Method 1) ──
-  const AG8_DPR = window.devicePixelRatio || 1;
-
-  function ag8PrepCanvas(id, lw, lh) {
-    const cv = document.getElementById(id);
-    cv.width  = Math.round(lw * AG8_DPR);
-    cv.height = Math.round(lh * AG8_DPR);
-    cv.style.width  = lw + 'px';
-    cv.style.height = lh + 'px';
-    const ctx = cv.getContext('2d');
-    ctx.scale(AG8_DPR, AG8_DPR);
-    return ctx;
-  }
-
-  function ag8RoundedRectPath(ctx, x, y, w, h, r) {
-    ctx.beginPath();
-    ctx.moveTo(x+r, y);
-    ctx.arcTo(x+w, y,   x+w, y+h, r);
-    ctx.arcTo(x+w, y+h, x,   y+h, r);
-    ctx.arcTo(x,   y+h, x,   y,   r);
-    ctx.arcTo(x,   y,   x+w, y,   r);
-    ctx.closePath();
-  }
-
-  function ag8GradientColors(hex) {
-    const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
-    const lighten = (v, f) => Math.min(255, Math.round(v + (255-v)*f));
-    const darken  = (v, f) => Math.max(0,   Math.round(v * (1-f)));
-    const toHex   = (r,g,b) => '#' + [r,g,b].map(c => c.toString(16).padStart(2,'0')).join('');
-    return { light: toHex(lighten(r,0.15), lighten(g,0.15), lighten(b,0.15)),
-             base:  toHex(darken(r,0.08),  darken(g,0.08),  darken(b,0.08)) };
-  }
-
-  function ag8DrawGradientBg(ctx, w, h, hex, radius=0) {
-    const c = ag8GradientColors(hex);
-    const grd = ctx.createLinearGradient(0, 0, 0, h);
-    grd.addColorStop(0, c.light);
-    grd.addColorStop(1, c.base);
-    ctx.fillStyle = grd;
-    if (radius > 0) { ag8RoundedRectPath(ctx,0,0,w,h,radius); ctx.fill(); }
-    else ctx.fillRect(0,0,w,h);
-  }
-
-  function ag8DrawContained(ctx, img, zx, zy, zw, zh, scalePct, vOffset, alignX='center', alignY='center') {
-    if (!img) return;
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = 'high';
-    const scale = scalePct / 100;
-    const maxW = zw * scale, maxH = zh * scale;
-    const aspect = (img.naturalWidth || img.width || 1) / (img.naturalHeight || img.height || 1);
-    let dw, dh;
-    if (aspect > maxW / maxH) { dw=maxW; dh=maxW/aspect; }
-    else                       { dh=maxH; dw=maxH*aspect; }
-    let dx;
-    if      (alignX==='center') dx = zx + (zw-dw)/2;
-    else if (alignX==='left')   dx = zx + 8;
-    else                        dx = zx + zw - dw - 8;
-    let dy;
-    if      (alignY==='center') dy = zy + (zh-dh)/2 + vOffset;
-    else if (alignY==='top')    dy = zy + vOffset;
-    else                        dy = zy + zh - dh + vOffset;
-    ctx.drawImage(img, dx, dy, dw, dh);
-  }
-
-  function ag8RenderSolid() {
-    const ctx = ag8PrepCanvas('ag8-c-solid', 116, 116);
-    ctx.fillStyle = S8.color;
-    ctx.fillRect(0, 0, 116, 116);
-    if (S8.logoImg) ag8DrawContained(ctx, S8.logoImg, 9, 9, 98, 98, S8.iconScale, 0, 'center', 'center');
-  }
-
-  function ag8RenderLogoCard() {
-    const ctx = ag8PrepCanvas('ag8-c-logo', 88, 40);
-    ctx.fillStyle = S8.color;
-    ctx.fillRect(0, 0, 88, 40);
-    if (S8.logoImg) {
-      const scale = S8.iconScale / 100;
-      const maxW = 88 * scale, maxH = 40 * scale;
-      const aspect = (S8.logoImg.naturalWidth || S8.logoImg.width || 1) / (S8.logoImg.naturalHeight || S8.logoImg.height || 1);
-      let dw, dh;
-      if (aspect > maxW / maxH) { dw = maxW; dh = maxW / aspect; }
-      else { dh = maxH; dw = maxH * aspect; }
-      ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
-      ctx.drawImage(S8.logoImg, 1, 40 - dh - 1, dw, dh);
+    if (subjectDU) {
+      parts.push({ inline_data: { mime_type: subjectDU.split(';')[0].split(':')[1], data: subjectDU.split(',')[1] } });
+      parts.push({ text: '(image above = SUBJECT, use href="SUBJECT_DATA_URL")' });
     }
-  }
 
-  function ag8RenderIcon() {
-    const ctx = ag8PrepCanvas('ag8-c-icon', 104, 116);
-    ctx.save();
-    ag8RoundedRectPath(ctx, 0, 0, 104, 116, 16); ctx.clip();
-    ag8DrawGradientBg(ctx, 104, 116, S8.color);
-    if (S8.logoImg)    ag8DrawContained(ctx, S8.logoImg,    5, 6,  94, 52, S8.iconScale, S8.iconOffset, 'center', 'center');
-    if (S8.productImg) ag8DrawContained(ctx, S8.productImg, 0, 56, 104, 60, S8.imgScale, S8.imgOffset, 'center', 'bottom');
-    ctx.restore();
-  }
-
-  function ag8RenderSquareIcon() {
-    const ctx = ag8PrepCanvas('ag8-c-sq-icon', 116, 116);
-    ctx.save();
-    ag8RoundedRectPath(ctx, 0, 0, 116, 116, 16); ctx.clip();
-    ag8DrawGradientBg(ctx, 116, 116, S8.color);
-    if (S8.logoImg)    ag8DrawContained(ctx, S8.logoImg,    11, 5,  94, 52, S8.iconScale, S8.iconOffset, 'center', 'center');
-    if (S8.productImg) ag8DrawContained(ctx, S8.productImg,  0, 56, 116, 60, S8.imgScale, S8.imgOffset, 'center', 'bottom');
-    ctx.restore();
-  }
-
-  function ag8RenderAll() {
-    ag8RenderSolid();
-    ag8RenderLogoCard();
-    ag8RenderIcon();
-    ag8RenderSquareIcon();
-  }
-
-  // ── Brand colour controls ──
-  function ag8SetBrandColor(hex) {
-    if (!/^#[0-9a-fA-F]{6}$/.test(hex)) return;
-    S8.color = hex;
-    document.getElementById('ag8-brandColorPicker').value = hex;
-    document.getElementById('ag8-brandHexInput').value = hex;
-    ag8RenderAll();
-  }
-
-  // ── Reveal controls + assets after extraction ──
-  function ag8RevealAssets() {
-    document.getElementById('ag8-controls').style.display = 'flex';
-    document.getElementById('ag8-assetsSection').style.display = 'flex';
-    ag8RenderAll();
-  }
-
-  // ── Bind controls (called once) ──
-  (function ag8BindControls() {
-    // Brand colour
-    document.getElementById('ag8-brandColorPicker').addEventListener('input', e => ag8SetBrandColor(e.target.value));
-    document.getElementById('ag8-brandHexInput').addEventListener('input', e => {
-      if (/^#[0-9a-fA-F]{6}$/.test(e.target.value)) ag8SetBrandColor(e.target.value);
-    });
-    document.getElementById('ag8-brandHexInput').addEventListener('blur', e => {
-      if (!/^#[0-9a-fA-F]{6}$/.test(e.target.value)) e.target.value = S8.color;
-    });
-
-    // Sliders
-    const sliders = [
-      { id: 'ag8-iconScale',  valId: 'ag8-iconScaleVal',  key: 'iconScale',  fmt: v => (v/100).toFixed(2)+'x' },
-      { id: 'ag8-iconOffset', valId: 'ag8-iconOffsetVal', key: 'iconOffset', fmt: v => v+'px' },
-      { id: 'ag8-imgScale',   valId: 'ag8-imgScaleVal',   key: 'imgScale',   fmt: v => (v/100).toFixed(2)+'x' },
-      { id: 'ag8-imgOffset',  valId: 'ag8-imgOffsetVal',  key: 'imgOffset',  fmt: v => v+'px' },
-    ];
-    sliders.forEach(({ id, valId, key, fmt }) => {
-      const el = document.getElementById(id);
-      const valEl = document.getElementById(valId);
-      el.addEventListener('input', () => {
-        S8[key] = +el.value;
-        valEl.textContent = fmt(S8[key]);
-        ag8RenderAll();
-      });
-    });
-
-    // Init brand colour picker to default
-    document.getElementById('ag8-brandColorPicker').value = S8.color;
-    document.getElementById('ag8-brandHexInput').value = S8.color;
-  })();
-
-  // ── Replicate background removal ──
-  async function ag8RemoveBg(dataUrl) {
-    const resp = await fetch('/api/replicate-remove-bg', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ image: dataUrl }),
-    });
+    const resp = await fetch(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + MODEL + ':generateContent?key=' + apiKey,
+      { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts }] }) }
+    );
     if (!resp.ok) {
       const e = await resp.json().catch(() => ({}));
-      throw new Error(e?.error || `HTTP ${resp.status}`);
+      throw new Error(e?.error?.message || 'Gemini HTTP ' + resp.status);
     }
-    const blob = await resp.blob();
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
+    const data = await resp.json();
+    let raw = (data?.candidates?.[0]?.content?.parts?.[0]?.text || '').trim();
+    raw = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+    try { return JSON.parse(raw); }
+    catch(_) {
+      const m = raw.match(/\{[\s\S]*\}/);
+      if (!m) throw new Error('Could not parse JSON from Gemini response');
+      return JSON.parse(m[0]);
+    }
   }
 
-  // ── Download helpers ──
-  window.ag8DownloadExtracted = function(key) {
-    const url = ag8Extracted[key];
-    if (!url) { showToast('No extracted image yet.'); return; }
-    const a = document.createElement('a'); a.href = url; a.download = `m7-extract-${key}.png`; a.click();
+  function ag8InjectImages(svgCode, logoDU, subjectDU) {
+    if (logoDU)    svgCode = svgCode.split('LOGO_DATA_URL').join(logoDU);
+    if (subjectDU) svgCode = svgCode.split('SUBJECT_DATA_URL').join(subjectDU);
+    return svgCode;
+  }
+
+  function ag8ShowSVG(name, svgCode) {
+    const wrap = document.getElementById('ag8-preview-' + name);
+    if (!wrap) return;
+    wrap.innerHTML = svgCode;
+    const el = wrap.querySelector('svg');
+    if (el) { el.style.width = '100%'; el.style.height = '100%'; el.style.display = 'block'; }
+  }
+
+  // ── Downloads ──
+  window.ag8DownloadSVG = function(name) {
+    const code = ag8SVGs[name];
+    if (!code) { showToast('Generate first.'); return; }
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([code], { type: 'image/svg+xml' }));
+    a.download = 'm7-' + name + '.svg'; a.click();
   };
-  window.ag8DownloadAllExtracted = async function() {
-    for (const key of ['logo','subject']) { window.ag8DownloadExtracted(key); await new Promise(r => setTimeout(r, 150)); }
+
+  window.ag8DownloadPNG = async function(name, w, h) {
+    const code = ag8SVGs[name];
+    if (!code) { showToast('Generate first.'); return; }
+    const url = URL.createObjectURL(new Blob([code], { type: 'image/svg+xml' }));
+    const img = new Image();
+    await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = url; });
+    const cv = document.createElement('canvas'); cv.width = w*2; cv.height = h*2;
+    cv.getContext('2d').drawImage(img, 0, 0, w*2, h*2);
+    URL.revokeObjectURL(url);
+    const a = document.createElement('a');
+    a.href = cv.toDataURL('image/png'); a.download = 'm7-' + name + '@2x.png'; a.click();
   };
-  window.ag8DownloadAsset = function(canvasId, name) {
-    const c = document.getElementById(canvasId); if (!c) return;
-    const a = document.createElement('a'); a.href = c.toDataURL('image/png'); a.download = `m7-${name}.png`; a.click();
-  };
-  window.ag8DownloadAllAssets = async function() {
-    const assets = [
-      { id: 'ag8-c-solid',   name: 'logo-square' },
-      { id: 'ag8-c-logo',    name: 'logo-card' },
-      { id: 'ag8-c-icon',    name: 'listing1' },
-      { id: 'ag8-c-sq-icon', name: 'listing2' },
-    ];
-    for (const { id, name } of assets) { window.ag8DownloadAsset(id, name); await new Promise(r => setTimeout(r, 150)); }
+
+  window.ag8DownloadAllSVGs = async function() {
+    for (const name of ['logo_square','logo_card','listing1','listing2']) {
+      if (ag8SVGs[name]) { window.ag8DownloadSVG(name); await new Promise(r => setTimeout(r, 150)); }
+    }
   };
 
   // ── Generate ──
   window.ag8Generate = async function() {
     if (!ag8Slots.logo.dataUrl && !ag8Slots.subject.dataUrl) {
-      showToast('Upload a logo and/or subject image to extract.'); return;
+      showToast('Upload at least a logo or subject image.'); return;
     }
+    const btn    = document.getElementById('ag8-generateBtn');
+    const hdr    = document.getElementById('ag8-statusHdr');
+    const status = document.getElementById('ag8-statusText');
+    const row    = document.getElementById('ag8-assetsRow');
 
-    const btn = document.getElementById('ag8-generateBtn');
     btn.disabled = true;
-    btn.innerHTML = '<i class="ph ph-circle-notch" style="animation:spin 0.8s linear infinite;"></i> Extracting…';
+    btn.innerHTML = '<i class="ph ph-circle-notch" style="animation:spin 0.8s linear infinite;"></i> Generating\u2026';
+    hdr.style.opacity = '0.5'; status.textContent = 'Calling Gemini\u2026';
+    row.style.opacity = '0.2'; row.style.pointerEvents = 'none';
 
-    const extractRow    = document.getElementById('ag8-extractRow');
-    const extractHdr    = document.getElementById('ag8-extractHdr');
-    const extractStatus = document.getElementById('ag8-extractStatus');
-    extractRow.style.opacity = '0.2'; extractRow.style.pointerEvents = 'none';
-    extractHdr.style.opacity = '0.35'; extractStatus.textContent = 'Removing backgrounds…';
-    ag8InitExtCanvases();
+    try {
+      const rules = (document.getElementById('ag8-rulesInput').value || '').trim();
+      const raw   = await ag8CallGemini(ag8BrandHex, rules, ag8Slots.logo.dataUrl, ag8Slots.subject.dataUrl);
 
-    const errors = [];
-
-    const processSlot = async (key) => {
-      if (!ag8Slots[key].dataUrl) return null;
-      // Step 1: Replicate bg removal
-      const removedUrl = await ag8RemoveBg(ag8Slots[key].dataUrl);
-      let finalUrl = removedUrl;
-
-      // Step 2: Optional chroma key if colour ref selected
-      if (ag8SelectedHex) {
-        const img0 = new Image();
-        await new Promise((res, rej) => { img0.onload = res; img0.onerror = rej; img0.src = removedUrl; });
-        finalUrl = ag8ChromaKey(img0, ag8SelectedHex);
+      for (const name of ['logo_square','logo_card','listing1','listing2']) {
+        if (!raw[name]) continue;
+        ag8SVGs[name] = ag8InjectImages(raw[name], ag8Slots.logo.dataUrl, ag8Slots.subject.dataUrl);
+        ag8ShowSVG(name, ag8SVGs[name]);
       }
-
-      // Step 3: Crop to content
-      const img1 = new Image();
-      await new Promise((res, rej) => { img1.onload = res; img1.onerror = rej; img1.src = finalUrl; });
-      const cropped = ag8CropToContent(img1, 10);
-      ag8Extracted[key] = cropped;
-
-      const croppedImg = new Image();
-      await new Promise((res, rej) => { croppedImg.onload = res; croppedImg.onerror = rej; croppedImg.src = cropped; });
-      ag8PaintExtracted(`ag8-ext-${key}`, croppedImg);
-      return croppedImg;
-    };
-
-    const [logoRes, subjRes] = await Promise.allSettled([
-      processSlot('logo'),
-      processSlot('subject'),
-    ]);
-    if (logoRes.status === 'rejected') errors.push(`Logo: ${logoRes.reason?.message}`);
-    if (subjRes.status === 'rejected') errors.push(`Subject: ${subjRes.reason?.message}`);
-
-    // Store extracted images into S8 for brand asset rendering
-    if (logoRes.status === 'fulfilled' && logoRes.value) S8.logoImg    = logoRes.value;
-    if (subjRes.status === 'fulfilled' && subjRes.value) S8.productImg = subjRes.value;
-
-    extractRow.style.opacity = '1'; extractRow.style.pointerEvents = '';
-    extractHdr.style.opacity = '1';
-    extractStatus.textContent = errors.length ? `⚠ ${errors.length} issue(s)` : '✓ Done';
-    errors.forEach(e => { console.warn('[ag8]', e); showToast(e); });
-
-    btn.disabled = false;
-    btn.innerHTML = '<i class="ph ph-magic-wand"></i> Extract';
-
-    // Reveal brand assets panel + controls if at least one slot succeeded
-    if ((logoRes.status === 'fulfilled' && logoRes.value) || (subjRes.status === 'fulfilled' && subjRes.value)) {
-      ag8RevealAssets();
+      row.style.opacity = '1'; row.style.pointerEvents = '';
+      hdr.style.opacity = '1'; status.textContent = '\u2713 Done';
+    } catch(err) {
+      console.error('[ag8]', err);
+      showToast('Error: ' + err.message);
+      hdr.style.opacity = '0.35'; status.textContent = '\u26a0 Failed';
     }
+    btn.disabled = false;
+    btn.innerHTML = '<i class="ph ph-magic-wand"></i> Generate SVGs';
   };
 
 })();
