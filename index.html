@@ -415,6 +415,19 @@
     .ag6-swatch.selected { border-color: rgba(255,255,255,0.75); box-shadow: 0 0 0 3px rgba(255,255,255,0.18); }
     .ag6-picker-swatch { display:flex; align-items:center; justify-content:center; background:#2a2a2a; position:relative; overflow:visible; }
 
+    /* ── Method 7 config playground ── */
+    .ag8-ct { padding:5px 12px; border-radius:7px; font-size:11px; font-weight:500; cursor:pointer; border:1px solid #2a2a2a; background:#1a1a1a; color:#7b7b7b; transition:background .15s,color .15s; white-space:nowrap; }
+    .ag8-ct.active { background:#2d2d2d; color:#e8e8e8; border-color:#444; }
+    .ag8-ct:disabled { opacity:.3; cursor:default; pointer-events:none; }
+    .ag8-ctrl-row { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+    .ag8-ctrl-lbl { color:#7b7b7b; min-width:130px; flex-shrink:0; font-size:11px; }
+    .ag8-ctrl-val { color:#e8e8e8; min-width:48px; font-size:11px; text-align:right; font-weight:500; }
+    .ag8-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+    .ag8-sec-hd { font-size:10px; color:#5c5c5c; text-transform:uppercase; letter-spacing:.06em; padding-bottom:5px; border-bottom:1px solid #1e1e1e; margin-bottom:10px; }
+    .ag8-stat { background:#1a1a1a; border:1px solid #222; border-radius:4px; padding:4px 7px; }
+    .ag8-stat .k { display:block; color:#5c5c5c; font-size:9px; margin-bottom:1px; }
+    .ag8-stat .v { font-weight:500; color:#e8e8e8; font-size:10px; }
+
     /* ── Brand Name ── */
     .brand-name-input {
       width: 100%;
@@ -1136,12 +1149,12 @@
 <nav class="tab-nav">
   <button class="tab-btn" data-tab="brands" onclick="showTab('brands')">All Brands</button>
   <button class="tab-btn" data-tab="add" onclick="showTab('add')">Method 1</button>
-  <button class="tab-btn active" data-tab="aigen2" onclick="showTab('aigen2')">Method 2</button>
+  <button class="tab-btn" data-tab="aigen2" onclick="showTab('aigen2')">Method 2</button>
   <button class="tab-btn" data-tab="aigen5" onclick="showTab('aigen5')">Method 3</button>
   <button class="tab-btn" data-tab="aigen4" onclick="showTab('aigen4')">Method 4</button>
   <button class="tab-btn" data-tab="aigen6" onclick="showTab('aigen6')">Method 5</button>
   <button class="tab-btn" data-tab="aigen7" onclick="showTab('aigen7')">Method 6</button>
-  <button class="tab-btn" data-tab="aigen8" onclick="showTab('aigen8')">Method 7</button>
+  <button class="tab-btn active" data-tab="aigen8" onclick="showTab('aigen8')">Method 7</button>
   <button class="tab-btn" id="trashBtn" data-tab="trash" onclick="showTab('trash')" style="margin-left:auto">Deleted assets</button>
 </nav>
 
@@ -1204,7 +1217,7 @@
 </div>
 
 <!-- ═══════════ AI GEN 2 VIEW ═══════════ -->
-<div id="view-aigen2" class="active">
+<div id="view-aigen2">
   <aside class="controls">
     <div class="app-header">
       <div class="app-title">Method 2</div>
@@ -1547,13 +1560,12 @@
   </main>
 </div>
 
-<!-- ═══════════ AI GEN 8 VIEW (Method 7 — AI SVG brand asset generator) ═══════════ -->
-<div id="view-aigen8">
+<!-- ═══════════ AI GEN 8 VIEW (Method 7 — Rule-based brand asset generator) ═══════════ -->
+<div id="view-aigen8" class="active">
   <aside class="controls" style="overflow-y:auto;">
     <div class="app-header">
       <div class="app-title">Method 7</div>
-      <div class="app-subtitle">Generate brand assets as responsive SVGs using AI with your custom rules.</div>
-      <span style="display:inline-block;font-size:10px;color:#7b7b7b;background:#262626;border:1px solid #333;border-radius:4px;padding:2px 7px;letter-spacing:0.04em;margin-top:8px;">gemini-2.0-flash · Gemini API</span>
+      <div class="app-subtitle">Rule-based brand assets — same outputs as Method 1, no AI. Updates in realtime as you upload and change colour.</div>
     </div>
 
     <div style="display:flex;flex-direction:column;gap:10px;">
@@ -1613,57 +1625,29 @@
           <div class="aigen-thumbs" id="ag8-subjectThumbs"></div>
         </div>
       </div>
-
-      <div>
-        <div class="section-label">Generation rules</div>
-        <textarea id="ag8-rulesInput" placeholder="e.g. Rounded corners everywhere, subtle drop shadow on logo, bold product presence, vibrant gradient..." style="width:100%;box-sizing:border-box;background:#111;border:1.5px solid #2a2a2a;border-radius:8px;color:#e8e8e8;font-size:12px;padding:10px;resize:vertical;min-height:80px;font-family:inherit;line-height:1.5;outline:none;"></textarea>
-      </div>
     </div>
-
-    <button class="ag2-generate-btn" id="ag8-generateBtn" onclick="ag8Generate()" style="margin-top:auto;">
-      <i class="ph ph-magic-wand"></i> Generate SVGs
-    </button>
   </aside>
 
   <main class="preview-panel" style="overflow-y:auto;">
     <div style="display:flex;flex-direction:column;gap:20px;padding:20px;">
 
-      <div class="preview-header" id="ag8-statusHdr" style="opacity:0.35;padding:0;">
+      <div class="preview-header" style="padding:0;">
         <span class="preview-header-title">Brand Assets</span>
-        <span id="ag8-statusText" style="font-size:11px;color:#7b7b7b;margin-left:8px;">—</span>
-        <div style="margin-left:auto;">
+        <div style="margin-left:auto;display:flex;gap:8px;align-items:center;">
+          <button id="ag8-cfg-btn" onclick="ag8ToggleConfig()" style="background:none;border:none;color:#7b7b7b;font-size:11px;font-weight:500;cursor:pointer;padding:4px 6px;letter-spacing:.02em;transition:color .15s;">Config</button>
           <button class="export-all-btn" onclick="ag8DownloadAllSVGs()">Export SVGs</button>
+          <button class="export-all-btn" onclick="ag8DownloadAllPNGs()">Export PNGs</button>
         </div>
       </div>
 
-      <div class="assets-row" id="ag8-assetsRow" style="opacity:0.2;pointer-events:none;flex-wrap:wrap;">
+      <div id="ag8-assets-container" style="display:flex;flex-direction:column;gap:20px;">
+      <!-- Small assets row -->
+      <div class="assets-row" id="ag8-assetsRow" style="flex-wrap:wrap;">
 
         <div class="asset-card">
-          <div class="asset-card-head"><span class="asset-card-name">Logo square</span><span class="asset-card-dims">116 × 116</span></div>
-          <div class="asset-canvas-wrap" id="ag8-preview-logo_square" style="width:116px;height:116px;overflow:hidden;border-radius:6px;background:#1a1a1a;display:flex;align-items:center;justify-content:center;">
-            <i class="ph ph-image" style="font-size:28px;opacity:0.15;"></i>
-          </div>
-          <div style="display:flex;gap:5px;">
-            <button class="download-btn" style="flex:1;" onclick="ag8DownloadSVG('logo_square')"><i class="ph ph-download-simple"></i> SVG</button>
-            <button class="download-btn" style="flex:1;" onclick="ag8DownloadPNG('logo_square',116,116)"><i class="ph ph-download-simple"></i> PNG</button>
-          </div>
-        </div>
-
-        <div class="asset-card">
-          <div class="asset-card-head"><span class="asset-card-name">Logo card</span><span class="asset-card-dims">88 × 40</span></div>
-          <div class="asset-canvas-wrap" id="ag8-preview-logo_card" style="width:88px;height:40px;overflow:hidden;border-radius:6px;background:#1a1a1a;display:flex;align-items:center;justify-content:center;">
-            <i class="ph ph-image" style="font-size:18px;opacity:0.15;"></i>
-          </div>
-          <div style="display:flex;gap:5px;">
-            <button class="download-btn" style="flex:1;" onclick="ag8DownloadSVG('logo_card')"><i class="ph ph-download-simple"></i> SVG</button>
-            <button class="download-btn" style="flex:1;" onclick="ag8DownloadPNG('logo_card',88,40)"><i class="ph ph-download-simple"></i> PNG</button>
-          </div>
-        </div>
-
-        <div class="asset-card">
-          <div class="asset-card-head"><span class="asset-card-name">Listing 1</span><span class="asset-card-dims">104 × 116</span></div>
-          <div class="asset-canvas-wrap" id="ag8-preview-listing1" style="width:104px;height:116px;overflow:hidden;border-radius:6px;background:#1a1a1a;display:flex;align-items:center;justify-content:center;">
-            <i class="ph ph-image" style="font-size:28px;opacity:0.15;"></i>
+          <div class="asset-card-head"><span class="asset-card-name">Listing1</span><span class="asset-card-dims">104 × 116</span></div>
+          <div class="asset-canvas-wrap">
+            <div id="ag8-wrap-listing1" style="width:104px;height:116px;overflow:hidden;display:block;"></div>
           </div>
           <div style="display:flex;gap:5px;">
             <button class="download-btn" style="flex:1;" onclick="ag8DownloadSVG('listing1')"><i class="ph ph-download-simple"></i> SVG</button>
@@ -1672,9 +1656,9 @@
         </div>
 
         <div class="asset-card">
-          <div class="asset-card-head"><span class="asset-card-name">Listing 2</span><span class="asset-card-dims">116 × 116</span></div>
-          <div class="asset-canvas-wrap" id="ag8-preview-listing2" style="width:116px;height:116px;overflow:hidden;border-radius:6px;background:#1a1a1a;display:flex;align-items:center;justify-content:center;">
-            <i class="ph ph-image" style="font-size:28px;opacity:0.15;"></i>
+          <div class="asset-card-head"><span class="asset-card-name">Listing2</span><span class="asset-card-dims">116 × 116</span></div>
+          <div class="asset-canvas-wrap">
+            <div id="ag8-wrap-listing2" style="width:116px;height:116px;overflow:hidden;display:block;"></div>
           </div>
           <div style="display:flex;gap:5px;">
             <button class="download-btn" style="flex:1;" onclick="ag8DownloadSVG('listing2')"><i class="ph ph-download-simple"></i> SVG</button>
@@ -1682,7 +1666,328 @@
           </div>
         </div>
 
+        <div class="asset-card">
+          <div class="asset-card-head"><span class="asset-card-name">Logo_square</span><span class="asset-card-dims">116 × 116</span></div>
+          <div class="asset-canvas-wrap">
+            <div id="ag8-wrap-logo-sq" style="width:116px;height:116px;overflow:hidden;display:block;"></div>
+          </div>
+          <div style="display:flex;gap:5px;">
+            <button class="download-btn" style="flex:1;" onclick="ag8DownloadSVG('logo-sq')"><i class="ph ph-download-simple"></i> SVG</button>
+            <button class="download-btn" style="flex:1;" onclick="ag8DownloadPNG('logo-sq',116,116)"><i class="ph ph-download-simple"></i> PNG</button>
+          </div>
+        </div>
+
+        <div class="asset-card">
+          <div class="asset-card-head"><span class="asset-card-name">Logo_card</span><span class="asset-card-dims">88 × 40</span></div>
+          <div class="asset-canvas-wrap">
+            <div id="ag8-wrap-logo-card" style="width:88px;height:40px;overflow:hidden;display:block;"></div>
+          </div>
+          <div style="display:flex;gap:5px;">
+            <button class="download-btn" style="flex:1;" onclick="ag8DownloadSVG('logo-card')"><i class="ph ph-download-simple"></i> SVG</button>
+            <button class="download-btn" style="flex:1;" onclick="ag8DownloadPNG('logo-card',88,40)"><i class="ph ph-download-simple"></i> PNG</button>
+          </div>
+        </div>
+
+        <div class="asset-card">
+          <div class="asset-card-head"><span class="asset-card-name">Background</span><span id="ag8-bgHexLabel" style="font-family:monospace;letter-spacing:0.04em;">—</span></div>
+          <div class="asset-canvas-wrap">
+            <div id="ag8-wrap-background" style="width:259px;height:94px;overflow:hidden;display:block;"></div>
+          </div>
+          <div style="display:flex;gap:5px;">
+            <button class="download-btn" style="flex:1;" onclick="ag8CopyBgHex()"><i class="ph ph-copy"></i> Copy Hex</button>
+            <button class="download-btn" style="flex:1;" onclick="ag8DownloadSVG('background')"><i class="ph ph-download-simple"></i> SVG</button>
+          </div>
+        </div>
+
       </div>
+
+      <!-- WhatsApp -->
+      <div class="wa-row">
+        <div class="asset-card">
+          <div class="asset-card-head"><span class="asset-card-name">Whatsapp</span><span class="asset-card-dims">1500 × 750</span></div>
+          <div class="asset-canvas-wrap">
+            <div id="ag8-wrap-wa" style="width:40%;aspect-ratio:2/1;overflow:hidden;display:block;"></div>
+          </div>
+          <div style="display:flex;gap:5px;">
+            <button class="download-btn" style="flex:1;" onclick="ag8DownloadSVG('wa')"><i class="ph ph-download-simple"></i> SVG</button>
+            <button class="download-btn" style="flex:1;" onclick="ag8DownloadPNG('wa',1500,750)"><i class="ph ph-download-simple"></i> PNG — full res</button>
+          </div>
+        </div>
+      </div>
+
+      </div><!-- /ag8-assets-container -->
+
+      <!-- ── Config playground panel ── -->
+      <div id="ag8-config-panel" style="display:none;flex-direction:column;gap:16px;">
+
+        <!-- Tab pills -->
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+          <button class="ag8-ct active" id="ag8-ctab-l1" onclick="ag8CfgTab('l1')">Listing1 <span style="opacity:.5;font-size:10px;margin-left:3px;">104×116</span></button>
+          <button class="ag8-ct" id="ag8-ctab-l2" onclick="ag8CfgTab('l2')">Listing2 <span style="opacity:.5;font-size:10px;margin-left:3px;">116×116</span></button>
+          <button class="ag8-ct" id="ag8-ctab-ls" onclick="ag8CfgTab('ls')">Logo_square <span style="opacity:.5;font-size:10px;margin-left:3px;">116×116</span></button>
+          <button class="ag8-ct" id="ag8-ctab-lc" onclick="ag8CfgTab('lc')">Logo_card <span style="opacity:.5;font-size:10px;margin-left:3px;">88×40</span></button>
+          <button class="ag8-ct" id="ag8-ctab-wa" onclick="ag8CfgTab('wa')">WhatsApp <span style="opacity:.5;font-size:10px;margin-left:3px;">1500×750</span></button>
+          <button onclick="ag8ToggleConfig()" style="background:none;border:none;color:#5c5c5c;font-size:11px;cursor:pointer;margin-left:auto;padding:4px 6px;">← Back</button>
+        </div>
+
+        <!-- ── Listing 1 panel ── -->
+        <div id="ag8-cfg-l1" style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start;">
+          <div style="flex-shrink:0;">
+            <div id="ag8-board-l1" style="position:relative;width:208px;height:280px;"></div>
+            <div id="ag8-board-l1-lbl" style="font-size:11px;color:#5c5c5c;text-align:center;margin-top:6px;">2× scale · 104×116 px</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
+              <div style="display:flex;align-items:center;gap:4px;font-size:10px;color:#7b7b7b;"><div style="width:12px;height:10px;border-radius:2px;border:1px dashed #888;background:rgba(140,140,140,.1);"></div>top margin</div>
+              <div style="display:flex;align-items:center;gap:4px;font-size:10px;color:#7b7b7b;"><div style="width:12px;height:10px;border-radius:2px;border:1px dashed #7571d0;background:rgba(102,96,204,.15);"></div>logo slot</div>
+              <div style="display:flex;align-items:center;gap:4px;font-size:10px;color:#7b7b7b;"><div style="width:12px;height:10px;border-radius:2px;border:1px dashed #9b94f0;background:rgba(127,119,221,.25);"></div>logo</div>
+              <div style="display:flex;align-items:center;gap:4px;font-size:10px;color:#7b7b7b;"><div style="width:12px;height:10px;border-radius:2px;border:1px dashed #3a7a58;background:rgba(29,100,60,.1);"></div>gap</div>
+              <div style="display:flex;align-items:center;gap:4px;font-size:10px;color:#7b7b7b;"><div style="width:12px;height:10px;border-radius:2px;border:1px dashed #2dc99a;background:rgba(29,158,117,.18);"></div>subject</div>
+            </div>
+            <div id="ag8-stats-l1" style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:10px;"></div>
+          </div>
+          <div style="flex:1;min-width:240px;max-width:400px;display:flex;flex-direction:column;gap:0;">
+            <div class="ag8-sec-hd">Preview inputs — aspect ratios</div>
+            <div class="ag8-ctrl-row">
+              <div class="ag8-dot" style="background:#9b94f0;"></div>
+              <span class="ag8-ctrl-lbl">Logo AR</span>
+              <input type="range" id="ag8-l1-lar" min="0.5" max="7" step="0.05" value="4" style="flex:1;">
+              <span class="ag8-ctrl-val" id="ag8-l1-lar-v">4.00</span>
+            </div>
+            <div class="ag8-ctrl-row">
+              <div class="ag8-dot" style="background:#2dc99a;"></div>
+              <span class="ag8-ctrl-lbl">Subject AR</span>
+              <input type="range" id="ag8-l1-sar" min="0.3" max="3" step="0.05" value="1" style="flex:1;">
+              <span class="ag8-ctrl-val" id="ag8-l1-sar-v">1.00</span>
+            </div>
+            <div class="ag8-sec-hd" style="margin-top:14px;">Layout parameters</div>
+            <div class="ag8-ctrl-row">
+              <div class="ag8-dot" style="background:#888;"></div>
+              <span class="ag8-ctrl-lbl">Top margin</span>
+              <input type="range" id="ag8-l1-tm" min="0" max="20" step="0.5" value="8" style="flex:1;">
+              <span class="ag8-ctrl-val" id="ag8-l1-tm-v">8 px</span>
+            </div>
+            <div class="ag8-ctrl-row">
+              <div class="ag8-dot" style="background:#7571d0;"></div>
+              <span class="ag8-ctrl-lbl">Slot min H</span>
+              <input type="range" id="ag8-l1-sloth" min="12" max="60" step="1" value="24" style="flex:1;">
+              <span class="ag8-ctrl-val" id="ag8-l1-sloth-v">24 px</span>
+            </div>
+            <div class="ag8-ctrl-row">
+              <div class="ag8-dot" style="background:#2dc99a;"></div>
+              <span class="ag8-ctrl-lbl">Gap (slot → subj)</span>
+              <input type="range" id="ag8-l1-gap" min="2" max="20" step="0.5" value="6" style="flex:1;">
+              <span class="ag8-ctrl-val" id="ag8-l1-gap-v">6 px</span>
+            </div>
+            <div class="ag8-ctrl-row">
+              <div class="ag8-dot" style="background:#2dc99a;"></div>
+              <span class="ag8-ctrl-lbl">Bottom bleed</span>
+              <input type="range" id="ag8-l1-bleed" min="0" max="24" step="0.5" value="14" style="flex:1;">
+              <span class="ag8-ctrl-val" id="ag8-l1-bleed-v">14 px</span>
+            </div>
+            <div id="ag8-warn-l1" style="display:none;font-size:11px;color:#BA7517;line-height:1.55;padding:10px 12px;background:#262220;border-radius:8px;border-left:2px solid #EF9F27;margin-top:10px;">
+              <strong style="color:#EF9F27;">⚠ Gap constraint hit.</strong> Subject height was reduced to maintain minimum gap.
+            </div>
+            <div style="display:flex;gap:8px;margin-top:16px;">
+              <button class="export-all-btn" onclick="ag8CfgSave()">Save rules</button>
+              <button class="download-btn" onclick="ag8CfgReset('l1')">Reset tab</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Listing 2 panel ── -->
+        <div id="ag8-cfg-l2" style="display:none;flex-wrap:wrap;gap:20px;align-items:flex-start;">
+          <div style="flex-shrink:0;">
+            <div id="ag8-board-l2" style="position:relative;width:232px;height:280px;"></div>
+            <div id="ag8-board-l2-lbl" style="font-size:11px;color:#5c5c5c;text-align:center;margin-top:6px;">2× scale · 116×116 px</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
+              <div style="display:flex;align-items:center;gap:4px;font-size:10px;color:#7b7b7b;"><div style="width:12px;height:10px;border-radius:2px;border:1px dashed #888;background:rgba(140,140,140,.1);"></div>top margin</div>
+              <div style="display:flex;align-items:center;gap:4px;font-size:10px;color:#7b7b7b;"><div style="width:12px;height:10px;border-radius:2px;border:1px dashed #7571d0;background:rgba(102,96,204,.15);"></div>logo slot</div>
+              <div style="display:flex;align-items:center;gap:4px;font-size:10px;color:#7b7b7b;"><div style="width:12px;height:10px;border-radius:2px;border:1px dashed #9b94f0;background:rgba(127,119,221,.25);"></div>logo</div>
+              <div style="display:flex;align-items:center;gap:4px;font-size:10px;color:#7b7b7b;"><div style="width:12px;height:10px;border-radius:2px;border:1px dashed #3a7a58;background:rgba(29,100,60,.1);"></div>gap</div>
+              <div style="display:flex;align-items:center;gap:4px;font-size:10px;color:#7b7b7b;"><div style="width:12px;height:10px;border-radius:2px;border:1px dashed #2dc99a;background:rgba(29,158,117,.18);"></div>subject</div>
+            </div>
+            <div id="ag8-stats-l2" style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:10px;"></div>
+          </div>
+          <div style="flex:1;min-width:240px;max-width:400px;display:flex;flex-direction:column;gap:0;">
+            <div class="ag8-sec-hd">Preview inputs — aspect ratios</div>
+            <div class="ag8-ctrl-row">
+              <div class="ag8-dot" style="background:#9b94f0;"></div>
+              <span class="ag8-ctrl-lbl">Logo AR</span>
+              <input type="range" id="ag8-l2-lar" min="0.5" max="7" step="0.05" value="4" style="flex:1;">
+              <span class="ag8-ctrl-val" id="ag8-l2-lar-v">4.00</span>
+            </div>
+            <div class="ag8-ctrl-row">
+              <div class="ag8-dot" style="background:#2dc99a;"></div>
+              <span class="ag8-ctrl-lbl">Subject AR</span>
+              <input type="range" id="ag8-l2-sar" min="0.3" max="3" step="0.05" value="1" style="flex:1;">
+              <span class="ag8-ctrl-val" id="ag8-l2-sar-v">1.00</span>
+            </div>
+            <div class="ag8-sec-hd" style="margin-top:14px;">Layout parameters</div>
+            <div class="ag8-ctrl-row">
+              <div class="ag8-dot" style="background:#888;"></div>
+              <span class="ag8-ctrl-lbl">Top margin</span>
+              <input type="range" id="ag8-l2-tm" min="0" max="20" step="0.5" value="8" style="flex:1;">
+              <span class="ag8-ctrl-val" id="ag8-l2-tm-v">8 px</span>
+            </div>
+            <div class="ag8-ctrl-row">
+              <div class="ag8-dot" style="background:#7571d0;"></div>
+              <span class="ag8-ctrl-lbl">Slot min H</span>
+              <input type="range" id="ag8-l2-sloth" min="12" max="60" step="1" value="24" style="flex:1;">
+              <span class="ag8-ctrl-val" id="ag8-l2-sloth-v">24 px</span>
+            </div>
+            <div class="ag8-ctrl-row">
+              <div class="ag8-dot" style="background:#2dc99a;"></div>
+              <span class="ag8-ctrl-lbl">Gap (slot → subj)</span>
+              <input type="range" id="ag8-l2-gap" min="2" max="20" step="0.5" value="6" style="flex:1;">
+              <span class="ag8-ctrl-val" id="ag8-l2-gap-v">6 px</span>
+            </div>
+            <div class="ag8-ctrl-row">
+              <div class="ag8-dot" style="background:#2dc99a;"></div>
+              <span class="ag8-ctrl-lbl">Bottom bleed</span>
+              <input type="range" id="ag8-l2-bleed" min="0" max="24" step="0.5" value="14" style="flex:1;">
+              <span class="ag8-ctrl-val" id="ag8-l2-bleed-v">14 px</span>
+            </div>
+            <div id="ag8-warn-l2" style="display:none;font-size:11px;color:#BA7517;line-height:1.55;padding:10px 12px;background:#262220;border-radius:8px;border-left:2px solid #EF9F27;margin-top:10px;">
+              <strong style="color:#EF9F27;">⚠ Gap constraint hit.</strong> Subject height was reduced to maintain minimum gap.
+            </div>
+            <div style="display:flex;gap:8px;margin-top:16px;">
+              <button class="export-all-btn" onclick="ag8CfgSave()">Save rules</button>
+              <button class="download-btn" onclick="ag8CfgReset('l2')">Reset tab</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Logo square panel ── -->
+        <div id="ag8-cfg-ls" style="display:none;flex-wrap:wrap;gap:20px;align-items:flex-start;">
+          <div style="flex-shrink:0;">
+            <div id="ag8-board-ls" style="position:relative;width:396px;height:396px;"></div>
+            <div id="ag8-board-ls-lbl" style="font-size:11px;color:#5c5c5c;text-align:center;margin-top:6px;">3× scale · 116×116 px</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
+              <div style="display:flex;align-items:center;gap:4px;font-size:10px;color:#7b7b7b;"><div style="width:12px;height:10px;border-radius:2px;background:rgba(140,140,140,.1);"></div>available slot</div>
+              <div style="display:flex;align-items:center;gap:4px;font-size:10px;color:#7b7b7b;"><div style="width:12px;height:10px;border-radius:2px;background:rgba(127,119,221,.25);"></div>logo</div>
+            </div>
+            <div id="ag8-stats-ls" style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:10px;"></div>
+          </div>
+          <div style="flex:1;min-width:240px;max-width:400px;display:flex;flex-direction:column;gap:0;">
+            <div class="ag8-sec-hd">Preview input — aspect ratio</div>
+            <div class="ag8-ctrl-row">
+              <div class="ag8-dot" style="background:#9b94f0;"></div>
+              <span class="ag8-ctrl-lbl">Logo AR</span>
+              <input type="range" id="ag8-ls-lar" min="0.3" max="10" step="0.05" value="2" style="flex:1;">
+              <span class="ag8-ctrl-val" id="ag8-ls-lar-v">2.00</span>
+            </div>
+            <div class="ag8-sec-hd" style="margin-top:14px;">Layout parameters</div>
+            <div class="ag8-ctrl-row">
+              <div class="ag8-dot" style="background:#888;"></div>
+              <span class="ag8-ctrl-lbl">Vertical padding <span style="font-size:9px;color:#555;">(pv)</span></span>
+              <input type="range" id="ag8-ls-pv" min="0" max="50" step="1" value="18" style="flex:1;">
+              <span class="ag8-ctrl-val" id="ag8-ls-pv-v">18 px</span>
+            </div>
+            <div class="ag8-ctrl-row">
+              <div class="ag8-dot" style="background:#9b94f0;"></div>
+              <span class="ag8-ctrl-lbl">Horizontal padding <span style="font-size:9px;color:#555;">(ph)</span></span>
+              <input type="range" id="ag8-ls-ph" min="0" max="50" step="1" value="18" style="flex:1;">
+              <span class="ag8-ctrl-val" id="ag8-ls-ph-v">18 px</span>
+            </div>
+            <div class="ag8-ctrl-row">
+              <div class="ag8-dot" style="background:#e8b86d;"></div>
+              <span class="ag8-ctrl-lbl">Min logo height</span>
+              <input type="range" id="ag8-ls-minh" min="0" max="40" step="1" value="20" style="flex:1;">
+              <span class="ag8-ctrl-val" id="ag8-ls-minh-v">20 px</span>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:16px;">
+              <button class="export-all-btn" onclick="ag8CfgSaveLs()">Save rules</button>
+              <button class="download-btn" onclick="ag8CfgResetLs()">Reset</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Logo card panel ── -->
+        <div id="ag8-cfg-lc" style="display:none;flex-wrap:wrap;gap:20px;align-items:flex-start;">
+          <div style="flex-shrink:0;">
+            <div id="ag8-board-lc" style="position:relative;width:400px;height:208px;"></div>
+            <div id="ag8-board-lc-lbl" style="font-size:11px;color:#5c5c5c;text-align:center;margin-top:6px;">4× scale · 88×40 px</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
+              <div style="display:flex;align-items:center;gap:4px;font-size:10px;color:#7b7b7b;"><div style="width:12px;height:10px;border-radius:2px;background:rgba(140,140,140,.1);"></div>available area</div>
+              <div style="display:flex;align-items:center;gap:4px;font-size:10px;color:#7b7b7b;"><div style="width:12px;height:10px;border-radius:2px;background:rgba(127,119,221,.25);"></div>logo</div>
+            </div>
+            <div id="ag8-stats-lc" style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:10px;"></div>
+          </div>
+          <div style="flex:1;min-width:240px;max-width:400px;display:flex;flex-direction:column;gap:0;">
+            <div class="ag8-sec-hd">Preview input — aspect ratio</div>
+            <div class="ag8-ctrl-row">
+              <div class="ag8-dot" style="background:#9b94f0;"></div>
+              <span class="ag8-ctrl-lbl">Logo AR</span>
+              <input type="range" id="ag8-lc-lar" min="0.3" max="10" step="0.05" value="4" style="flex:1;">
+              <span class="ag8-ctrl-val" id="ag8-lc-lar-v">4.00</span>
+            </div>
+            <div class="ag8-sec-hd" style="margin-top:14px;">Fixed rules (read-only)</div>
+            <div class="ag8-ctrl-row" style="opacity:.5;pointer-events:none;">
+              <div class="ag8-dot" style="background:#888;"></div>
+              <span class="ag8-ctrl-lbl">Gap all sides</span>
+              <span class="ag8-ctrl-val">1 px</span>
+            </div>
+            <div class="ag8-ctrl-row" style="opacity:.5;pointer-events:none;">
+              <div class="ag8-dot" style="background:#9b94f0;"></div>
+              <span class="ag8-ctrl-lbl">Alignment</span>
+              <span class="ag8-ctrl-val">left-bottom</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── WhatsApp panel ── -->
+        <div id="ag8-cfg-wa" style="display:none;flex-wrap:wrap;gap:20px;align-items:flex-start;">
+          <div style="flex-shrink:0;">
+            <div id="ag8-board-wa" style="position:relative;width:423px;height:236px;"></div>
+            <div id="ag8-board-wa-lbl" style="font-size:11px;color:#5c5c5c;text-align:center;margin-top:6px;">0.25× scale · 1500×750 px</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
+              <div style="display:flex;align-items:center;gap:4px;font-size:10px;color:#7b7b7b;"><div style="width:12px;height:10px;border-radius:2px;background:rgba(127,119,221,.25);"></div>logo zone</div>
+              <div style="display:flex;align-items:center;gap:4px;font-size:10px;color:#7b7b7b;"><div style="width:12px;height:10px;border-radius:2px;background:rgba(29,158,117,.18);"></div>logo</div>
+              <div style="display:flex;align-items:center;gap:4px;font-size:10px;color:#7b7b7b;"><div style="width:12px;height:10px;border-radius:2px;background:rgba(200,160,50,.2);"></div>static (bow)</div>
+              <div style="display:flex;align-items:center;gap:4px;font-size:10px;color:#7b7b7b;"><div style="width:12px;height:10px;border-radius:2px;background:rgba(140,140,140,.12);"></div>hubble</div>
+            </div>
+            <div id="ag8-stats-wa" style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:10px;"></div>
+          </div>
+          <div style="flex:1;min-width:240px;max-width:400px;display:flex;flex-direction:column;gap:0;">
+            <div class="ag8-sec-hd">Preview input — aspect ratio</div>
+            <div class="ag8-ctrl-row">
+              <div class="ag8-dot" style="background:#2dc99a;"></div>
+              <span class="ag8-ctrl-lbl">Logo AR</span>
+              <input type="range" id="ag8-wa-lar" min="0.3" max="10" step="0.05" value="2" style="flex:1;">
+              <span class="ag8-ctrl-val" id="ag8-wa-lar-v">2.00</span>
+            </div>
+            <div class="ag8-sec-hd" style="margin-top:14px;">Layout parameters</div>
+            <div class="ag8-ctrl-row">
+              <div class="ag8-dot" style="background:#9b94f0;"></div>
+              <span class="ag8-ctrl-lbl">Logo zone width</span>
+              <input type="range" id="ag8-wa-logoW" min="200" max="1200" step="10" value="640" style="flex:1;">
+              <span class="ag8-ctrl-val" id="ag8-wa-logoW-v">640 px</span>
+            </div>
+            <div class="ag8-ctrl-row">
+              <div class="ag8-dot" style="background:#9b94f0;"></div>
+              <span class="ag8-ctrl-lbl">Logo zone height</span>
+              <input type="range" id="ag8-wa-logoH" min="100" max="700" step="10" value="520" style="flex:1;">
+              <span class="ag8-ctrl-val" id="ag8-wa-logoH-v">520 px</span>
+            </div>
+            <div class="ag8-sec-hd" style="margin-top:14px;">Static elements (read-only)</div>
+            <div class="ag8-ctrl-row" style="opacity:.5;pointer-events:none;">
+              <div class="ag8-dot" style="background:#c8a032;"></div>
+              <span class="ag8-ctrl-lbl">Bow ribbon</span>
+              <span class="ag8-ctrl-val">x=−122 · 1818×753</span>
+            </div>
+            <div class="ag8-ctrl-row" style="opacity:.5;pointer-events:none;">
+              <div class="ag8-dot" style="background:#888;"></div>
+              <span class="ag8-ctrl-lbl">Hubble logo</span>
+              <span class="ag8-ctrl-val">x=1103 · opacity 20%</span>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:16px;">
+              <button class="export-all-btn" onclick="ag8CfgSaveWa()">Save rules</button>
+              <button class="download-btn" onclick="ag8CfgResetWa()">Reset</button>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /ag8-config-panel -->
+
     </div>
   </main>
 </div>
@@ -1731,11 +2036,26 @@
   <!-- Brand Colour -->
   <div>
     <div class="section-label">Brand Colour</div>
-    <div class="color-row">
-      <div class="color-swatch" id="colorSwatch">
-        <input type="color" id="colorPicker" value="#83C9C4">
+    <div id="colorRef" style="display:flex;flex-direction:column;gap:7px;">
+      <input type="text" class="hex-input" id="hexInput" value="#83C9C4" maxlength="7" placeholder="#RRGGBB">
+      <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
+        <div class="ag6-swatch" data-hex="#FFFFFF" style="background:#FFFFFF;" title="White"></div>
+        <div class="ag6-swatch" data-hex="#F5F5F5" style="background:#F5F5F5;" title="#F5F5F5"></div>
+        <div class="ag6-swatch" data-hex="#8A8A8A" style="background:#8A8A8A;" title="#8A8A8A"></div>
+        <div class="ag6-swatch" data-hex="#3A3A3A" style="background:#3A3A3A;" title="#3A3A3A"></div>
+        <div class="ag6-swatch" data-hex="#1A1A1A" style="background:#1A1A1A;" title="#1A1A1A"></div>
+        <div class="ag6-swatch" data-hex="#000000" style="background:#000000;" title="Black"></div>
+        <div class="ag6-swatch" data-hex="#FF3B30" style="background:#FF3B30;" title="Red"></div>
+        <div class="ag6-swatch" data-hex="#FF9500" style="background:#FF9500;" title="Orange"></div>
+        <div class="ag6-swatch" data-hex="#FFCC00" style="background:#FFCC00;" title="Yellow"></div>
+        <div class="ag6-swatch" data-hex="#34C759" style="background:#34C759;" title="Green"></div>
+        <div class="ag6-swatch" data-hex="#007AFF" style="background:#007AFF;" title="Blue"></div>
+        <div class="ag6-swatch" data-hex="#9B59B6" style="background:#9B59B6;" title="Purple"></div>
+        <div class="ag6-swatch ag6-picker-swatch" id="colorSwatch" title="Custom colour" onclick="document.getElementById('colorPicker').click()">
+          <input type="color" id="colorPicker" value="#83C9C4" style="position:absolute;opacity:0;width:0;height:0;pointer-events:none;">
+          <i class="ph ph-palette" style="font-size:14px;color:rgba(255,255,255,0.55);pointer-events:none;"></i>
+        </div>
       </div>
-      <input type="text" class="hex-input" id="hexInput" value="#83C9C4" maxlength="7" placeholder="#000000">
     </div>
   </div>
 
@@ -2501,8 +2821,15 @@ function applyColor(hex) {
   hexInput.value = hex;
   swatchEl.style.background = hex;
   hexInput.classList.remove('invalid');
+  document.querySelectorAll('#colorRef .ag6-swatch').forEach(s => {
+    s.classList.toggle('selected', s.dataset.hex?.toUpperCase() === hex.toUpperCase());
+  });
   renderAll();
 }
+
+document.querySelectorAll('#colorRef .ag6-swatch').forEach(s => {
+  if (s.dataset.hex) s.addEventListener('click', () => applyColor(s.dataset.hex));
+});
 
 colorPicker.addEventListener('input', (e) => applyColor(e.target.value));
 
@@ -4315,15 +4642,303 @@ function getReplicateApiKey() {
 
 })();
 
-// ── Method 7 — AI SVG brand asset generator ──────────────────────────────
+// ── Method 7 — Rule-based brand asset generator ───────────────────────────
 (function initAg8() {
 
   // ── State ──
   let ag8BrandHex = '#83C9C4';
-  const ag8Slots = { logo: { dataUrl: null }, subject: { dataUrl: null } };
-  const ag8SVGs  = {};   // keyed: logo_square | logo_card | listing1 | listing2
+  const ag8Slots = {
+    logo:    { _img: null },
+    subject: { _img: null }
+  };
 
-  // ── Compact colour picker ──
+  // ── SVG store ──
+  const ag8SVGs = {};
+
+  // ── Config data ──
+  const AG8_CFG_DEF = {
+    l1: { topMargin: 8, slotMinH: 24, gap: 6, minGap: 4, bottomBleed: 14 },
+    l2: { topMargin: 8, slotMinH: 24, gap: 6, minGap: 4, bottomBleed: 14 },
+    ls: { pv: 18, ph: 18, minH: 20 },
+    wa: { logoW: 640, logoH: 520 }
+  };
+  function ag8DeepClone(o) { return JSON.parse(JSON.stringify(o)); }
+  let ag8CfgData = JSON.parse(localStorage.getItem('ag8CfgData') || 'null') || ag8DeepClone(AG8_CFG_DEF);
+
+  // ── Config panel state ──
+  let ag8CfgOpen = false;
+  let ag8CfgActiveTab = 'l1';
+
+  // ── SVG helpers ──
+  const ag8R = v => Math.round(v * 100) / 100;  // round to 2 dp
+
+  function ag8ImgToDataUrl(img) {
+    if (!img) return null;
+    if (img.src && img.src.startsWith('data:')) return img.src;
+    try {
+      const cv = document.createElement('canvas');
+      cv.width  = img.naturalWidth  || img.width  || 1;
+      cv.height = img.naturalHeight || img.height || 1;
+      cv.getContext('2d').drawImage(img, 0, 0);
+      return cv.toDataURL('image/png');
+    } catch(e) { return img.src; }
+  }
+
+  function ag8ShowSVG(name, svg) {
+    const wrap = document.getElementById('ag8-wrap-' + name);
+    if (!wrap) return;
+    wrap.innerHTML = svg;
+    const el = wrap.querySelector('svg');
+    if (el) { el.style.width = '100%'; el.style.height = '100%'; el.style.display = 'block'; }
+  }
+
+  // Rounded-rect clip element for SVG <defs> (r=16, matching Method 1)
+  function ag8SqClip(id, w, h) {
+    return `<clipPath id="${id}"><rect width="${w}" height="${h}" rx="16" ry="16"/></clipPath>`;
+  }
+
+  // ── Layout engine ──
+  // Computes logo + subject pixel positions from AR-based rules.
+  // Returns { logoX,logoY,logoW,logoH, subjX,subjTop,subjW,subjH }
+  function ag8ComputeLayout(CW, CH, logoImg, subjImg, opts) {
+    const {
+      topMargin   = 8,
+      slotMinH    = 24,
+      gap         = 6,
+      minGap      = 4,
+      bottomBleed = 14,
+      // logo AR thresholds
+      wideAR      = 3.0,
+      medAR       = 1.5,
+      // logo render fractions
+      wideWPct, medWPct,
+      sqHPct      = 0.43,
+      // subject AR thresholds
+      portAR      = 0.8,
+      sqAR        = 1.2,
+      // subject render fractions
+      portMaxWPct, sqMaxWPct,
+      landWPct    = 1.08,
+      landTopAdj  = -4,
+    } = opts;
+
+    // ── Logo slot ──
+    let logoW = 0, logoH = 0, lar = 1;
+    if (logoImg) {
+      lar = (logoImg.naturalWidth || logoImg.width || 1) /
+            (logoImg.naturalHeight || logoImg.height || 1);
+      if (lar >= wideAR)      { logoW = CW * wideWPct; logoH = logoW / lar; }
+      else if (lar >= medAR)  { logoW = CW * medWPct;  logoH = logoW / lar; }
+      else                    { logoH = CH * sqHPct;   logoW = logoH * lar; }
+    }
+    const slotH = Math.max(logoH, slotMinH);
+    const slotY = topMargin;
+    const logoX = (CW - logoW) / 2;          // logo always centred on canvas
+    const logoY = slotY + (slotH - logoH) / 2;
+
+    // ── Subject ──
+    const bottomAnchor = CH + bottomBleed;
+    const availH = bottomAnchor - (slotY + slotH + gap);
+    let subjW = 0, subjH = 0, topAdj = 0;
+
+    if (subjImg) {
+      const sar = (subjImg.naturalWidth || subjImg.width || 1) /
+                  (subjImg.naturalHeight || subjImg.height || 1);
+      if (sar > sqAR) {
+        // landscape — fixed width bleed
+        subjW   = CW * landWPct;
+        subjH   = subjW / sar;
+        topAdj  = landTopAdj;
+      } else if (sar >= portAR) {
+        // square — fill available height, cap width
+        const maxW = CW * sqMaxWPct;
+        subjH = availH;
+        if (subjH * sar > maxW) { subjW = maxW; subjH = subjW / sar; }
+        else                    { subjW = subjH * sar; }
+      } else {
+        // portrait — fill available height, cap width
+        const maxW = CW * portMaxWPct;
+        subjH = availH;
+        if (subjH * sar > maxW) { subjW = maxW; subjH = subjW / sar; }
+        else                    { subjW = subjH * sar; }
+      }
+      // Gap constraint — clamp subject height so gap ≥ minGap
+      const maxSubjH = bottomAnchor + topAdj - (slotY + slotH) - minGap;
+      if (subjH > maxSubjH) {
+        subjH = Math.max(0, maxSubjH);
+        subjW = subjH * ((subjImg.naturalWidth || subjImg.width || 1) /
+                         (subjImg.naturalHeight || subjImg.height || 1));
+      }
+    }
+    const subjTop = subjH > 0 ? bottomAnchor - subjH + topAdj : 0;
+    const subjX   = subjW > 0 ? (CW - subjW) / 2 : 0;
+
+    return { logoX, logoY, logoW, logoH, subjX, subjTop, subjW, subjH };
+  }
+
+  // ── SVG builders ──
+
+  function ag8BuildListingSVG(name, CW, CH, opts) {
+    const L  = ag8ComputeLayout(CW, CH, ag8Slots.logo._img, ag8Slots.subject._img, opts);
+    const gc = gradientColors(ag8BrandHex);
+    const cid = name + '-c', gid = name + '-g';
+    const R = ag8R;
+    const parts = [
+      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${CW} ${CH}">`,
+      `<defs>`,
+      ag8SqClip(cid, CW, CH),
+      `<linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="${CH}" gradientUnits="userSpaceOnUse">`,
+      `<stop offset="0" stop-color="${gc.light}"/><stop offset="1" stop-color="${gc.base}"/>`,
+      `</linearGradient></defs>`,
+      `<g clip-path="url(#${cid})">`,
+      `<rect width="${CW}" height="${CH}" fill="url(#${gid})"/>`,
+    ];
+    if (ag8Slots.logo._img && L.logoW > 0) {
+      const du = ag8ImgToDataUrl(ag8Slots.logo._img);
+      if (du) parts.push(`<image href="${du}" x="${R(L.logoX)}" y="${R(L.logoY)}" width="${R(L.logoW)}" height="${R(L.logoH)}" preserveAspectRatio="xMidYMid meet"/>`);
+    }
+    if (ag8Slots.subject._img && L.subjW > 0) {
+      const du = ag8ImgToDataUrl(ag8Slots.subject._img);
+      if (du) parts.push(`<image href="${du}" x="${R(L.subjX)}" y="${R(L.subjTop)}" width="${R(L.subjW)}" height="${R(L.subjH)}" preserveAspectRatio="xMidYMid meet"/>`);
+    }
+    parts.push(`</g></svg>`);
+    return parts.join('');
+  }
+
+  function ag8BuildLogoSquareSVG() {
+    // Rule: max_h = CW−2·pv, max_w = CW−2·ph
+    // logo_h = clamp(min(max_h, max_w/AR), minH, max_h)
+    // logo_w = logo_h × AR, centred
+    const R   = ag8R;
+    const cfg = ag8CfgData.ls || AG8_CFG_DEF.ls;
+    const CW = 116, CH = 116;
+    const pv = cfg.pv, ph = cfg.ph, minH = cfg.minH;
+    const autoMaxH = Math.floor(0.9 * CH);   // 104px
+    const autoMaxW = Math.floor(0.9 * CW);   // 104px
+    const slotH = CH - 2 * pv;              // padding-defined slot height
+    const slotW = CW - 2 * ph;              // padding-defined slot width
+    const parts = [
+      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${CW} ${CH}">`,
+      `<rect width="${CW}" height="${CH}" fill="${ag8BrandHex}"/>`,
+    ];
+    if (ag8Slots.logo._img) {
+      const img = ag8Slots.logo._img;
+      const ar  = (img.naturalWidth||img.width||1) / (img.naturalHeight||img.height||1);
+      const dhNatural = Math.min(slotH, slotW / ar);
+      let dh = Math.min(autoMaxH, Math.max(minH, dhNatural));
+      let dw = dh * ar;
+      if (dw > autoMaxW) { dw = autoMaxW; dh = dw / ar; } // scale down, ignore minH
+      const cx = CW / 2, cy = CH / 2;
+      const ix = R(cx - dw / 2), iy = R(cy - dh / 2);
+      const du = ag8ImgToDataUrl(img);
+      if (du) parts.push(`<image href="${du}" x="${ix}" y="${iy}" width="${R(dw)}" height="${R(dh)}" preserveAspectRatio="xMidYMid meet"/>`);
+    }
+    parts.push(`</svg>`);
+    return parts.join('');
+  }
+
+  function ag8BuildLogoCardSVG() {
+    // Rule: 2px gap on all sides, logo fills max possible area, left-bottom aligned
+    const R   = ag8R;
+    const GAP = 1;
+    const CW  = 88, CH = 40;
+    const maxW = CW - GAP * 2;   // 86
+    const maxH = CH - GAP * 2;   // 38
+    const parts = [
+      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${CW} ${CH}">`,
+      `<rect width="${CW}" height="${CH}" fill="${ag8BrandHex}"/>`,
+    ];
+    if (ag8Slots.logo._img) {
+      const img = ag8Slots.logo._img;
+      const ar  = (img.naturalWidth||img.width||1) / (img.naturalHeight||img.height||1);
+      let dw, dh;
+      if (ar > maxW / maxH) { dw = maxW; dh = dw / ar; }
+      else                  { dh = maxH; dw = dh * ar; }
+      const x  = GAP;                   // left aligned
+      const y  = R(CH - GAP - dh);      // bottom aligned
+      const du = ag8ImgToDataUrl(img);
+      if (du) parts.push(`<image href="${du}" x="${x}" y="${y}" width="${R(dw)}" height="${R(dh)}" preserveAspectRatio="xMinYMin meet"/>`);
+    }
+    parts.push(`</svg>`);
+    return parts.join('');
+  }
+
+  function ag8BuildBackgroundSVG() {
+    const hex = ag8BrandHex;
+    const txtCol = isColorDark(hex) ? '#ffffff' : '#111111';
+    return [
+      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 259 94">`,
+      `<defs>${ag8SqClip('bg-c', 259, 94)}</defs>`,
+      `<g clip-path="url(#bg-c)">`,
+      `<rect width="259" height="94" fill="${hex}"/>`,
+      `<text x="129.5" y="47" dominant-baseline="middle" text-anchor="middle" font-family="monospace" font-size="12" font-weight="600" letter-spacing="2" fill="${txtCol}">${hex}</text>`,
+      `</g></svg>`,
+    ].join('');
+  }
+
+  function ag8BuildWASVG() {
+    const R    = ag8R;
+    const dark = isColorDark(ag8BrandHex);
+    const bowDu    = ag8ImgToDataUrl(bowImg);
+    const hubbleDu = ag8ImgToDataUrl(hubbleImg);
+    const parts = [
+      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 750">`,
+      `<defs>`,
+      ``,
+      dark ? `<filter id="wa-wh"><feColorMatrix type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1 0"/></filter>` : '',
+      `</defs>`,
+      `<rect width="1500" height="750" fill="${ag8BrandHex}"/>`,
+    ];
+    if (bowDu)    parts.push(`<image href="${bowDu}" x="0" y="0" width="1500" height="750"/>`);
+    if (ag8Slots.logo._img) {
+      const img = ag8Slots.logo._img;
+      const ar  = (img.naturalWidth||img.width||1)/(img.naturalHeight||img.height||1);
+      const waCfg = ag8CfgData.wa || AG8_CFG_DEF.wa;
+      const ZW = waCfg.logoW, ZH = waCfg.logoH;
+      const ZX = Math.round((1500 - ZW) / 2), ZY = Math.round((750 - ZH) / 2);
+      let dw, dh;
+      if (ar > ZW/ZH) { dw=ZW; dh=R(ZW/ar); } else { dh=ZH; dw=R(ZH*ar); }
+      const du = ag8ImgToDataUrl(img);
+      if (du) parts.push(`<image href="${du}" x="${R(ZX+(ZW-dw)/2)}" y="${R(ZY+(ZH-dh)/2)}" width="${R(dw)}" height="${R(dh)}" preserveAspectRatio="xMidYMid meet"/>`);
+    }
+    if (hubbleDu) {
+      const f = dark ? ' filter="url(#wa-wh)"' : '';
+      parts.push(`<image href="${hubbleDu}" x="1103.27" y="138.17" width="325.93" height="60.95"${f}/>`);
+    }
+    parts.push(`</svg>`);
+    return parts.join('');
+  }
+
+  function ag8RenderAll() {
+    const c1 = ag8CfgData.l1, c2 = ag8CfgData.l2;
+    const s1 = ag8BuildListingSVG('listing1', 104, 116, {
+      topMargin: c1.topMargin, slotMinH: c1.slotMinH, gap: c1.gap, minGap: c1.minGap, bottomBleed: c1.bottomBleed,
+      wideWPct:0.77, medWPct:0.71, portMaxWPct:0.70, sqMaxWPct:0.95
+    });
+    ag8SVGs['listing1'] = s1; ag8ShowSVG('listing1', s1);
+
+    const s2 = ag8BuildListingSVG('listing2', 116, 116, {
+      topMargin: c2.topMargin, slotMinH: c2.slotMinH, gap: c2.gap, minGap: c2.minGap, bottomBleed: c2.bottomBleed,
+      wideWPct:0.69, medWPct:0.65, portMaxWPct:0.70, sqMaxWPct:0.93
+    });
+    ag8SVGs['listing2'] = s2; ag8ShowSVG('listing2', s2);
+
+    const slsq = ag8BuildLogoSquareSVG();
+    ag8SVGs['logo-sq'] = slsq; ag8ShowSVG('logo-sq', slsq);
+
+    const slcard = ag8BuildLogoCardSVG();
+    ag8SVGs['logo-card'] = slcard; ag8ShowSVG('logo-card', slcard);
+
+    const sbg = ag8BuildBackgroundSVG();
+    ag8SVGs['background'] = sbg; ag8ShowSVG('background', sbg);
+    const hexLbl = document.getElementById('ag8-bgHexLabel');
+    if (hexLbl) hexLbl.textContent = ag8BrandHex;
+
+    const swa = ag8BuildWASVG();
+    ag8SVGs['wa'] = swa; ag8ShowSVG('wa', swa);
+  }
+
+  // ── Colour picker ──
   function ag8DominantColor(dataUrl) {
     return new Promise(resolve => {
       const img = new Image();
@@ -4358,6 +4973,7 @@ function getReplicateApiKey() {
     document.querySelectorAll('#ag8-colorRef .ag6-swatch').forEach(s => {
       s.classList.toggle('selected', !!(s.dataset.hex && s.dataset.hex.toUpperCase() === hex.toUpperCase()));
     });
+    ag8RenderAll();
   }
 
   document.querySelectorAll('#ag8-colorRef .ag6-swatch').forEach(s => {
@@ -4404,29 +5020,42 @@ function getReplicateApiKey() {
     }
   });
 
-  ag8SetColor(ag8BrandHex);
-
   // ── Upload slots ──
+  function ag8LoadImg(dataUrl, cb) {
+    const img = new Image();
+    img.onload = () => cb(img);
+    img.onerror = () => cb(null);
+    img.src = dataUrl;
+  }
+
   function ag8SetSlot(key, file) {
     if (!file || !file.type.startsWith('image/')) return;
     const reader = new FileReader();
-    reader.onload = e => { ag8Slots[key] = { dataUrl: e.target.result }; ag8RenderThumb(key); };
+    reader.onload = e => {
+      ag8LoadImg(e.target.result, img => {
+        ag8Slots[key]._img = img;
+        ag8RenderThumb(key);
+        ag8RenderAll();
+      });
+    };
     reader.readAsDataURL(file);
   }
+
   function ag8RenderThumb(key) {
     const slot   = ag8Slots[key];
     const thumbs = document.getElementById('ag8-' + key + 'Thumbs');
     const ph     = document.getElementById('ag8-' + key + 'Placeholder');
     thumbs.innerHTML = '';
-    if (!slot.dataUrl) { ph.style.display = ''; return; }
+    if (!slot._img) { ph.style.display = ''; return; }
     ph.style.display = 'none';
     const item = document.createElement('div'); item.className = 'aigen-thumb-item';
-    item.innerHTML = '<img src="' + slot.dataUrl + '"><button class="aigen-thumb-remove"><i class="ph ph-x"></i></button>';
+    item.innerHTML = '<img src="' + slot._img.src + '"><button class="aigen-thumb-remove"><i class="ph ph-x"></i></button>';
     item.querySelector('.aigen-thumb-remove').addEventListener('click', ev => {
-      ev.stopPropagation(); ag8Slots[key] = { dataUrl: null }; ag8RenderThumb(key);
+      ev.stopPropagation(); ag8Slots[key]._img = null; ag8RenderThumb(key); ag8RenderAll();
     });
     thumbs.appendChild(item);
   }
+
   ['logo','subject'].forEach(key => {
     const zone  = document.getElementById('ag8-' + key + 'Zone');
     const input = document.getElementById('ag8-' + key + 'Input');
@@ -4436,143 +5065,502 @@ function getReplicateApiKey() {
     zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('drag-over'); ag8SetSlot(key, e.dataTransfer.files[0]); });
   });
 
-  // ── Gemini call ──
-  async function ag8CallGemini(brandHex, rules, logoDU, subjectDU) {
-    const apiKey = await getGeminiApiKey();
-    const MODEL  = 'gemini-2.0-flash';
-
-    const prompt = [
-      'You are a professional brand asset SVG designer. Generate 4 responsive SVG brand assets.',
-      '',
-      'BRAND COLOR: ' + brandHex,
-      '',
-      'DESIGN RULES:',
-      rules || 'Clean minimal design. Subtle linear gradient background (5% lighter at top, 8% darker at bottom). Rounded corners r=16 on listing cards. Logo centered with generous padding. Product image prominently displayed.',
-      '',
-      'ASSETS (exact viewBox — do NOT add width/height on root SVG):',
-      '1. logo_square  viewBox="0 0 116 116"  — Solid brand-colour fill, logo centered in 98x98 zone (9px padding all sides)',
-      '2. logo_card    viewBox="0 0 88 40"    — Solid brand-colour fill, logo bottom-left 1px margin',
-      '3. listing1     viewBox="0 0 104 116"  — Gradient bg, rounded r=16, logo zone x=5 y=6 w=94 h=52, subject zone x=0 y=56 w=104 h=60',
-      '4. listing2     viewBox="0 0 116 116"  — Gradient bg, rounded r=16, logo zone x=11 y=5 w=94 h=52, subject zone x=0 y=56 w=116 h=60',
-      '',
-      'IMAGE EMBEDDING — use these EXACT placeholder strings as href values:',
-      '  Logo:    href="LOGO_DATA_URL"',
-      '  Subject: href="SUBJECT_DATA_URL"',
-      '  Always add preserveAspectRatio="xMidYMid meet" and set width/height to zone dimensions.',
-      logoDU    ? '' : '(No logo provided — omit logo image elements)',
-      subjectDU ? '' : '(No subject provided — fill subject zone with decorative shape in brand colour)',
-      '',
-      'REQUIREMENTS: xmlns="http://www.w3.org/2000/svg" on root. Use <defs> for gradients/clipPaths. No fixed root width/height.',
-      '',
-      'OUTPUT: Raw JSON only — no markdown fences, no explanation:',
-      '{"logo_square":"<svg...>","logo_card":"<svg...>","listing1":"<svg...>","listing2":"<svg...>"}',
-    ].join('\n');
-
-    const parts = [{ text: prompt }];
-    if (logoDU) {
-      parts.push({ inline_data: { mime_type: logoDU.split(';')[0].split(':')[1], data: logoDU.split(',')[1] } });
-      parts.push({ text: '(image above = LOGO, use href="LOGO_DATA_URL")' });
-    }
-    if (subjectDU) {
-      parts.push({ inline_data: { mime_type: subjectDU.split(';')[0].split(':')[1], data: subjectDU.split(',')[1] } });
-      parts.push({ text: '(image above = SUBJECT, use href="SUBJECT_DATA_URL")' });
-    }
-
-    const resp = await fetch(
-      'https://generativelanguage.googleapis.com/v1beta/models/' + MODEL + ':generateContent?key=' + apiKey,
-      { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts }] }) }
-    );
-    if (!resp.ok) {
-      const e = await resp.json().catch(() => ({}));
-      throw new Error(e?.error?.message || 'Gemini HTTP ' + resp.status);
-    }
-    const data = await resp.json();
-    let raw = (data?.candidates?.[0]?.content?.parts?.[0]?.text || '').trim();
-    raw = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
-    try { return JSON.parse(raw); }
-    catch(_) {
-      const m = raw.match(/\{[\s\S]*\}/);
-      if (!m) throw new Error('Could not parse JSON from Gemini response');
-      return JSON.parse(m[0]);
-    }
-  }
-
-  function ag8InjectImages(svgCode, logoDU, subjectDU) {
-    if (logoDU)    svgCode = svgCode.split('LOGO_DATA_URL').join(logoDU);
-    if (subjectDU) svgCode = svgCode.split('SUBJECT_DATA_URL').join(subjectDU);
-    return svgCode;
-  }
-
-  function ag8ShowSVG(name, svgCode) {
-    const wrap = document.getElementById('ag8-preview-' + name);
-    if (!wrap) return;
-    wrap.innerHTML = svgCode;
-    const el = wrap.querySelector('svg');
-    if (el) { el.style.width = '100%'; el.style.height = '100%'; el.style.display = 'block'; }
-  }
-
   // ── Downloads ──
   window.ag8DownloadSVG = function(name) {
-    const code = ag8SVGs[name];
-    if (!code) { showToast('Generate first.'); return; }
+    const svg = ag8SVGs[name];
+    if (!svg) { showToast('No asset yet.'); return; }
     const a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([code], { type: 'image/svg+xml' }));
+    a.href = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }));
     a.download = 'm7-' + name + '.svg'; a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   };
 
-  window.ag8DownloadPNG = async function(name, w, h) {
-    const code = ag8SVGs[name];
-    if (!code) { showToast('Generate first.'); return; }
-    const url = URL.createObjectURL(new Blob([code], { type: 'image/svg+xml' }));
+  window.ag8DownloadPNG = async function(name, lw, lh) {
+    const svg = ag8SVGs[name];
+    if (!svg) { showToast('No asset yet.'); return; }
+    const url = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }));
     const img = new Image();
     await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = url; });
-    const cv = document.createElement('canvas'); cv.width = w*2; cv.height = h*2;
-    cv.getContext('2d').drawImage(img, 0, 0, w*2, h*2);
+    const cv = document.createElement('canvas');
+    cv.width = lw * 2; cv.height = lh * 2;
+    cv.getContext('2d').drawImage(img, 0, 0, lw * 2, lh * 2);
     URL.revokeObjectURL(url);
     const a = document.createElement('a');
     a.href = cv.toDataURL('image/png'); a.download = 'm7-' + name + '@2x.png'; a.click();
   };
 
+  window.ag8CopyBgHex = function() {
+    navigator.clipboard.writeText(ag8BrandHex).then(() => showToast('Copied ' + ag8BrandHex));
+  };
+
   window.ag8DownloadAllSVGs = async function() {
-    for (const name of ['logo_square','logo_card','listing1','listing2']) {
+    for (const name of ['listing1','listing2','logo-sq','logo-card','background','wa']) {
       if (ag8SVGs[name]) { window.ag8DownloadSVG(name); await new Promise(r => setTimeout(r, 150)); }
     }
   };
 
-  // ── Generate ──
-  window.ag8Generate = async function() {
-    if (!ag8Slots.logo.dataUrl && !ag8Slots.subject.dataUrl) {
-      showToast('Upload at least a logo or subject image.'); return;
+  window.ag8DownloadAllPNGs = async function() {
+    const assets = [
+      ['listing1', 104, 116], ['listing2', 116, 116],
+      ['logo-sq',  116, 116], ['logo-card',  88,  40],
+      ['background', 259, 94], ['wa', 1500, 750],
+    ];
+    for (const [name, w, h] of assets) {
+      await window.ag8DownloadPNG(name, w, h);
+      await new Promise(r => setTimeout(r, 150));
     }
-    const btn    = document.getElementById('ag8-generateBtn');
-    const hdr    = document.getElementById('ag8-statusHdr');
-    const status = document.getElementById('ag8-statusText');
-    const row    = document.getElementById('ag8-assetsRow');
-
-    btn.disabled = true;
-    btn.innerHTML = '<i class="ph ph-circle-notch" style="animation:spin 0.8s linear infinite;"></i> Generating\u2026';
-    hdr.style.opacity = '0.5'; status.textContent = 'Calling Gemini\u2026';
-    row.style.opacity = '0.2'; row.style.pointerEvents = 'none';
-
-    try {
-      const rules = (document.getElementById('ag8-rulesInput').value || '').trim();
-      const raw   = await ag8CallGemini(ag8BrandHex, rules, ag8Slots.logo.dataUrl, ag8Slots.subject.dataUrl);
-
-      for (const name of ['logo_square','logo_card','listing1','listing2']) {
-        if (!raw[name]) continue;
-        ag8SVGs[name] = ag8InjectImages(raw[name], ag8Slots.logo.dataUrl, ag8Slots.subject.dataUrl);
-        ag8ShowSVG(name, ag8SVGs[name]);
-      }
-      row.style.opacity = '1'; row.style.pointerEvents = '';
-      hdr.style.opacity = '1'; status.textContent = '\u2713 Done';
-    } catch(err) {
-      console.error('[ag8]', err);
-      showToast('Error: ' + err.message);
-      hdr.style.opacity = '0.35'; status.textContent = '\u26a0 Failed';
-    }
-    btn.disabled = false;
-    btn.innerHTML = '<i class="ph ph-magic-wand"></i> Generate SVGs';
   };
+
+  // ── Config: board layout engine (AR-based, for visualization) ──
+  function ag8BoardLayout(CW, CH, lar, sar, opts) {
+    const { topMargin=8, slotMinH=24, gap=6, minGap=4, bottomBleed=14 } = opts;
+    const isL1 = (CW === 104);
+    // Logo sizing from AR
+    let logoW, logoH;
+    if      (lar >= 3)   { logoW = CW * (isL1 ? 0.77 : 0.69); }
+    else if (lar >= 1.5) { logoW = CW * (isL1 ? 0.71 : 0.65); }
+    else                 { logoH = CH * 0.43; logoW = logoH * lar; }
+    logoH = logoH || logoW / lar;
+    // Slot
+    const slotH   = Math.max(logoH, slotMinH);
+    const slotY   = topMargin;
+    const slotX   = (CW - logoW) / 2;
+    const slotW   = logoW;
+    const logoX   = slotX;
+    const logoY   = slotY + (slotH - logoH) / 2;
+    const slotBottom = slotY + slotH;
+    // Gap
+    const gapTop    = slotBottom;
+    const gapBottom = slotBottom + gap;
+    // Subject
+    const bottomAnchor = CH + bottomBleed;
+    const availH = bottomAnchor - gapBottom;
+    const maxW = sar < 0.8  ? CW * (isL1 ? 0.70 : 0.70)
+               : sar <= 1.2 ? CW * (isL1 ? 0.95 : 0.93)
+               : CW * 1.08;
+    let sw, sh, topAdj = 0, gapConstrained = false;
+    if (sar > 1.2) {
+      sw = maxW; sh = sw / sar; topAdj = -4;
+    } else {
+      sh = availH; sw = Math.min(sh * sar, maxW); sh = sw / sar;
+    }
+    const maxSubjH = bottomAnchor + topAdj - gapBottom - minGap;
+    if (sh > maxSubjH) { sh = Math.max(0, maxSubjH); sw = sh * sar; gapConstrained = true; }
+    const sTopY = sh > 0 ? bottomAnchor + topAdj - sh : gapBottom;
+    const sx    = (CW - sw) / 2;
+    return {
+      topMargin, slotX, slotY, slotW, slotH, slotBottom,
+      logoX, logoY, logoW, logoH,
+      gapTop, gapBottom, gap,
+      sx, sTopY, sw, sh, bottomAnchor, bottomBleed,
+      gapConstrained,
+      p: (v, b) => Math.round(v / b * 100)
+    };
+  }
+
+  // ── Config: add a zone box to board ──
+  function ag8AddZone(board, bg, border, l, t, w, h, label, lblColor, show) {
+    if (!show || w <= 0 || h <= 0) return;
+    const d = document.createElement('div');
+    d.style.cssText = `position:absolute;left:${l}px;top:${t}px;width:${Math.max(w,1)}px;height:${Math.max(h,1)}px;` +
+      `background:${bg};border-radius:3px;` +
+      `display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;`;
+    if (label) {
+      d.innerHTML = label.split('\n').map((line, i) =>
+        `<span style="font-size:${i===0?'9':'8'}px;font-weight:600;letter-spacing:.02em;padding:0 3px;text-align:center;line-height:1.3;color:${i===0?lblColor:'#aaa'}">${line}</span>`
+      ).join('');
+    }
+    board.appendChild(d);
+  }
+
+  // ── Config: draw zone board ──
+  function ag8DrawBoard(tab) {
+    const CW = tab === 'l1' ? 104 : 116;
+    const CH = 116;
+    const S  = 2;
+    const CR = 16 * S; // corner radius at 2× scale, matching actual card rx="16"
+    const lar   = parseFloat(document.getElementById('ag8-'+tab+'-lar').value);
+    const sar   = parseFloat(document.getElementById('ag8-'+tab+'-sar').value);
+    const tm    = parseFloat(document.getElementById('ag8-'+tab+'-tm').value);
+    const sloth = parseFloat(document.getElementById('ag8-'+tab+'-sloth').value);
+    const gap   = parseFloat(document.getElementById('ag8-'+tab+'-gap').value);
+    const bleed = parseFloat(document.getElementById('ag8-'+tab+'-bleed').value);
+    // Update display values
+    document.getElementById('ag8-'+tab+'-lar-v').textContent   = lar.toFixed(2);
+    document.getElementById('ag8-'+tab+'-sar-v').textContent   = sar.toFixed(2);
+    document.getElementById('ag8-'+tab+'-tm-v').textContent    = tm.toFixed(1)+' px';
+    document.getElementById('ag8-'+tab+'-sloth-v').textContent = sloth.toFixed(0)+' px';
+    document.getElementById('ag8-'+tab+'-gap-v').textContent   = gap.toFixed(1)+' px';
+    document.getElementById('ag8-'+tab+'-bleed-v').textContent = bleed.toFixed(1)+' px';
+    const L = ag8BoardLayout(CW, CH, lar, sar, { topMargin:tm, slotMinH:sloth, gap, minGap:4, bottomBleed:bleed });
+    const board = document.getElementById('ag8-board-'+tab);
+    board.innerHTML = '';
+
+    // PAD: space around the canvas inside the dark bounding box
+    const PAD = 24;
+    const totalBleedPx = Math.max(0, L.sh - (CH - L.sTopY)) * S;
+    const boardW = CW*S + PAD*2;
+    const boardH = CH*S + PAD*2 + totalBleedPx;
+    board.style.width  = boardW + 'px';
+    board.style.height = boardH + 'px';
+
+    // ── Large dark bounding box ──
+    const outerBg = document.createElement('div');
+    outerBg.style.cssText = `position:absolute;left:0;top:0;width:${boardW}px;height:${boardH}px;` +
+      `border-radius:14px;background:#060a07;`;
+    board.appendChild(outerBg);
+
+    // ── Dark card shadow box (same size as canvas, slightly darker) ──
+    const bgBox = document.createElement('div');
+    bgBox.style.cssText = `position:absolute;left:${PAD}px;top:${PAD}px;width:${CW*S}px;height:${CH*S}px;` +
+      `border-radius:${CR}px;background:#0d1610;`;
+    board.appendChild(bgBox);
+
+    // ── Inner canvas clip wrapper — green fill + matching corner radius ──
+    // Subject is NOT placed here so it won't be corner-clipped
+    const wrap = document.createElement('div');
+    wrap.style.cssText = `position:absolute;left:${PAD}px;top:${PAD}px;width:${CW*S}px;height:${CH*S}px;` +
+      `border-radius:${CR}px;overflow:hidden;background:#1c2b22;`;
+    board.appendChild(wrap);
+
+    // Zones inside the clipped canvas area (back to front) — no subject here
+    ag8AddZone(wrap, 'rgba(140,140,140,.07)', '#888',     0,          0,          CW*S,      tm*S,         `top margin\n${tm.toFixed(1)}px`,                    '#aaa',    tm > 0.5);
+    ag8AddZone(wrap, 'rgba(102,96,204,.12)',  '#6660cc',  L.slotX*S,  L.slotY*S,  L.slotW*S, L.slotH*S,    `slot\n${Math.round(L.slotW)}×${Math.round(L.slotH)}px`, '#9991e8', true);
+    ag8AddZone(wrap, 'rgba(127,119,221,.22)', '#9b94f0',  L.logoX*S,  L.logoY*S,  L.logoW*S, L.logoH*S,    `logo\n${Math.round(L.logoW)}×${Math.round(L.logoH)}px`,  '#c4bfff', true);
+    const gapZoneH = Math.max(0, L.sTopY - L.slotBottom);
+    ag8AddZone(wrap, 'rgba(29,100,60,.08)',   '#3a5a48',  0,          L.gapTop*S, CW*S,      gapZoneH*S,   `gap ${L.gap.toFixed(1)}px`,                         '#4a9a6e', gapZoneH > 0);
+
+    // Subject — on board with PAD offset so it's never clipped by canvas corners
+    if (L.sw > 0) {
+      ag8AddZone(board, 'rgba(29,158,117,.14)', '#2dc99a',
+        L.sx*S + PAD, L.sTopY*S + PAD, L.sw*S, L.sh*S,
+        `subject\n${Math.round(L.sw)}×${Math.round(L.sh)}px`, '#6ddbb8', L.sh > 0);
+    }
+
+    // Warning
+    document.getElementById('ag8-warn-'+tab).style.display = L.gapConstrained ? 'block' : 'none';
+    // Stats
+    const statsEl = document.getElementById('ag8-stats-'+tab);
+    statsEl.innerHTML = [
+      ['Top margin',  `${tm.toFixed(1)}px/${L.p(tm,CH)}%H`],
+      ['Slot H',      `${Math.round(L.slotH)}px/${L.p(L.slotH,CH)}%H`],
+      ['Logo W',      `${Math.round(L.logoW)}px/${L.p(L.logoW,CW)}%W`],
+      ['Logo H',      `${Math.round(L.logoH)}px/${L.p(L.logoH,CH)}%H`],
+      ['Gap',         `${gap.toFixed(1)}px/${L.p(gap,CH)}%H`],
+      ['Slot btm',    `${Math.round(L.slotBottom)}px/${L.p(L.slotBottom,CH)}%H`],
+      ['Subject W',   `${Math.round(L.sw)}px/${L.p(L.sw,CW)}%W`],
+      ['Subject H',   `${Math.round(L.sh)}px/${L.p(L.sh,CH)}%H`],
+      ['Subj top',    `${Math.round(L.sTopY)}px/${L.p(L.sTopY,CH)}%H`],
+      ['Bleed',       `${bleed.toFixed(1)}px/${L.p(bleed,CH)}%H`],
+    ].map(([k,v]) => `<div class="ag8-stat"><span class="k">${k}</span><span class="v">${v}</span></div>`).join('');
+    // Label
+    const type = lar >= 3 ? 'Wide (≥3)' : lar >= 1.5 ? 'Med (1.5–3)' : 'Sq/Tall (<1.5)';
+    document.getElementById('ag8-board-'+tab+'-lbl').textContent = `2× · ${CW}×${CH}px · Logo: ${type}`;
+  }
+
+  // ── Config: load slider values from stored config ──
+  function ag8LoadCfgSliders(tab) {
+    const cfg = ag8CfgData[tab];
+    const set = (id, val) => { const el = document.getElementById('ag8-'+tab+'-'+id); if (el) el.value = val; };
+    set('tm',    cfg.topMargin);
+    set('sloth', cfg.slotMinH);
+    set('gap',   cfg.gap);
+    set('bleed', cfg.bottomBleed);
+  }
+
+  // ── Config: wire sliders to redraw board ──
+  function ag8WireCfgSliders(tab) {
+    ['lar','sar'].forEach(id => {
+      const el = document.getElementById('ag8-'+tab+'-'+id);
+      if (el) el.addEventListener('input', () => ag8DrawBoard(tab));
+    });
+    ['tm','sloth','gap','bleed'].forEach(id => {
+      const el = document.getElementById('ag8-'+tab+'-'+id);
+      if (!el) return;
+      el.addEventListener('input', () => {
+        const cfg = ag8CfgData[tab];
+        const val = parseFloat(el.value);
+        if (id === 'tm')    cfg.topMargin   = val;
+        if (id === 'sloth') cfg.slotMinH    = val;
+        if (id === 'gap')   cfg.gap         = val;
+        if (id === 'bleed') cfg.bottomBleed = val;
+        ag8DrawBoard(tab);
+        ag8RenderAll();
+      });
+    });
+  }
+  ag8WireCfgSliders('l1');
+  ag8WireCfgSliders('l2');
+  const ag8LcLar = document.getElementById('ag8-lc-lar');
+  if (ag8LcLar) ag8LcLar.addEventListener('input', () => ag8DrawBoardLogoCard());
+  // Logo square sliders
+  ['ls-lar','ls-pv','ls-ph','ls-minh'].forEach(id => {
+    const el = document.getElementById('ag8-' + id);
+    if (el) el.addEventListener('input', () => ag8DrawBoardLogoSquare());
+  });
+  // WhatsApp sliders
+  ['wa-lar','wa-logoW','wa-logoH'].forEach(id => {
+    const el = document.getElementById('ag8-' + id);
+    if (el) el.addEventListener('input', () => ag8DrawBoardWA());
+  });
+
+  // ── Config: toggle panel ──
+  window.ag8ToggleConfig = function() {
+    ag8CfgOpen = !ag8CfgOpen;
+    const panel  = document.getElementById('ag8-config-panel');
+    const assets = document.getElementById('ag8-assets-container');
+    const btn    = document.getElementById('ag8-cfg-btn');
+    panel.style.display  = ag8CfgOpen ? 'flex' : 'none';
+    assets.style.display = ag8CfgOpen ? 'none' : 'flex';
+    if (btn) btn.style.color = ag8CfgOpen ? '#e8e8e8' : '#7b7b7b';
+    if (ag8CfgOpen) { ag8LoadCfgSliders(ag8CfgActiveTab); ag8DrawBoard(ag8CfgActiveTab); }
+  };
+
+  // ── Config: Logo square board ──
+  function ag8DrawBoardLogoSquare() {
+    const CW = 116, CH = 116, S = 3, PAD = 24;
+    const lar  = parseFloat(document.getElementById('ag8-ls-lar').value);
+    const pv   = parseFloat(document.getElementById('ag8-ls-pv').value);
+    const ph   = parseFloat(document.getElementById('ag8-ls-ph').value);
+    const minH = parseFloat(document.getElementById('ag8-ls-minh').value);
+    document.getElementById('ag8-ls-lar-v').textContent  = lar.toFixed(2);
+    document.getElementById('ag8-ls-pv-v').textContent   = pv + ' px';
+    document.getElementById('ag8-ls-ph-v').textContent   = ph + ' px';
+    document.getElementById('ag8-ls-minh-v').textContent = minH + ' px';
+    const autoMaxH = Math.floor(0.9 * CH);  // 104px
+    const autoMaxW = Math.floor(0.9 * CW);  // 104px
+    const slotH = CH - 2 * pv;
+    const slotW = CW - 2 * ph;
+    const dhNatural = Math.min(slotH, slotW / lar);
+    let dh = Math.min(autoMaxH, Math.max(minH, dhNatural));
+    let dw = dh * lar;
+    if (dw > autoMaxW) { dw = autoMaxW; dh = dw / lar; } // scale down, ignore minH
+    const cx = CW / 2, cy = CH / 2;
+    const lx = cx - dw / 2, ly = cy - dh / 2;
+    const board = document.getElementById('ag8-board-ls');
+    board.innerHTML = '';
+    const boardW = CW * S + PAD * 2, boardH = CH * S + PAD * 2;
+    board.style.width = boardW + 'px'; board.style.height = boardH + 'px';
+    // Outer dark bg
+    const outerBg = document.createElement('div');
+    outerBg.style.cssText = `position:absolute;left:0;top:0;width:${boardW}px;height:${boardH}px;border-radius:14px;background:#060a07;`;
+    board.appendChild(outerBg);
+    // Canvas shadow
+    const shadow = document.createElement('div');
+    shadow.style.cssText = `position:absolute;left:${PAD}px;top:${PAD}px;width:${CW*S}px;height:${CH*S}px;border-radius:${16*S}px;background:#0d1610;`;
+    board.appendChild(shadow);
+    // Canvas clip wrapper
+    const wrap = document.createElement('div');
+    wrap.style.cssText = `position:absolute;left:${PAD}px;top:${PAD}px;width:${CW*S}px;height:${CH*S}px;border-radius:${16*S}px;overflow:hidden;background:#1c2b22;`;
+    board.appendChild(wrap);
+    // 90% auto-cap zone (centered)
+    ag8AddZone(wrap, 'rgba(232,184,109,.05)', '#e8b86d',
+      (CW-autoMaxW)/2*S, (CH-autoMaxH)/2*S, autoMaxW*S, autoMaxH*S,
+      `90% cap`, '#c8984d', true);
+    // Available slot zone (ph left, pv top)
+    ag8AddZone(wrap, 'rgba(140,140,140,.07)', '#888',
+      ph*S, pv*S, slotW*S, slotH*S,
+      `${slotW}×${slotH} slot`, '#aaa', slotW > 0 && slotH > 0);
+    // Logo zone (on board, not clipped)
+    ag8AddZone(board, 'rgba(127,119,221,.22)', '#9b94f0',
+      PAD + lx*S, PAD + ly*S, dw*S, dh*S,
+      `logo\n${Math.round(dw)}×${Math.round(dh)}px`, '#c4bfff', dw > 0);
+    // Stats
+    const statsEl = document.getElementById('ag8-stats-ls');
+    if (statsEl) statsEl.innerHTML = [
+      ['pv / ph',  `${pv}px / ${ph}px`],
+      ['Max slot', `${slotW}×${slotH}px`],
+      ['Logo W',   `${Math.round(dw)}px/${Math.round(dw/CW*100)}%W`],
+      ['Logo H',   `${Math.round(dh)}px/${Math.round(dh/CH*100)}%H`],
+      ['Logo X',   `${Math.round(lx)}px`],
+      ['Logo Y',   `${Math.round(ly)}px`],
+    ].map(([k,v]) => `<div class="ag8-stat"><span class="k">${k}</span><span class="v">${v}</span></div>`).join('');
+  }
+
+  // ── Config: WhatsApp board ──
+  function ag8DrawBoardWA() {
+    const CW = 1500, CH = 750, S = 0.25, PAD = 24;
+    const lar  = parseFloat(document.getElementById('ag8-wa-lar').value);
+    const logoW = parseFloat(document.getElementById('ag8-wa-logoW').value);
+    const logoH = parseFloat(document.getElementById('ag8-wa-logoH').value);
+    document.getElementById('ag8-wa-lar-v').textContent   = lar.toFixed(2);
+    document.getElementById('ag8-wa-logoW-v').textContent = logoW + ' px';
+    document.getElementById('ag8-wa-logoH-v').textContent = logoH + ' px';
+    // Logo dimensions
+    let dw, dh;
+    if (lar > logoW / logoH) { dw = logoW; dh = dw / lar; }
+    else                     { dh = logoH; dw = dh * lar; }
+    const zx = (CW - logoW) / 2, zy = (CH - logoH) / 2;
+    const lx = (CW - dw) / 2, ly = (CH - dh) / 2;
+    const board = document.getElementById('ag8-board-wa');
+    board.innerHTML = '';
+    const boardW = CW * S + PAD * 2, boardH = CH * S + PAD * 2;
+    board.style.width = boardW + 'px'; board.style.height = boardH + 'px';
+    // Outer dark bg
+    const outerBg = document.createElement('div');
+    outerBg.style.cssText = `position:absolute;left:0;top:0;width:${boardW}px;height:${boardH}px;border-radius:14px;background:#060a07;`;
+    board.appendChild(outerBg);
+    // Canvas bg (brand color zone)
+    const canvas = document.createElement('div');
+    canvas.style.cssText = `position:absolute;left:${PAD}px;top:${PAD}px;width:${CW*S}px;height:${CH*S}px;background:#1c2b22;`;
+    board.appendChild(canvas);
+    // Bow (static) — covers full canvas from x=-122
+    ag8AddZone(board, 'rgba(200,160,50,.18)', '#c8a032',
+      PAD + (-122)*S, PAD + 0, 1818*S, 753*S,
+      'bow (static)', '#c8a032', true);
+    // Logo zone
+    ag8AddZone(board, 'rgba(102,96,204,.15)', '#6660cc',
+      PAD + zx*S, PAD + zy*S, logoW*S, logoH*S,
+      `zone ${logoW}×${logoH}`, '#9991e8', true);
+    // Logo fill
+    ag8AddZone(board, 'rgba(29,158,117,.22)', '#2dc99a',
+      PAD + lx*S, PAD + ly*S, dw*S, dh*S,
+      `logo\n${Math.round(dw)}×${Math.round(dh)}px`, '#6ddbb8', dw > 0);
+    // Hubble logo (static, top-right)
+    ag8AddZone(board, 'rgba(140,140,140,.12)', '#888',
+      PAD + 1103*S, PAD + 138*S, 326*S, 61*S,
+      'hubble', '#aaa', true);
+    // Stats
+    const statsEl = document.getElementById('ag8-stats-wa');
+    if (statsEl) statsEl.innerHTML = [
+      ['Zone W',  `${logoW}px`],
+      ['Zone H',  `${logoH}px`],
+      ['Logo W',  `${Math.round(dw)}px`],
+      ['Logo H',  `${Math.round(dh)}px`],
+      ['Logo X',  `${Math.round(lx)}px`],
+      ['Logo Y',  `${Math.round(ly)}px`],
+    ].map(([k,v]) => `<div class="ag8-stat"><span class="k">${k}</span><span class="v">${v}</span></div>`).join('');
+  }
+
+  // ── Config: Logo card board ──
+  function ag8DrawBoardLogoCard() {
+    const CW = 88, CH = 40, GAP = 1, S = 4, PAD = 24;
+    const maxW = CW - GAP * 2;  // 84
+    const maxH = CH - GAP * 2;  // 36
+    const lar = parseFloat(document.getElementById('ag8-lc-lar').value);
+    document.getElementById('ag8-lc-lar-v').textContent = lar.toFixed(2);
+    let dw, dh;
+    if (lar > maxW / maxH) { dw = maxW; dh = dw / lar; }
+    else                   { dh = maxH; dw = dh * lar; }
+    const lx = GAP;
+    const ly = CH - GAP - dh;
+    const board = document.getElementById('ag8-board-lc');
+    board.innerHTML = '';
+    const boardW = CW * S + PAD * 2;
+    const boardH = CH * S + PAD * 2;
+    board.style.width  = boardW + 'px';
+    board.style.height = boardH + 'px';
+    // Outer dark bg
+    const outerBg = document.createElement('div');
+    outerBg.style.cssText = `position:absolute;left:0;top:0;width:${boardW}px;height:${boardH}px;border-radius:14px;background:#060a07;`;
+    board.appendChild(outerBg);
+    // Card shadow bg
+    const cardShadow = document.createElement('div');
+    cardShadow.style.cssText = `position:absolute;left:${PAD}px;top:${PAD}px;width:${CW*S}px;height:${CH*S}px;background:#0d1610;`;
+    board.appendChild(cardShadow);
+    // Card canvas (no corner radius on logo card)
+    const wrap = document.createElement('div');
+    wrap.style.cssText = `position:absolute;left:${PAD}px;top:${PAD}px;width:${CW*S}px;height:${CH*S}px;overflow:hidden;background:#1c2b22;`;
+    board.appendChild(wrap);
+    // Available area (inside 2px gap on all sides)
+    ag8AddZone(wrap, 'rgba(140,140,140,.07)', '#888', GAP*S, GAP*S, maxW*S, maxH*S, `${maxW}×${maxH} available`, '#aaa', true);
+    // Logo zone (left-bottom aligned, on board so corners not clipped)
+    ag8AddZone(board, 'rgba(127,119,221,.22)', '#9b94f0',
+      PAD + lx*S, PAD + ly*S, dw*S, dh*S,
+      `logo\n${Math.round(dw)}×${Math.round(dh)}px`, '#c4bfff', true);
+    // Stats
+    const statsEl = document.getElementById('ag8-stats-lc');
+    if (statsEl) statsEl.innerHTML = [
+      ['Gap',     `${GAP}px all sides`],
+      ['Max area',`${maxW}×${maxH}px`],
+      ['Logo W',  `${Math.round(dw)}px`],
+      ['Logo H',  `${Math.round(dh)}px`],
+      ['Logo X',  `${GAP}px (left)`],
+      ['Logo Y',  `${Math.round(ly)}px (btm)`],
+    ].map(([k,v]) => `<div class="ag8-stat"><span class="k">${k}</span><span class="v">${v}</span></div>`).join('');
+  }
+
+  // ── Config: switch tab ──
+  window.ag8CfgTab = function(tab) {
+    ag8CfgActiveTab = tab;
+    ['l1','l2','lc','ls','wa'].forEach(t => {
+      const panel = document.getElementById('ag8-cfg-'+t);
+      const pill  = document.getElementById('ag8-ctab-'+t);
+      if (panel) panel.style.display = t === tab ? 'flex' : 'none';
+      if (pill)  pill.classList.toggle('active', t === tab);
+    });
+    if (tab === 'lc') ag8DrawBoardLogoCard();
+    else if (tab === 'ls') {
+      const lsCfg = ag8CfgData.ls || AG8_CFG_DEF.ls;
+      document.getElementById('ag8-ls-pv').value   = lsCfg.pv   ?? AG8_CFG_DEF.ls.pv;
+      document.getElementById('ag8-ls-ph').value   = lsCfg.ph   ?? AG8_CFG_DEF.ls.ph;
+      document.getElementById('ag8-ls-minh').value = lsCfg.minH ?? AG8_CFG_DEF.ls.minH;
+      ag8DrawBoardLogoSquare();
+    }
+    else if (tab === 'wa') ag8DrawBoardWA();
+    else { ag8LoadCfgSliders(tab); ag8DrawBoard(tab); }
+  };
+
+  // ── Config: save/reset Logo square ──
+  window.ag8CfgSaveLs = function() {
+    ag8CfgData.ls = {
+      pv:   parseFloat(document.getElementById('ag8-ls-pv').value),
+      ph:   parseFloat(document.getElementById('ag8-ls-ph').value),
+      minH: parseFloat(document.getElementById('ag8-ls-minh').value)
+    };
+    localStorage.setItem('ag8CfgData', JSON.stringify(ag8CfgData));
+    ag8RenderAll();
+    showToast('Logo square config saved ✓');
+  };
+  window.ag8CfgResetLs = function() {
+    ag8CfgData.ls = ag8DeepClone(AG8_CFG_DEF.ls);
+    document.getElementById('ag8-ls-pv').value   = ag8CfgData.ls.pv;
+    document.getElementById('ag8-ls-ph').value   = ag8CfgData.ls.ph;
+    document.getElementById('ag8-ls-minh').value = ag8CfgData.ls.minH;
+    ag8DrawBoardLogoSquare();
+    ag8RenderAll();
+    showToast('Reset to defaults');
+  };
+
+  // ── Config: save/reset WhatsApp ──
+  window.ag8CfgSaveWa = function() {
+    ag8CfgData.wa = {
+      logoW: parseFloat(document.getElementById('ag8-wa-logoW').value),
+      logoH: parseFloat(document.getElementById('ag8-wa-logoH').value)
+    };
+    localStorage.setItem('ag8CfgData', JSON.stringify(ag8CfgData));
+    ag8RenderAll();
+    showToast('WhatsApp config saved ✓');
+  };
+  window.ag8CfgResetWa = function() {
+    ag8CfgData.wa = ag8DeepClone(AG8_CFG_DEF.wa);
+    document.getElementById('ag8-wa-logoW').value = ag8CfgData.wa.logoW;
+    document.getElementById('ag8-wa-logoH').value = ag8CfgData.wa.logoH;
+    ag8DrawBoardWA();
+    ag8RenderAll();
+    showToast('Reset to defaults');
+  };
+
+  // ── Config: save current slider values ──
+  window.ag8CfgSave = function() {
+    const tab = ag8CfgActiveTab;
+    const get = id => parseFloat(document.getElementById('ag8-'+tab+'-'+id).value);
+    ag8CfgData[tab] = { topMargin: get('tm'), slotMinH: get('sloth'), gap: get('gap'), minGap: 4, bottomBleed: get('bleed') };
+    localStorage.setItem('ag8CfgData', JSON.stringify(ag8CfgData));
+    ag8RenderAll();
+    showToast('Config saved ✓');
+  };
+
+  // ── Config: reset tab to defaults ──
+  window.ag8CfgReset = function(tab) {
+    ag8CfgData[tab] = ag8DeepClone(AG8_CFG_DEF[tab]);
+    ag8LoadCfgSliders(tab);
+    ag8DrawBoard(tab);
+    showToast('Reset to defaults');
+  };
+
+  // ── Initial render ──
+  ag8SetColor(ag8BrandHex);
 
 })();
 
