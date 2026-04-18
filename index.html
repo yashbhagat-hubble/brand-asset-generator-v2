@@ -2363,14 +2363,8 @@
             <div class="ag8-ctrl-row">
               <div class="ag8-dot" style="background:#e8b86d;"></div>
               <span class="ag8-ctrl-lbl">s (slope)</span>
-              <input type="range" id="ag9-ls-s" min="0" max="4" step="0.05" value="1" style="flex:1;">
-              <span class="ag8-ctrl-val" id="ag9-ls-s-v">1.00</span>
-            </div>
-            <div class="ag8-ctrl-row">
-              <div class="ag8-dot" style="background:#5c5c5c;"></div>
-              <span class="ag8-ctrl-lbl">Min logo height</span>
-              <input type="range" id="ag9-ls-minh" min="0" max="40" step="0.5" value="10" style="flex:1;">
-              <span class="ag8-ctrl-val" id="ag9-ls-minh-v">10 %</span>
+              <input type="range" id="ag9-ls-s" min="0" max="4" step="0.05" value="1.2" style="flex:1;">
+              <span class="ag8-ctrl-val" id="ag9-ls-s-v">1.20</span>
             </div>
             <div style="display:flex;gap:8px;margin-top:16px;">
               <button class="export-all-btn" onclick="ag9CfgSaveLs()">Save rules</button>
@@ -2456,12 +2450,6 @@
               <span class="ag8-ctrl-lbl">s (slope)</span>
               <input type="range" id="ag9-wa-s" min="0" max="4" step="0.05" value="1" style="flex:1;">
               <span class="ag8-ctrl-val" id="ag9-wa-s-v">1.00</span>
-            </div>
-            <div class="ag8-ctrl-row">
-              <div class="ag8-dot" style="background:#5c5c5c;"></div>
-              <span class="ag8-ctrl-lbl">Min logo height</span>
-              <input type="range" id="ag9-wa-minh" min="0" max="40" step="0.5" value="5" style="flex:1;">
-              <span class="ag8-ctrl-val" id="ag9-wa-minh-v">5 %</span>
             </div>
             <div style="display:flex;gap:8px;margin-top:16px;">
               <button class="export-all-btn" onclick="ag9CfgSaveWa()">Save rules</button>
@@ -6108,8 +6096,8 @@ function getReplicateApiKey() {
   const AG9_CFG_DEF = {
     l1: { topMargin: 8, slotMinH: 40, gap: 6, minGap: 4, bottomBleed: 5.5 },
     l2: { topMargin: 8, slotMinH: 40, gap: 6, minGap: 4, bottomBleed: 5.5 },
-    ls: { pv: 6, ph: 6, c: 115, s: 1, minH: 10 },
-    wa: { pv: 34, ph: 28, c: 90, s: 1, minH: 5 }
+    ls: { pv: 6, ph: 6, c: 115, s: 1.2 },
+    wa: { pv: 34, ph: 28, c: 90, s: 1 }
   };
   function ag9DeepClone(o) { return JSON.parse(JSON.stringify(o)); }
   let ag9CfgData = JSON.parse(localStorage.getItem('ag9CfgData') || 'null') || ag9DeepClone(AG9_CFG_DEF);
@@ -6266,7 +6254,6 @@ function getReplicateApiKey() {
     const phPx = (cfg.ph  / 100) * CW;
     const c    = (cfg.c   / 100) * CW;   // w + h governed by c and slope
     const s    = cfg.s   ?? AG9_CFG_DEF.ls.s;
-    const minH = (cfg.minH / 100) * CH;
     const slotW = CW - 2 * phPx;
     const slotH = CH - 2 * pvPx;
     const parts = [
@@ -6281,8 +6268,6 @@ function getReplicateApiKey() {
       // Cap to padding slot — maintain AR
       if (dw > slotW) { dw = slotW; dh = dw / ar; }
       if (dh > slotH) { dh = slotH; dw = dh * ar; }
-      // minH floor
-      if (dh < minH) { dh = minH; dw = dh * ar; }
       const cx = CW / 2, cy = CH / 2;
       const ix = R(cx - dw / 2), iy = R(cy - dh / 2);
       const du = ag9ImgToDataUrl(img);
@@ -6352,13 +6337,11 @@ function getReplicateApiKey() {
       const phPx  = ((waCfg.ph ?? AG9_CFG_DEF.wa.ph) / 100) * CW;
       const c_px  = ((waCfg.c   ?? AG9_CFG_DEF.wa.c)  / 100) * CW;
       const s     = waCfg.s   ?? AG9_CFG_DEF.wa.s;
-      const minH  = ((waCfg.minH ?? AG9_CFG_DEF.wa.minH) / 100) * CH;
       const slotW = CW - 2 * phPx, slotH = CH - 2 * pvPx;
       let dh = c_px / (1 + s * ar);
       let dw = dh * ar;
       if (dw > slotW) { dw = slotW; dh = dw / ar; }
       if (dh > slotH) { dh = slotH; dw = dh * ar; }
-      if (dh < minH)  { dh = minH;  dw = dh * ar; }
       const lx = R((CW - dw) / 2), ly = R((CH - dh) / 2);
       const du = ag9ImgToDataUrl(img);
       if (du) parts.push(`<image href="${du}" x="${lx}" y="${ly}" width="${R(dw)}" height="${R(dh)}" preserveAspectRatio="xMidYMid meet"/>`);
@@ -6814,15 +6797,12 @@ function getReplicateApiKey() {
     const ph   = parseFloat(document.getElementById('ag9-ls-ph').value);
     const cPct = parseFloat(document.getElementById('ag9-ls-c').value);
     const s    = parseFloat(document.getElementById('ag9-ls-s').value);
-    const minH = parseFloat(document.getElementById('ag9-ls-minh').value);
     document.getElementById('ag9-ls-lar-v').textContent  = lar.toFixed(2);
     document.getElementById('ag9-ls-pv-v').textContent   = pv + ' %';
     document.getElementById('ag9-ls-ph-v').textContent   = ph + ' %';
     document.getElementById('ag9-ls-c-v').textContent    = cPct + ' %';
     document.getElementById('ag9-ls-s-v').textContent    = s.toFixed(2);
-    document.getElementById('ag9-ls-minh-v').textContent = minH + ' %';
     const c_px    = (cPct / 100) * CW;
-    const minH_px = (minH / 100) * CH;
     const pvPx    = (pv   / 100) * CH;
     const phPx    = (ph   / 100) * CW;
     const slotW   = CW - 2 * phPx;
@@ -6832,8 +6812,6 @@ function getReplicateApiKey() {
     // Cap to slot — maintain AR, largest dimension wins
     if (dw > slotW) { dw = slotW; dh = dw / lar; }
     if (dh > slotH) { dh = slotH; dw = dh * lar; }
-    // minH floor
-    if (dh < minH_px) { dh = minH_px; dw = dh * lar; }
     const cx = CW / 2, cy = CH / 2;
     const lx = cx - dw / 2, ly = cy - dh / 2;
     const board = document.getElementById('ag9-board-ls');
@@ -6877,23 +6855,19 @@ function getReplicateApiKey() {
     const ph   = parseFloat(document.getElementById('ag9-wa-ph').value);
     const cPct = parseFloat(document.getElementById('ag9-wa-c').value);
     const s    = parseFloat(document.getElementById('ag9-wa-s').value);
-    const minH = parseFloat(document.getElementById('ag9-wa-minh').value);
     document.getElementById('ag9-wa-lar-v').textContent  = lar.toFixed(2);
     document.getElementById('ag9-wa-pv-v').textContent   = pv + ' %';
     document.getElementById('ag9-wa-ph-v').textContent   = ph + ' %';
     document.getElementById('ag9-wa-c-v').textContent    = cPct + ' %';
     document.getElementById('ag9-wa-s-v').textContent    = s.toFixed(2);
-    document.getElementById('ag9-wa-minh-v').textContent = minH + ' %';
     const pvPx  = (pv   / 100) * CH;
     const phPx  = (ph   / 100) * CW;
     const c_px  = (cPct / 100) * CW;
-    const minH_px = (minH / 100) * CH;
     const slotW = CW - 2 * phPx, slotH = CH - 2 * pvPx;
     let dh = c_px / (1 + s * lar);
     let dw = dh * lar;
     if (dw > slotW) { dw = slotW; dh = dw / lar; }
     if (dh > slotH) { dh = slotH; dw = dh * lar; }
-    if (dh < minH_px) { dh = minH_px; dw = dh * lar; }
     const cx = CW / 2, cy = CH / 2;
     const lx = cx - dw / 2, ly = cy - dh / 2;
     const board = document.getElementById('ag9-board-wa');
@@ -7001,7 +6975,6 @@ function getReplicateApiKey() {
       document.getElementById('ag9-ls-ph').value   = lsCfg.ph   ?? AG9_CFG_DEF.ls.ph;
       document.getElementById('ag9-ls-c').value    = lsCfg.c    ?? AG9_CFG_DEF.ls.c;
       document.getElementById('ag9-ls-s').value    = lsCfg.s    ?? AG9_CFG_DEF.ls.s;
-      document.getElementById('ag9-ls-minh').value = lsCfg.minH ?? AG9_CFG_DEF.ls.minH;
       ag9DrawBoardLogoSquare();
     }
     else if (tab === 'wa') {
@@ -7010,7 +6983,6 @@ function getReplicateApiKey() {
       document.getElementById('ag9-wa-ph').value   = waCfg.ph   ?? AG9_CFG_DEF.wa.ph;
       document.getElementById('ag9-wa-c').value    = waCfg.c    ?? AG9_CFG_DEF.wa.c;
       document.getElementById('ag9-wa-s').value    = waCfg.s    ?? AG9_CFG_DEF.wa.s;
-      document.getElementById('ag9-wa-minh').value = waCfg.minH ?? AG9_CFG_DEF.wa.minH;
       ag9DrawBoardWA();
     }
     else { ag9LoadCfgSliders(tab); ag9DrawBoard(tab); }
@@ -7023,7 +6995,6 @@ function getReplicateApiKey() {
       ph:   parseFloat(document.getElementById('ag9-ls-ph').value),
       c:    parseFloat(document.getElementById('ag9-ls-c').value),
       s:    parseFloat(document.getElementById('ag9-ls-s').value),
-      minH: parseFloat(document.getElementById('ag9-ls-minh').value),
     };
     localStorage.setItem('ag9CfgData', JSON.stringify(ag9CfgData));
     showToast('Config saved ✓');
@@ -7035,7 +7006,6 @@ function getReplicateApiKey() {
     document.getElementById('ag9-ls-ph').value   = ag9CfgData.ls.ph;
     document.getElementById('ag9-ls-c').value    = ag9CfgData.ls.c;
     document.getElementById('ag9-ls-s').value    = ag9CfgData.ls.s;
-    document.getElementById('ag9-ls-minh').value = ag9CfgData.ls.minH;
     ag9DrawBoardLogoSquare();
     ag9RenderAll();
     showToast('Reset to defaults');
@@ -7048,7 +7018,6 @@ function getReplicateApiKey() {
       ph:   parseFloat(document.getElementById('ag9-wa-ph').value),
       c:    parseFloat(document.getElementById('ag9-wa-c').value),
       s:    parseFloat(document.getElementById('ag9-wa-s').value),
-      minH: parseFloat(document.getElementById('ag9-wa-minh').value),
     };
     localStorage.setItem('ag9CfgData', JSON.stringify(ag9CfgData));
     ag9RenderAll();
@@ -7060,7 +7029,6 @@ function getReplicateApiKey() {
     document.getElementById('ag9-wa-ph').value   = ag9CfgData.wa.ph;
     document.getElementById('ag9-wa-c').value    = ag9CfgData.wa.c;
     document.getElementById('ag9-wa-s').value    = ag9CfgData.wa.s;
-    document.getElementById('ag9-wa-minh').value = ag9CfgData.wa.minH;
     ag9DrawBoardWA();
     ag9RenderAll();
     showToast('Reset to defaults');
@@ -7084,7 +7052,6 @@ function getReplicateApiKey() {
       document.getElementById('ag9-ls-ph').value   = ag9CfgData.ls.ph;
       document.getElementById('ag9-ls-c').value    = ag9CfgData.ls.c;
       document.getElementById('ag9-ls-s').value    = ag9CfgData.ls.s;
-      document.getElementById('ag9-ls-minh').value = ag9CfgData.ls.minH;
       ag9DrawBoardLogoSquare();
     } else {
       ag9LoadCfgSliders(tab);
